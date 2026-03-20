@@ -2,9 +2,7 @@
 
 A comprehensive UK vegetable garden planner built as a single HTML file. No server, no install, no dependencies — just open it in a browser and start planning your food production like your survival depends on it.
 
-**[🚀 Try it live on GitHub Pages →](https://YOUR-USERNAME.github.io/veg-plot-survival/)**
-
-*(Replace YOUR-USERNAME with your GitHub username after deploying)*
+**[🚀 Try it live on GitHub Pages →](https://majestic10110.github.io/survival_veg_planner/)**
 
 ![Screenshot](screenshot.png)
 
