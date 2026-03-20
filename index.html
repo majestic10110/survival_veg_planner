@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 The Veg Plot — Survival Edition</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0f1114;
+    --bg2: #161920;
+    --surface: #1d2028;
+    --surface2: #252a36;
+    --surface3: #2e3444;
+    --border: rgba(255,255,255,0.07);
+    --border-light: rgba(255,255,255,0.12);
+    --accent: #d4872e;
+    --accent-light: #f0a54a;
+    --accent-glow: rgba(212,135,46,0.25);
+    --accent2: #4a9ebb;
+    --accent2-light: #6bbfdd;
+    --green: #5aad6a;
+    --green-light: #7acc8a;
+    --red: #c44040;
+    --red-light: #e06060;
+    --red-glow: rgba(196,64,64,0.25);
+    --purple: #9a6dd7;
+    --yellow: #d4c040;
+    --text: #e5e1d8;
+    --text-dim: #7a7f8e;
+    --text-muted: #555a66;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --greenhouse: #2a8a5a;
+    --greenhouse-light: #40c080;
+    --polytunnel: #5a7abf;
+    --polytunnel-light: #7a9adf;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+  .alert-banner { background:linear-gradient(135deg,#2a1008,#3a1510,#2a0808); border-bottom:2px solid rgba(196,64,64,0.4); padding:0; overflow:hidden; max-height:0; transition:max-height 0.5s,padding 0.5s; }
+  .alert-banner.visible { max-height:300px; padding:12px 24px; }
+  .alert-banner-inner { display:flex; align-items:center; gap:14px; max-width:1440px; margin:0 auto; }
+  .alert-icon { font-size:28px; animation:alertPulse 2s infinite; flex-shrink:0; }
+  @keyframes alertPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15);opacity:0.7} }
+  .alert-text { font-size:13px; color:var(--red-light); font-weight:500; line-height:1.5; flex:1; }
+  .alert-text strong { color:#ff8080; }
+  .alert-dismiss { background:none; border:1px solid rgba(255,100,100,0.3); color:var(--red-light); padding:4px 12px; border-radius:6px; cursor:pointer; font-size:11px; white-space:nowrap; }
+
+  header { position:sticky; top:0; z-index:50; background:var(--bg2); border-bottom:1px solid var(--border); padding:10px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; backdrop-filter:blur(20px); }
+  .logo { font-family:'Bitter',serif; font-size:22px; font-weight:900; letter-spacing:-0.5px; }
+  .logo span { color:var(--accent-light); }
+  .logo-sub { font-size:9px; color:var(--text-dim); letter-spacing:2px; text-transform:uppercase; }
+  .header-right { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .month-badge { background:linear-gradient(135deg,var(--accent),#b06a20); color:#fff; padding:4px 12px; border-radius:20px; font-weight:600; font-size:11px; }
+  .location-badge { padding:4px 12px; border-radius:20px; font-size:10px; font-weight:600; cursor:pointer; background:rgba(74,158,187,0.15); color:var(--accent2-light); border:1px solid rgba(74,158,187,0.25); transition:all 0.2s; }
+  .location-badge:hover { background:rgba(74,158,187,0.25); }
+  .env-badge { padding:4px 10px; border-radius:20px; font-size:10px; font-weight:600; }
+  .env-outdoor { background:rgba(90,173,106,0.12); color:var(--green-light); border:1px solid rgba(90,173,106,0.2); }
+  .env-greenhouse { background:rgba(42,138,90,0.15); color:var(--greenhouse-light); border:1px solid rgba(42,138,90,0.3); }
+  .env-polytunnel { background:rgba(90,122,191,0.15); color:var(--polytunnel-light); border:1px solid rgba(90,122,191,0.3); }
+  .threat-badge { padding:4px 12px; border-radius:20px; font-weight:700; font-size:10px; letter-spacing:0.5px; cursor:pointer; transition:all 0.2s; }
+  .threat-green { background:rgba(90,173,106,0.15); color:var(--green-light); border:1px solid rgba(90,173,106,0.3); }
+  .threat-amber { background:rgba(212,192,64,0.15); color:var(--yellow); border:1px solid rgba(212,192,64,0.3); animation:gentlePulse 3s infinite; }
+  .threat-red { background:rgba(196,64,64,0.2); color:var(--red-light); border:1px solid rgba(196,64,64,0.4); animation:gentlePulse 2s infinite; }
+  @keyframes gentlePulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+  nav { position:sticky; top:50px; z-index:40; display:flex; gap:0; background:var(--bg2); border-bottom:1px solid var(--border); overflow-x:auto; }
+  nav::-webkit-scrollbar { height:0; }
+  nav button { padding:9px 14px; border:none; background:none; color:var(--text-dim); cursor:pointer; font-family:inherit; font-size:11px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; white-space:nowrap; border-bottom:2px solid transparent; transition:all 0.15s; position:relative; }
+  nav button:hover { color:var(--text); background:rgba(255,255,255,0.03); }
+  nav button.active { color:var(--accent-light); border-bottom-color:var(--accent); }
+  nav button .nav-alert { position:absolute; top:5px; right:3px; width:7px; height:7px; border-radius:50%; background:var(--red); }
+
+  main { padding:16px; max-width:1440px; margin:0 auto; }
+  .panel { display:none; }
+  .panel.active { display:block; animation:fadeIn 0.2s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} }
+
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px; margin-bottom:14px; }
+  .card-danger { border-color:rgba(196,64,64,0.3); background:linear-gradient(135deg,var(--surface),rgba(60,20,20,0.3)); }
+  .card-warn { border-color:rgba(212,192,64,0.25); background:linear-gradient(135deg,var(--surface),rgba(60,50,15,0.2)); }
+  .card-success { border-color:rgba(90,173,106,0.25); background:linear-gradient(135deg,var(--surface),rgba(20,50,25,0.2)); }
+  .card h2 { font-family:'Bitter',serif; color:var(--accent-light); margin-bottom:12px; font-size:17px; font-weight:800; letter-spacing:-0.3px; }
+  .card h3 { color:var(--accent2-light); margin-bottom:8px; font-size:13px; font-weight:600; }
+  .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; }
+  .grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+
+  /* Timeline */
+  .timeline-bar { display:grid; grid-template-columns:repeat(12,1fr); gap:3px; margin:10px 0; }
+  .timeline-month { text-align:center; border-radius:6px; padding:6px 2px; font-size:9px; font-weight:600; position:relative; }
+  .timeline-month .tm-label { text-transform:uppercase; margin-bottom:3px; color:rgba(255,255,255,0.6); }
+  .timeline-month .tm-count { font-size:16px; font-family:'Bitter',serif; font-weight:800; }
+  .timeline-month .tm-sub { font-size:8px; margin-top:1px; opacity:0.7; }
+  .tm-empty { background:rgba(196,64,64,0.15); border:1px solid rgba(196,64,64,0.25); color:var(--red-light); }
+  .tm-low { background:rgba(212,192,64,0.12); border:1px solid rgba(212,192,64,0.2); color:var(--yellow); }
+  .tm-good { background:rgba(90,173,106,0.12); border:1px solid rgba(90,173,106,0.2); color:var(--green-light); }
+  .tm-great { background:rgba(90,173,106,0.2); border:1px solid rgba(90,173,106,0.3); color:var(--green-light); }
+  .tm-current { outline:2px solid var(--accent-light); outline-offset:2px; }
+
+  /* Harvest warning cards */
+  .hw-card { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:12px; display:flex; align-items:center; gap:12px; transition:all 0.15s; }
+  .hw-card:hover { border-color:var(--border-light); }
+  .hw-card.hw-overdue { border-left:3px solid var(--red); background:linear-gradient(90deg,rgba(196,64,64,0.08),transparent 30%); }
+  .hw-card.hw-imminent { border-left:3px solid var(--red-light); animation:imminentPulse 3s infinite; }
+  .hw-card.hw-soon { border-left:3px solid var(--yellow); }
+  .hw-card.hw-upcoming { border-left:3px solid var(--green); }
+  @keyframes imminentPulse { 0%,100%{opacity:1} 50%{opacity:0.85} }
+  .hw-days { min-width:52px; text-align:center; padding:5px 3px; border-radius:8px; font-family:'Bitter',serif; font-weight:800; font-size:15px; line-height:1.1; }
+  .hw-days small { display:block; font-size:8px; font-weight:500; letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+  .hw-days.d-overdue { background:var(--red); color:#fff; }
+  .hw-days.d-imminent { background:rgba(224,96,96,0.8); color:#fff; animation:alertPulse 2s infinite; }
+  .hw-days.d-soon { background:rgba(212,192,64,0.25); color:var(--yellow); }
+  .hw-days.d-upcoming { background:rgba(90,173,106,0.15); color:var(--green-light); }
+  .hw-info { flex:1; min-width:0; }
+  .hw-name { font-weight:700; font-size:13px; }
+  .hw-detail { font-size:10px; color:var(--text-dim); margin-top:2px; }
+
+  /* Gap bar */
+  .gap-bar { height:28px; border-radius:6px; overflow:hidden; display:flex; margin:8px 0; background:rgba(196,64,64,0.1); border:1px solid rgba(196,64,64,0.15); }
+  .gap-segment { height:100%; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:rgba(255,255,255,0.8); }
+  .gap-filled { background:rgba(90,173,106,0.5); }
+  .gap-partial { background:rgba(212,192,64,0.4); }
+  .gap-empty { background:rgba(196,64,64,0.15); color:var(--red-light); }
+
+  /* Beds */
+  .beds-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; }
+  .bed-card { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .bed-header { background:var(--surface); padding:8px 12px; display:flex; justify-content:space-between; align-items:center; }
+  .bed-title { font-family:'Bitter',serif; font-weight:700; color:var(--accent-light); font-size:13px; }
+  .bed-size { font-size:9px; color:var(--text-dim); }
+  .bed-grid { display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(4,1fr); gap:2px; padding:8px; background:rgba(0,0,0,0.3); min-height:110px; }
+  .bed-cell { aspect-ratio:1; border-radius:3px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+  .bed-cell:hover { transform:scale(1.12); z-index:5; box-shadow:0 2px 10px rgba(0,0,0,0.5); }
+  .bed-cell.planted { background:rgba(74,158,187,0.2); border-color:rgba(74,158,187,0.4); }
+  .bed-cell.harvested { background:rgba(212,135,46,0.2); border-color:rgba(212,135,46,0.4); }
+  .bed-cell.failed { background:rgba(196,64,64,0.2); border-color:rgba(196,64,64,0.4); }
+  .bed-cell.harvest-due { animation:harvestGlow 2s infinite; }
+  @keyframes harvestGlow { 0%,100%{box-shadow:0 0 0 rgba(240,165,74,0)} 50%{box-shadow:0 0 8px 2px rgba(240,165,74,0.4)} }
+  .bed-cell.selected { outline:2px solid var(--accent-light); outline-offset:1px; background:rgba(232,168,79,0.3)!important; }
+
+  /* Calendar */
+  .cal-wrap { overflow-x:auto; }
+  .cal-table { width:100%; border-collapse:collapse; font-size:10px; }
+  .cal-table th { background:var(--surface2); color:var(--accent-light); padding:6px 4px; text-align:center; border:1px solid var(--border); font-size:9px; letter-spacing:1px; font-weight:700; }
+  .cal-table td { border:1px solid rgba(255,255,255,0.03); padding:3px; vertical-align:middle; }
+  .cal-table tr:nth-child(even) td { background:rgba(255,255,255,0.015); }
+  .cal-table tr:hover td { background:rgba(255,255,255,0.04); }
+  .veg-name { color:var(--text); font-weight:600; white-space:nowrap; font-size:11px; }
+  .cal-dot { display:inline-block; width:100%; height:16px; border-radius:3px; font-size:8px; line-height:16px; font-weight:700; text-align:center; }
+  .dot-sow-in { background:rgba(90,159,212,0.75); color:#fff; }
+  .dot-sow-out { background:rgba(106,170,94,0.75); color:#fff; }
+  .dot-harvest { background:rgba(224,148,58,0.75); color:#fff; }
+  .dot-gh-sow { background:rgba(42,138,90,0.7); color:#fff; }
+  .dot-gh-harv { background:rgba(42,138,90,0.5); color:var(--greenhouse-light); border:1px solid rgba(42,138,90,0.6); }
+  .dot-pt-sow { background:rgba(90,122,191,0.6); color:#fff; }
+  .dot-pt-harv { background:rgba(90,122,191,0.4); color:var(--polytunnel-light); border:1px solid rgba(90,122,191,0.5); }
+  .cal-legend { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .legend-item { display:flex; align-items:center; gap:4px; font-size:9px; color:var(--text-dim); }
+  .legend-dot { width:11px; height:11px; border-radius:3px; }
+
+  /* Forms */
+  .log-form { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-bottom:14px; }
+  .form-group label { display:block; font-size:9px; color:var(--text-muted); margin-bottom:3px; letter-spacing:1px; text-transform:uppercase; font-weight:600; }
+  .form-group input,.form-group select,.form-group textarea { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:7px 9px; border-radius:6px; font-family:inherit; font-size:12px; transition:border-color 0.2s; }
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus { outline:none; border-color:var(--accent2); }
+  .form-group select option { background:var(--bg2); }
+  .form-group textarea { resize:vertical; min-height:50px; }
+  .btn { padding:7px 14px; border:none; border-radius:6px; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; }
+  .btn:active { transform:scale(0.97); }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:hover { background:var(--accent-light); }
+  .btn-harvest { background:var(--accent2); color:#fff; }
+  .btn-danger { background:rgba(196,64,64,0.8); color:#fff; }
+  .btn-success { background:rgba(90,173,106,0.8); color:#fff; }
+  .btn-sm { padding:4px 9px; font-size:10px; }
+  .btn-ghost { background:rgba(255,255,255,0.06); color:var(--text-dim); border:1px solid var(--border); }
+  .btn-ghost:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+  .btn-ai { background:linear-gradient(135deg,#1e2a4a,#2a3d6a); color:#9ab8dd; border:1px solid rgba(100,150,220,0.2); }
+
+  /* Log */
+  .log-list { max-height:400px; overflow-y:auto; }
+  .log-entry { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:9px 11px; margin-bottom:5px; display:grid; grid-template-columns:1fr auto; gap:6px; align-items:start; }
+  .log-meta { display:flex; flex-wrap:wrap; gap:3px; margin-top:3px; }
+  .log-badge { font-size:8px; padding:2px 6px; border-radius:10px; font-weight:600; }
+  .badge-sow { background:rgba(90,159,212,0.15); color:#5a9fd4; border:1px solid rgba(90,159,212,0.25); }
+  .badge-plant { background:rgba(106,170,94,0.15); color:#6aaa5e; border:1px solid rgba(106,170,94,0.25); }
+  .badge-harvest { background:rgba(224,148,58,0.15); color:#e0943a; border:1px solid rgba(224,148,58,0.25); }
+  .badge-note { background:rgba(200,200,200,0.08); color:#999; border:1px solid rgba(200,200,200,0.1); }
+  .log-veg { font-weight:700; font-size:12px; }
+  .log-date,.log-loc { font-size:9px; color:var(--text-dim); }
+  .log-loc { color:var(--accent2-light); }
+  .log-notes { font-size:10px; color:var(--text-dim); margin-top:2px; }
+
+  /* AI */
+  .ai-chat { height:320px; overflow-y:auto; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px; margin-bottom:8px; display:flex; flex-direction:column; gap:6px; }
+  .chat-msg { max-width:85%; padding:8px 12px; border-radius:10px; font-size:11px; line-height:1.6; }
+  .chat-msg.user { background:rgba(74,158,187,0.15); border:1px solid rgba(74,158,187,0.25); align-self:flex-end; }
+  .chat-msg.ai { background:var(--surface2); border:1px solid var(--border); align-self:flex-start; }
+  .chat-msg.system { background:rgba(100,80,50,0.15); border:1px solid rgba(200,150,80,0.15); align-self:center; font-style:italic; font-size:10px; color:var(--text-dim); }
+  .chat-input-row { display:flex; gap:5px; }
+  .chat-input-row input { flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:7px 10px; border-radius:8px; font-family:inherit; font-size:11px; }
+  .typing-indicator { display:flex; gap:4px; padding:8px; align-items:center; }
+  .typing-dot { width:5px; height:5px; background:var(--accent2); border-radius:50%; animation:typing 1s infinite; }
+  .typing-dot:nth-child(2) { animation-delay:.15s; }
+  .typing-dot:nth-child(3) { animation-delay:.3s; }
+  @keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
+
+  .rotation-card { background:var(--surface2); border-radius:8px; padding:10px; border:1px solid var(--border); text-align:center; }
+  .task-item { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:9px; border-left:3px solid var(--accent2); }
+  .task-item.urgent { border-left-color:var(--red); }
+  .task-veg { font-weight:700; font-size:12px; }
+  .task-action { font-size:10px; color:var(--text-dim); margin-top:2px; }
+  .task-location { font-size:9px; color:var(--accent2-light); margin-top:2px; }
+
+  .pots-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; }
+  .pot-item { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:8px; text-align:center; cursor:pointer; transition:all 0.15s; }
+  .pot-item:hover { border-color:var(--accent2); transform:translateY(-2px); }
+  .pot-item.has-plant { border-color:rgba(74,158,187,0.4); background:rgba(74,158,187,0.08); }
+  .pot-emoji { font-size:22px; margin-bottom:3px; }
+  .pot-label { font-size:9px; color:var(--text-dim); }
+  .pot-plant { font-size:11px; font-weight:600; }
+  .pot-planted { font-size:8px; color:var(--accent2-light); }
+  .add-pot { border:1px dashed rgba(255,255,255,0.1); background:transparent; color:var(--text-muted); }
+
+  .stat-card { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:12px; text-align:center; }
+  .stat-num { font-family:'Bitter',serif; font-size:26px; font-weight:900; color:var(--accent-light); }
+  .stat-lbl { font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+
+  /* Settings - Location */
+  .zone-card { background:var(--surface2); border:2px solid var(--border); border-radius:var(--radius); padding:14px; cursor:pointer; transition:all 0.2s; }
+  .zone-card:hover { border-color:var(--accent2); }
+  .zone-card.active { border-color:var(--accent-light); background:rgba(240,165,74,0.08); }
+  .zone-name { font-family:'Bitter',serif; font-weight:700; font-size:15px; margin-bottom:4px; }
+  .zone-desc { font-size:11px; color:var(--text-dim); line-height:1.5; }
+  .zone-tag { display:inline-block; font-size:9px; padding:2px 7px; border-radius:10px; margin-top:6px; font-weight:600; }
+
+  .env-card { background:var(--surface2); border:2px solid var(--border); border-radius:var(--radius); padding:14px; cursor:pointer; transition:all 0.2s; text-align:center; }
+  .env-card:hover { border-color:var(--accent2); }
+  .env-card.active { border-color:var(--greenhouse-light); background:rgba(42,138,90,0.08); }
+  .env-card .env-icon { font-size:32px; margin-bottom:6px; }
+  .env-card .env-name { font-weight:700; font-size:13px; }
+  .env-card .env-desc { font-size:10px; color:var(--text-dim); margin-top:4px; line-height:1.4; }
+
+  .notif-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+  .notif-row:last-child { border:none; }
+  .toggle-switch { width:36px; height:20px; border-radius:10px; background:rgba(255,255,255,0.1); cursor:pointer; position:relative; transition:background 0.2s; flex-shrink:0; }
+  .toggle-switch.on { background:var(--green); }
+  .toggle-switch::after { content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform 0.2s; }
+  .toggle-switch.on::after { transform:translateX(16px); }
+  .notif-label { font-size:12px; font-weight:500; }
+  .notif-desc { font-size:10px; color:var(--text-dim); }
+
+  .modal-overlay { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.2s; backdrop-filter:blur(4px); }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal { background:var(--surface); border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:22px; max-width:480px; width:92%; transform:scale(0.95); transition:transform 0.2s; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+  .modal-overlay.open .modal { transform:scale(1); }
+  .modal h3 { font-family:'Bitter',serif; color:var(--accent-light); margin-bottom:12px; font-size:15px; }
+  .modal-btns { display:flex; gap:6px; justify-content:flex-end; margin-top:14px; }
+  .modal .form-group { margin-bottom:8px; }
+
+  .ai-config { display:flex; gap:6px; align-items:flex-end; margin-bottom:12px; flex-wrap:wrap; }
+  .ai-config .form-group { flex:1; min-width:180px; }
+  .ai-status { font-size:9px; padding:3px 8px; border-radius:10px; }
+  .status-ok { background:rgba(106,170,94,0.15); color:var(--green-light); }
+  .status-err { background:rgba(224,148,58,0.15); color:var(--accent); }
+  .status-off { background:rgba(255,255,255,0.06); color:var(--text-dim); }
+
+  .toast-container { position:fixed; bottom:16px; right:16px; z-index:200; display:flex; flex-direction:column-reverse; gap:6px; pointer-events:none; }
+  .toast { background:var(--surface); border:1px solid var(--border-light); border-radius:var(--radius); padding:10px 14px; min-width:260px; max-width:360px; box-shadow:0 8px 30px rgba(0,0,0,0.5); display:flex; align-items:flex-start; gap:8px; animation:toastIn 0.3s ease; pointer-events:all; cursor:pointer; }
+  .toast.toast-out { animation:toastOut 0.3s ease forwards; }
+  @keyframes toastIn { from{opacity:0;transform:translateX(40px)} }
+  @keyframes toastOut { to{opacity:0;transform:translateX(40px)} }
+  .toast-icon { font-size:18px; flex-shrink:0; }
+  .toast-title { font-weight:700; font-size:11px; margin-bottom:1px; }
+  .toast-msg { font-size:10px; color:var(--text-dim); line-height:1.4; }
+  .toast-danger { border-left:3px solid var(--red); }
+  .toast-warn { border-left:3px solid var(--yellow); }
+  .toast-success { border-left:3px solid var(--green); }
+  .toast-info { border-left:3px solid var(--accent2); }
+
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--surface2); border-radius:3px; }
+  .hidden { display:none!important; }
+  .mt { margin-top:10px; }
+  .flex-row { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .grow { flex:1; }
+  .sel-count { font-size:9px; color:var(--accent-light); font-weight:700; padding:2px 7px; background:rgba(232,168,79,0.12); border-radius:8px; }
+  .row-btn { padding:3px 6px; font-size:9px; background:var(--surface2); border:1px solid var(--border); color:var(--text-dim); border-radius:4px; cursor:pointer; }
+
+  /* Cal env filter tabs */
+  .cal-env-tabs { display:flex; gap:4px; margin-bottom:10px; }
+  .cal-env-tab { padding:5px 12px; border-radius:6px; font-size:10px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--surface2); color:var(--text-dim); transition:all 0.15s; }
+  .cal-env-tab.active { color:#fff; }
+  .cal-env-tab.tab-outdoor.active { background:rgba(106,170,94,0.4); border-color:rgba(106,170,94,0.5); }
+  .cal-env-tab.tab-greenhouse.active { background:rgba(42,138,90,0.4); border-color:rgba(42,138,90,0.5); }
+  .cal-env-tab.tab-polytunnel.active { background:rgba(90,122,191,0.4); border-color:rgba(90,122,191,0.5); }
+</style>
+</head>
+<body>
+
+<div class="alert-banner" id="alertBanner"><div class="alert-banner-inner"><div class="alert-icon">🚨</div><div class="alert-text" id="alertText"></div><button class="alert-dismiss" onclick="dismissAlert()">Dismiss</button></div></div>
+
+<header>
+  <div>
+    <div class="logo">🌿 The <span>Veg Plot</span></div>
+    <div class="logo-sub" id="headerLocationSub">Survival Edition</div>
+  </div>
+  <div class="header-right">
+    <div class="location-badge" id="locationBadge" onclick="showPanel('settings')" title="Click to change location">📍 South Coast / Isle of Wight</div>
+    <div id="envBadges"></div>
+    <div class="threat-badge threat-amber" id="threatBadge" onclick="showPanel('warnings')">⚠️ Checking...</div>
+    <div class="month-badge" id="currentMonthBadge"></div>
+    <button class="btn btn-ai btn-sm" onclick="showPanel('ai')">🤖 AI</button>
+  </div>
+</header>
+
+<nav id="mainNav">
+  <button class="active" onclick="showPanel('dashboard',this)">📊 Command</button>
+  <button onclick="showPanel('warnings',this)">🚨 Warnings<span class="nav-alert hidden" id="navAlertWarnings"></span></button>
+  <button onclick="showPanel('beds',this)">🌱 Beds</button>
+  <button onclick="showPanel('calendar',this)">📅 Calendar</button>
+  <button onclick="showPanel('log',this)">📋 Log</button>
+  <button onclick="showPanel('harvest',this)">🍅 Harvest</button>
+  <button onclick="showPanel('pipeline',this)">🔄 Pipeline</button>
+  <button onclick="showPanel('rotation',this)">♻️ Rotation</button>
+  <button onclick="showPanel('settings',this)">⚙️ Settings</button>
+  <button onclick="showPanel('ai',this)">🤖 AI</button>
+</nav>
+
+<main>
+  <!-- DASHBOARD -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="grid-4" id="statsGrid" style="margin-bottom:14px;">
+      <div class="stat-card"><div class="stat-num" id="statPlanted">0</div><div class="stat-lbl">Growing</div></div>
+      <div class="stat-card"><div class="stat-num" id="statHarvested">0</div><div class="stat-lbl">Harvested</div></div>
+      <div class="stat-card"><div class="stat-num" id="statDueSoon">0</div><div class="stat-lbl">Due ≤14d</div></div>
+      <div class="stat-card"><div class="stat-num" id="statOverdue">0</div><div class="stat-lbl">Overdue</div></div>
+      <div class="stat-card"><div class="stat-num" id="statVarieties">0</div><div class="stat-lbl">Varieties</div></div>
+      <div class="stat-card"><div class="stat-num" id="statEmptyCells">0</div><div class="stat-lbl">Empty Cells</div></div>
+      <div class="stat-card"><div class="stat-num" id="statGapMonths">0</div><div class="stat-lbl">Hungry Months</div></div>
+      <div class="stat-card"><div class="stat-num" id="statScore" style="font-size:22px;">—</div><div class="stat-lbl">Continuity</div></div>
+    </div>
+    <div class="card" id="timelineCard"><h2>📊 12-Month Food Security</h2><p style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Projected harvests per month. Red = nothing coming.</p><div class="timeline-bar" id="foodTimeline"></div></div>
+    <div id="dashAlerts" style="margin-bottom:14px;"></div>
+    <div class="grid-2">
+      <div class="card"><h2>📅 This Month's Jobs</h2><div id="thisMonthTasks"></div></div>
+      <div class="card"><h2>🍅 Nearest Harvests</h2><div id="dashHarvests"></div></div>
+    </div>
+    <div class="card mt"><h2>🔄 Succession Sowing</h2><div id="successionTips" class="grid-3"></div></div>
+  </div>
+
+  <!-- WARNINGS -->
+  <div class="panel" id="panel-warnings">
+    <div class="card"><h2>🚨 Food Security Warnings</h2><div id="warningsList"></div></div>
+    <div class="card mt"><h2>📉 Harvest Gap Analysis</h2><div id="gapAnalysis"></div></div>
+    <div class="card mt"><h2>🌱 Emergency Sowing</h2><div id="emergencySowing" class="grid-2"></div></div>
+  </div>
+
+  <!-- BEDS -->
+  <div class="panel" id="panel-beds">
+    <div class="card">
+      <h2>🌱 Raised Beds</h2>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
+        <button class="btn btn-ghost btn-sm" id="selModeBtn" onclick="toggleSelectionMode()">⬜ Select</button>
+        <span id="selCountBadge" class="sel-count" style="display:none;">0</span>
+        <button id="plantSelBtn" class="btn btn-primary btn-sm" style="display:none;" onclick="openMultiPlantModal()">🌱 Plant</button>
+        <button id="clearSelBtn" class="btn btn-danger btn-sm" style="display:none;" onclick="clearSelectedCells()">🗑</button>
+        <button id="failSelBtn" class="btn btn-danger btn-sm" style="display:none;" onclick="markSelectedFailed()">💀</button>
+        <button id="cancelSelBtn" class="btn btn-ghost btn-sm" style="display:none;" onclick="cancelSelection()">✕</button>
+      </div>
+      <div class="beds-container" id="bedsContainer"></div>
+    </div>
+    <div class="card mt"><h2>💬 Tell AI About Beds</h2>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="bedAIPreset('I sowed lettuce, carrots and beetroot in bed 1')">Mix sow bed 1</button>
+        <button class="btn btn-ghost btn-sm" onclick="bedAIPreset('Bed 2 has failed completely')">Bed 2 failed</button>
+      </div>
+      <div style="display:flex;gap:5px;"><input type="text" id="bedAIInput" placeholder="What's happening in your beds..." style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-family:inherit;font-size:11px;" onkeydown="if(event.key==='Enter')sendBedAIMessage()"><button class="btn btn-ai btn-sm" onclick="sendBedAIMessage()">🤖</button><button class="btn btn-primary btn-sm" onclick="logBedAIMessage()">📋</button></div>
+      <div id="bedAIResponse" style="display:none;margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;line-height:1.6;"></div>
+    </div>
+    <div class="card mt"><h2>🪴 Pots</h2><div class="pots-grid" id="potsGrid"></div></div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="panel" id="panel-calendar">
+    <div class="card">
+      <h2>📅 Planting Calendar — <span id="calZoneName">South Coast / Isle of Wight — Outdoor</span></h2>
+      <div class="cal-env-tabs" id="calEnvTabs"></div>
+      <div class="cal-legend" id="calLegend"></div>
+      <div class="cal-wrap"><table class="cal-table"><thead><tr><th>Veg / Herb</th><th>J</th><th>F</th><th>M</th><th>A</th><th>M</th><th>J</th><th>J</th><th>A</th><th>S</th><th>O</th><th>N</th><th>D</th></tr></thead><tbody id="calBody"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="panel" id="panel-log">
+    <div class="card"><h2>📋 Add Entry</h2>
+      <div class="log-form">
+        <div class="form-group"><label>Vegetable</label><select id="logVeg"></select></div>
+        <div class="form-group"><label>Action</label><select id="logAction"><option value="sow-in">Sow Indoors</option><option value="sow-out">Sow Direct</option><option value="plant-out">Plant Out</option><option value="harvest">Harvest</option><option value="compost">Compost</option><option value="feed">Feed</option><option value="note">Note</option></select></div>
+        <div class="form-group"><label>Location</label><select id="logLocation"></select></div>
+        <div class="form-group"><label>Date</label><input type="date" id="logDate"></div>
+        <div class="form-group"><label>Quantity</label><input type="text" id="logQty" placeholder="e.g. 20 seeds"></div>
+        <div class="form-group"><label>Notes</label><textarea id="logNotes" placeholder="Variety, condition..."></textarea></div>
+      </div>
+      <div class="flex-row"><button class="btn btn-primary" onclick="addLogEntry()">➕ Add</button><button class="btn btn-ai btn-sm" onclick="askAIAboutEntry()">🤖 AI</button></div>
+    </div>
+    <div class="card mt"><div class="flex-row" style="margin-bottom:8px;"><h2 class="grow">📖 Diary</h2><input type="text" id="logSearch" placeholder="Search..." style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:10px;width:120px;" onkeyup="renderLog()"></div><div class="log-list" id="logList"></div></div>
+  </div>
+
+  <!-- HARVEST -->
+  <div class="panel" id="panel-harvest">
+    <div class="card"><h2>🍅 Harvest Countdowns</h2><div id="harvestCountdowns"></div></div>
+    <div class="card mt"><h2>📦 Harvest Records</h2><div id="harvestRecords" class="log-list"></div></div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="panel" id="panel-pipeline">
+    <div class="card"><h2>🔄 Food Pipeline</h2><div id="pipelineView"></div></div>
+    <div class="card mt"><h2>📊 Crop Timelines</h2><div id="cropPipelines"></div></div>
+    <div class="card mt"><h2>🎯 Sow This Week</h2><div id="weeklyActions" class="grid-2"></div></div>
+  </div>
+
+  <!-- ROTATION -->
+  <div class="panel" id="panel-rotation">
+    <div class="card"><h2>♻️ Rotation Planner</h2><div id="rotationPlanner"></div></div>
+    <div class="card mt"><h2>🌿 Companions</h2><div id="companionGuide" class="grid-2"></div></div>
+    <div class="card mt"><h2>📋 Succession Schedule</h2><div id="successionSchedule"></div></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="panel" id="panel-settings">
+    <div class="card">
+      <h2>📍 Your Growing Location</h2>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Your location determines sowing dates, harvest times, and growing advice. All calendar data shifts to match your climate zone.</p>
+      <div class="grid-3" id="zoneSelector"></div>
+    </div>
+    <div class="card mt">
+      <h2>🏗️ Growing Environments</h2>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Tick every environment you have. Greenhouse and polytunnel extend your season by weeks — the calendar will show separate timings for each.</p>
+      <div class="grid-3" id="envSelector"></div>
+    </div>
+    <div class="card mt"><h2>🔔 Notifications</h2><div id="notifSettings"></div></div>
+    <div class="card mt"><h2>🗃️ Data</h2><div class="flex-row">
+      <button class="btn btn-primary btn-sm" onclick="exportData()">📥 Export</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()">📤 Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-danger btn-sm" onclick="if(confirm('DELETE all data?')){localStorage.removeItem('vegplot');location.reload();}">🗑 Reset</button>
+    </div></div>
+  </div>
+
+  <!-- AI -->
+  <div class="panel" id="panel-ai">
+    <div class="card"><h2>🤖 AI Advisor (LM Studio)</h2>
+      <div class="ai-config"><div class="form-group"><label>LM Studio URL</label><input type="text" id="lmUrl" value="http://127.0.0.1:1234/v1/chat/completions"></div><button class="btn btn-primary btn-sm" onclick="testConnection()">Test</button><span class="ai-status status-off" id="aiStatusBadge">⚪</span></div>
+      <div class="ai-chat" id="aiChat"><div class="chat-msg system">👋 Connect to LM Studio for AI advice!</div></div>
+      <div class="chat-input-row"><input type="text" id="chatInput" placeholder="Ask about planting, pests..." onkeydown="if(event.key==='Enter')sendChat()"><button class="btn btn-primary btn-sm" onclick="sendChat()">Send</button><button class="btn btn-ai btn-sm" onclick="autoContextChat()">📊</button></div>
+      <div class="mt" style="display:flex;gap:4px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="quickAsk('What should I do this month?')">Monthly Jobs</button>
+        <button class="btn btn-ghost btn-sm" onclick="quickAsk('Succession sowing advice')">Succession</button>
+        <button class="btn btn-ghost btn-sm" onclick="quickAsk('Pest advice for my region')">Pests</button>
+        <button class="btn btn-ghost btn-sm" onclick="sendFullBedStatus()">📊 Status</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)"><div class="modal" id="modalBox"><h3 id="modalTitle"></h3><div id="modalBody"></div><div class="modal-btns" id="modalBtns"></div></div></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ========================================================================
+// CLIMATE ZONE SYSTEM
+// ========================================================================
+const ZONES = {
+  'south-coast': {
+    name: 'South Coast / Isle of Wight',
+    desc: 'Mildest UK climate. Long season, mild winters, early springs. RHS Zone H4-H5.',
+    icon: '🏖️', adjust: 0, winterHardy: true, lastFrost: 'mid March', firstFrost: 'late November',
+    tags: ['Mild', 'Long season', 'Frost-free: ~250 days'],
+    advice: 'You benefit from the UK\'s mildest climate — exploit it! Start sowing outdoors 2-4 weeks earlier than national guides. Winter salads and overwintering crops do very well here.',
+  },
+  'south-england': {
+    name: 'Southern England (avg)',
+    desc: 'Moderate climate. Standard UK growing calendar applies. Most gardening guides target this zone.',
+    icon: '🌤️', adjust: 0, winterHardy: false, lastFrost: 'late April', firstFrost: 'late October',
+    tags: ['Standard', 'Frost-free: ~180 days'],
+    advice: 'Standard growing season. Follow national sowing guides directly.',
+  },
+  'midlands': {
+    name: 'Midlands / Central England',
+    desc: 'Slightly shorter season. Later spring, earlier autumn frosts.',
+    icon: '🌥️', adjust: 1, winterHardy: false, lastFrost: 'early May', firstFrost: 'mid October',
+    tags: ['Moderate', 'Frost-free: ~160 days'],
+    advice: 'Start tender crops indoors and plant out after last frost. Choose faster-maturing varieties where possible.',
+  },
+  'north-england': {
+    name: 'Northern England / Wales',
+    desc: 'Cooler, shorter season. Hardier varieties recommended.',
+    icon: '🌧️', adjust: 1, winterHardy: false, lastFrost: 'mid May', firstFrost: 'early October',
+    tags: ['Cool', 'Frost-free: ~140 days'],
+    advice: 'Focus on cold-hardy crops. Start everything possible indoors. Fleece and cloches are essential.',
+  },
+  'scotland-lowlands': {
+    name: 'Scottish Lowlands',
+    desc: 'Short season with cool summers. Good for root veg and brassicas.',
+    icon: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', adjust: 2, winterHardy: false, lastFrost: 'late May', firstFrost: 'late September',
+    tags: ['Cool', 'Short season', 'Frost-free: ~120 days'],
+    advice: 'Prioritise cold-tolerant crops. Root vegetables and brassicas do well. Start everything indoors.',
+  },
+  'scotland-highlands': {
+    name: 'Scottish Highlands & Islands',
+    desc: 'Very short, cool growing season. Harsh winters, late springs, limited warm months. Protection is essential.',
+    icon: '🏔️', adjust: 3, winterHardy: false, lastFrost: 'early June', firstFrost: 'mid September',
+    tags: ['Harsh', 'Very short season', 'Frost-free: ~100 days'],
+    advice: 'Growing here is a serious challenge. Greenhouse or polytunnel is almost essential for anything beyond the hardiest crops. Focus on: potatoes, kale, leeks, turnips, swede, broad beans. Sow indoors aggressively from February. Fleece everything. Choose the fastest-maturing varieties available.',
+  },
+};
+
+// Environment modifiers: how many months earlier/later you can sow/harvest
+const ENV_MODIFIERS = {
+  outdoor: { sowEarlier: 0, harvestLater: 0, label: 'Outdoor', icon: '🌤️', desc: 'Standard outdoor beds and pots' },
+  greenhouse: { sowEarlier: 1, harvestLater: 1, label: 'Greenhouse', icon: '🏡', desc: 'Heated or unheated greenhouse. Extends season ~4-6 weeks each end. Protection from frost, wind, rain.' },
+  polytunnel: { sowEarlier: 1, harvestLater: 1, label: 'Polytunnel', icon: '🫧', desc: 'Polytunnel / hoop house. Similar to greenhouse but typically unheated. Extends season ~3-5 weeks each end.' },
+};
+
+// ========================================================================
+// VEGETABLE DATA — base months are for south-coast/south-england
+// ========================================================================
+const VEGETABLES = [
+  {name:'Basil',family:'Herb',sowIn:[3,4],sowOut:[5,6],harvest:[6,7,8,9],days:60,icon:'🌿',calories:23,fastGrow:true,minZone:'south-england',ghOnly:false},
+  {name:'Beans (French)',family:'Legume',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9],days:60,icon:'🫘',calories:31,fastGrow:true},
+  {name:'Beans (Broad)',family:'Legume',sowIn:[1,2],sowOut:[2,3,10,11],harvest:[5,6,7],days:90,icon:'🫘',calories:88,store:true,coldHardy:true},
+  {name:'Beetroot',family:'Root',sowIn:[],sowOut:[3,4,5,6],harvest:[6,7,8,9,10],days:90,icon:'🫐',calories:43,store:true},
+  {name:'Broccoli (PSB)',family:'Brassica',sowIn:[2],sowOut:[4,5],harvest:[1,2,3,6],days:200,icon:'🥦',calories:34,coldHardy:true},
+  {name:'Brussels Sprouts',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[10,11,12,1,2],days:180,icon:'🌿',calories:43,store:true,coldHardy:true},
+  {name:'Cabbage (Spring)',family:'Brassica',sowIn:[],sowOut:[7,8],harvest:[3,4,5],days:240,icon:'🥬',calories:25,coldHardy:true},
+  {name:'Cabbage (Summer)',family:'Brassica',sowIn:[1,2],sowOut:[4,5],harvest:[6,7,8],days:90,icon:'🥬',calories:25},
+  {name:'Cabbage (Winter)',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[10,11,12],days:180,icon:'🥬',calories:25,store:true,coldHardy:true},
+  {name:'Carrot',family:'Root',sowIn:[],sowOut:[3,4,5,6,7],harvest:[6,7,8,9,10],days:70,icon:'🥕',calories:41,store:true,fastGrow:true},
+  {name:'Chard / Spinach',family:'Leaf',sowIn:[],sowOut:[3,4,5,8,9],harvest:[5,6,7,8,9,10,11],days:60,icon:'🌿',calories:19,fastGrow:true,coldHardy:true},
+  {name:'Coriander',family:'Herb',sowIn:[],sowOut:[4,5,6,7,8],harvest:[6,7,8,9,10],days:45,icon:'🌿',calories:23,fastGrow:true},
+  {name:'Garlic',family:'Allium',sowIn:[],sowOut:[10,11],harvest:[6,7],days:240,store:true,icon:'🧄',calories:149,coldHardy:true},
+  {name:'Kale',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9,10,11,12],days:60,icon:'🥬',calories:49,fastGrow:true,coldHardy:true},
+  {name:'Leeks',family:'Allium',sowIn:[1,2],sowOut:[3,4,5],harvest:[9,10,11,12,1,2],days:140,icon:'🥬',calories:61,store:true,coldHardy:true},
+  {name:'Lettuce',family:'Leaf',sowIn:[2,3],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🥗',calories:15,fastGrow:true},
+  {name:'Onion',family:'Allium',sowIn:[1,2],sowOut:[3,4],harvest:[7,8,9],days:150,icon:'🧅',calories:40,store:true},
+  {name:'Pak Choi',family:'Brassica',sowIn:[],sowOut:[4,5,6,7,8],harvest:[6,7,8,9,10],days:45,icon:'🥬',calories:13,fastGrow:true},
+  {name:'Parsley',family:'Herb',sowIn:[],sowOut:[3,4,5],harvest:[5,6,7,8,9,10,11],days:70,icon:'🌿',calories:36,coldHardy:true},
+  {name:'Peas',family:'Legume',sowIn:[2,3],sowOut:[3,4,5,6],harvest:[6,7,8,9],days:60,icon:'🟢',calories:81,fastGrow:true},
+  {name:'Peppers',family:'Fruiting',sowIn:[2,3,4],sowOut:[6],harvest:[8,9,10],days:90,icon:'🫑',calories:20,minZone:'south-england',ghBetter:true},
+  {name:'Potato (Early)',family:'Solanaceae',sowIn:[2],sowOut:[3,4],harvest:[6,7],days:70,icon:'🥔',calories:77,store:true},
+  {name:'Potato (Main)',family:'Solanaceae',sowIn:[2],sowOut:[4,5],harvest:[8,9,10],days:120,icon:'🥔',calories:77,store:true},
+  {name:'Parsnip',family:'Root',sowIn:[],sowOut:[3,4,5],harvest:[10,11,12,1,2],days:150,icon:'🥕',calories:75,store:true,coldHardy:true},
+  {name:'Squash',family:'Cucurbit',sowIn:[4],sowOut:[5,6],harvest:[8,9,10],days:90,icon:'🎃',calories:45,store:true},
+  {name:'Spring Onions',family:'Allium',sowIn:[],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🌿',calories:32,fastGrow:true},
+  {name:'Swede',family:'Root',sowIn:[],sowOut:[5,6,7],harvest:[10,11,12,1],days:140,icon:'🥔',calories:38,store:true,coldHardy:true},
+  {name:'Sweetcorn',family:'Grass',sowIn:[3,4],sowOut:[5,6],harvest:[8,9],days:80,icon:'🌽',calories:86,minZone:'midlands'},
+  {name:'Tomato',family:'Solanaceae',sowIn:[2,3],sowOut:[5,6],harvest:[7,8,9,10],days:80,icon:'🍅',calories:18,ghBetter:true},
+  {name:'Turnips',family:'Root',sowIn:[],sowOut:[3,4,5,7,8],harvest:[5,6,7,9,10],days:50,icon:'🥔',calories:28,fastGrow:true,store:true,emergency:true,coldHardy:true},
+  {name:'Radish',family:'Root',sowIn:[],sowOut:[3,4,5,6,7,8,9],harvest:[4,5,6,7,8,9,10],days:25,icon:'🔴',calories:16,fastGrow:true,emergency:true},
+  {name:'Rocket',family:'Leaf',sowIn:[],sowOut:[3,4,5,6,7,8,9,10],harvest:[4,5,6,7,8,9,10,11],days:21,icon:'🌿',calories:25,fastGrow:true,emergency:true,coldHardy:true},
+];
+
+const MONTHS=['J','F','M','A','M','J','J','A','S','O','N','D'];
+const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const ROTATION_FAMILIES={Solanaceae:{note:'Potatoes, Tomatoes, Peppers → follow with legumes.',after:'Legume'},Brassica:{note:'Cabbages, Kale, Broccoli → follow with roots.',after:'Root'},Root:{note:'Carrots, Parsnips, Beetroot → follow with solanaceae.',after:'Solanaceae'},Legume:{note:'Beans, Peas → follow with brassicas.',after:'Brassica'}};
+const COMPANIONS=[{a:'Tomato',b:'Basil',why:'Basil repels aphids and whitefly.'},{a:'Carrot',b:'Onion',why:'Onion masks carrot fly.'},{a:'Brassicas',b:'Nasturtium',why:'Trap crop for aphids.'},{a:'Beans',b:'Sweetcorn',why:'Three Sisters nitrogen fixing.'},{a:'Lettuce',b:'Beetroot',why:'Lettuce finishes before beets need space.'},{a:'Kale',b:'Dill',why:'Dill attracts hoverflies.'}];
+
+// ========================================================================
+// ZONE-AWARE FUNCTIONS
+// ========================================================================
+function getZone() { return ZONES[state.location] || ZONES['south-coast']; }
+
+function getAdjustedMonths(months, env = 'outdoor') {
+  if (!months || months.length === 0) return [];
+  const zone = getZone();
+  const zoneAdj = zone.adjust || 0; // months later
+  const envMod = ENV_MODIFIERS[env] || ENV_MODIFIERS.outdoor;
+  return months.map(m => {
+    let adjusted = m + zoneAdj - (env !== 'outdoor' ? envMod.sowEarlier : 0);
+    if (adjusted < 1) adjusted += 12;
+    if (adjusted > 12) adjusted -= 12;
+    return adjusted;
+  }).sort((a, b) => a - b);
+}
+
+function getAdjustedHarvest(months, env = 'outdoor') {
+  if (!months || months.length === 0) return [];
+  const zone = getZone();
+  const zoneAdj = zone.adjust || 0;
+  const envMod = ENV_MODIFIERS[env] || ENV_MODIFIERS.outdoor;
+  return months.map(m => {
+    let adjusted = m + zoneAdj + (env !== 'outdoor' ? envMod.harvestLater : 0);
+    if (adjusted < 1) adjusted += 12;
+    if (adjusted > 12) adjusted -= 12;
+    return adjusted;
+  }).sort((a, b) => a - b);
+}
+
+function getAdjustedDays(baseDays, env = 'outdoor') {
+  const zone = getZone();
+  // Colder zones = slower growth
+  const extra = (zone.adjust || 0) * 7;
+  // Protected environments = slightly faster
+  const envBonus = env !== 'outdoor' ? -7 : 0;
+  return Math.max(14, baseDays + extra + envBonus);
+}
+
+function getVegForZone(env = 'outdoor') {
+  const zone = getZone();
+  const zoneOrder = Object.keys(ZONES);
+  const zoneIdx = zoneOrder.indexOf(state.location);
+  return VEGETABLES.filter(v => {
+    // If a veg has a minimum zone and we're colder, only show in greenhouse/polytunnel
+    if (v.minZone) {
+      const minIdx = zoneOrder.indexOf(v.minZone);
+      if (zoneIdx > minIdx && env === 'outdoor') return false;
+    }
+    return true;
+  });
+}
+
+// ========================================================================
+// STATE
+// ========================================================================
+let state = JSON.parse(localStorage.getItem('vegplot') || 'null') || {
+  beds: [
+    {id:'bed1',name:'Bed 1',cells:new Array(32).fill(null)},
+    {id:'bed2',name:'Bed 2',cells:new Array(32).fill(null)},
+    {id:'bed3',name:'Bed 3',cells:new Array(32).fill(null)},
+  ],
+  pots: [
+    {id:'pot1',name:'Large Pot 1',emoji:'🪴',plant:null,plantedDate:null},
+    {id:'pot2',name:'Large Pot 2',emoji:'🪴',plant:null,plantedDate:null},
+    {id:'pot3',name:'Hanging Basket',emoji:'🧺',plant:null,plantedDate:null},
+  ],
+  log: [],
+  lmUrl: 'http://127.0.0.1:1234/v1/chat/completions',
+  location: 'south-coast', // Isle of Wight default
+  environments: ['outdoor'], // can include 'greenhouse', 'polytunnel'
+  calendarEnv: 'outdoor', // which env the calendar currently shows
+  notifications: { harvestReminder:true, harvestDaysBefore:7, gapWarning:true, sowingReminder:true, overdueAlert:true, emptyBedWarning:true, lastCheck:null },
+  dismissedAlerts: [],
+};
+// Migrate old state
+if (!state.location) state.location = 'south-coast';
+if (!state.environments) state.environments = ['outdoor'];
+if (!state.calendarEnv) state.calendarEnv = 'outdoor';
+// Migrate beds to have cols, rows, env
+state.beds.forEach(b => {
+  if (!b.cols) b.cols = 8;
+  if (!b.rows) b.rows = 4;
+  if (!b.env) b.env = 'outdoor';
+  // Ensure cells array matches cols*rows
+  const needed = b.cols * b.rows;
+  if (b.cells.length < needed) b.cells = b.cells.concat(new Array(needed - b.cells.length).fill(null));
+  else if (b.cells.length > needed) b.cells = b.cells.slice(0, needed);
+});
+
+function save() { localStorage.setItem('vegplot', JSON.stringify(state)); }
+
+// ========================================================================
+// CORE ANALYSIS (zone-aware)
+// ========================================================================
+function getHarvestProjections() {
+  const now = new Date(), projections = [];
+  // From log entries (covers beds, pots, greenhouse, polytunnel — anything logged)
+  state.log.filter(e => ['sow-in','sow-out','plant-out'].includes(e.action)).forEach(e => {
+    const veg = VEGETABLES.find(v => v.name === e.veg); if (!veg?.days) return;
+    const env = (e.location === 'greenhouse' || e.location === 'polytunnel') ? e.location : 'outdoor';
+    const adjDays = getAdjustedDays(veg.days, env);
+    const plantDate = new Date(e.date);
+    const harvestDate = new Date(plantDate.getTime() + adjDays * 864e5);
+    const daysLeft = Math.ceil((harvestDate - now) / 864e5);
+    projections.push({ veg:e.veg, icon:veg.icon, daysLeft, harvestDate, plantDate, location:e.location, qty:e.qty, source:'log',
+      isOverdue:daysLeft<-7, isImminent:daysLeft>=-7&&daysLeft<=3, isSoon:daysLeft>3&&daysLeft<=14, isUpcoming:daysLeft>14,
+      store:veg.store, calories:veg.calories||0 });
+  });
+  // From bed cells (avoid duplicates with log)
+  state.beds.forEach(bed => {
+    bed.cells.forEach((cell,i) => {
+      if (!cell||cell.failed||cell.harvested) return;
+      const veg = VEGETABLES.find(v => v.name === cell.veg); if (!veg?.days) return;
+      const adjDays = getAdjustedDays(veg.days, bed.env || 'outdoor');
+      const plantDate = new Date(cell.date);
+      const harvestDate = new Date(plantDate.getTime() + adjDays * 864e5);
+      const daysLeft = Math.ceil((harvestDate - now) / 864e5);
+      const dup = projections.find(p => p.veg===cell.veg && p.location===bed.id && Math.abs(p.daysLeft-daysLeft)<5);
+      if (!dup) projections.push({ veg:cell.veg, icon:veg.icon, daysLeft, harvestDate, plantDate, location:bed.id, qty:'', source:'bed',
+        isOverdue:daysLeft<-7, isImminent:daysLeft>=-7&&daysLeft<=3, isSoon:daysLeft>3&&daysLeft<=14, isUpcoming:daysLeft>14,
+        store:veg.store, calories:veg.calories||0 });
+    });
+  });
+  // From pots — these are a real food source, must be tracked
+  state.pots.forEach(pot => {
+    if (!pot.plant || !pot.plantedDate) return;
+    const veg = VEGETABLES.find(v => v.name === pot.plant); if (!veg?.days) return;
+    const adjDays = getAdjustedDays(veg.days, 'outdoor');
+    const plantDate = new Date(pot.plantedDate);
+    const harvestDate = new Date(plantDate.getTime() + adjDays * 864e5);
+    const daysLeft = Math.ceil((harvestDate - now) / 864e5);
+    // Avoid duplicates if also in log
+    const dup = projections.find(p => p.veg===pot.plant && (p.location===pot.id || p.location===pot.name || p.location==='pot') && Math.abs(p.daysLeft-daysLeft)<5);
+    if (!dup) projections.push({ veg:pot.plant, icon:veg.icon, daysLeft, harvestDate, plantDate, location:`🪴 ${pot.name}`, qty:'', source:'pot',
+      isOverdue:daysLeft<-7, isImminent:daysLeft>=-7&&daysLeft<=3, isSoon:daysLeft>3&&daysLeft<=14, isUpcoming:daysLeft>14,
+      store:veg.store, calories:veg.calories||0 });
+  });
+  return projections.sort((a,b) => a.daysLeft - b.daysLeft);
+}
+
+function getMonthlyHarvestCounts() {
+  const counts = new Array(12).fill(0), now = new Date(), cm = now.getMonth();
+  getHarvestProjections().forEach(p => { if (p.daysLeft > 0) counts[p.harvestDate.getMonth()]++; });
+  // Add calendar potential for each env
+  state.environments.forEach(env => {
+    getVegForZone(env).forEach(v => {
+      const hMonths = getAdjustedHarvest(v.harvest, env);
+      hMonths.forEach(m => { const mi = m-1; if (mi >= cm && counts[mi] === 0) {
+        const inBed = state.beds.some(b => b.cells.some(c => c && !c.failed && c.veg === v.name));
+        const inLog = state.log.some(e => e.veg === v.name && ['sow-in','sow-out','plant-out'].includes(e.action));
+        const inPot = state.pots.some(p => p.plant === v.name && p.plantedDate);
+        if (inBed || inLog || inPot) counts[mi]++;
+      }});
+    });
+  });
+  return counts;
+}
+
+function getFoodSecurityScore() {
+  const counts = getMonthlyHarvestCounts();
+  const filled = counts.filter(c=>c>0).length;
+  const proj = getHarvestProjections();
+  const overdue = proj.filter(p=>p.isOverdue).length;
+  const emptyCells = state.beds.reduce((s,b)=>s+b.cells.filter(c=>!c).length,0);
+  const totalCells = state.beds.reduce((s,b)=>s+b.cells.length,0);
+  const emptyPots = state.pots.filter(p=>!p.plant).length;
+  const totalPots = state.pots.length;
+  const totalSlots = totalCells + totalPots;
+  const usedSlots = (totalCells - emptyCells) + (totalPots - emptyPots);
+  const util = totalSlots > 0 ? usedSlots / totalSlots : 0;
+  let score = (filled/12)*40 + util*30 + Math.max(0,20-overdue*5) + Math.min(10,proj.length);
+  return Math.round(Math.min(100,Math.max(0,score)));
+}
+
+function getWarnings() {
+  const w=[], now=new Date(), month=now.getMonth()+1, proj=getHarvestProjections(), counts=getMonthlyHarvestCounts();
+  proj.filter(p=>p.isOverdue).forEach(p => { w.push({type:'danger',icon:'🚨',title:`${p.icon} ${p.veg} — OVERDUE ${Math.abs(p.daysLeft)}d!`,detail:`At ${p.location}. Harvest NOW.`}); });
+  proj.filter(p=>p.isImminent&&!p.isOverdue).forEach(p => { w.push({type:'warn',icon:'⏰',title:`${p.icon} ${p.veg} — ${p.daysLeft<=0?'READY':p.daysLeft+'d left'}`,detail:`At ${p.location}. Prepare to harvest.`}); });
+  for(let i=0;i<12;i++){const mi=(now.getMonth()+i)%12;if(counts[mi]===0&&i<=6)w.push({type:i<=2?'danger':'warn',icon:'📉',title:`NO FOOD in ${MONTH_NAMES[mi]}${i<=2?' — CRITICAL':''}`,detail:`Sow fast-growing crops NOW.`});}
+  state.beds.forEach(bed=>{const total=bed.cells.length;const empty=bed.cells.filter(c=>!c).length;if(empty>=total*0.75)w.push({type:'warn',icon:'🪴',title:`${bed.name} is ${Math.round(empty/total*100)}% empty`,detail:`${empty}/${total} cells unused.`});});
+  // Empty pots warning
+  const emptyPots=state.pots.filter(p=>!p.plant);
+  if(emptyPots.length>0&&state.pots.length>0){
+    const pct=Math.round(emptyPots.length/state.pots.length*100);
+    if(pct>=50) w.push({type:'warn',icon:'🪴',title:`${emptyPots.length} of ${state.pots.length} pots empty (${pct}%)`,detail:`Every pot is growing space. Plant ${emptyPots.map(p=>p.name).join(', ')} with herbs, salads, or fast crops.`});
+  }
+  // Pot harvest warnings (overdue pots)
+  state.pots.forEach(pot=>{
+    if(!pot.plant||!pot.plantedDate) return;
+    const veg=VEGETABLES.find(v=>v.name===pot.plant); if(!veg?.days) return;
+    const adjDays=getAdjustedDays(veg.days,'outdoor');
+    const daysLeft=Math.ceil((new Date(pot.plantedDate).getTime()+adjDays*864e5-now)/864e5);
+    if(daysLeft<=-7) w.push({type:'danger',icon:'🚨',title:`${veg.icon} ${pot.plant} in ${pot.name} — OVERDUE ${Math.abs(daysLeft)}d!`,detail:`Harvest from ${pot.name} immediately!`});
+    else if(daysLeft<=3) w.push({type:'warn',icon:'⏰',title:`${veg.icon} ${pot.plant} in ${pot.name} — ${daysLeft<=0?'READY':daysLeft+'d left'}`,detail:`Pot harvest approaching.`});
+  });
+  // Zone-specific warning
+  const zone=getZone();
+  if(zone.adjust>=2&&!state.environments.includes('greenhouse')&&!state.environments.includes('polytunnel')){
+    w.push({type:'warn',icon:'🏔️',title:'No protection in a cold zone!',detail:`${zone.name} has a very short season. A greenhouse or polytunnel would massively extend your growing capability. Consider adding one in Settings.`});
+  }
+  return w;
+}
+
+// ========================================================================
+// TOAST
+// ========================================================================
+function showToast(title,msg,type='info',dur=5000){const c=document.getElementById('toastContainer'),t=document.createElement('div');t.className=`toast toast-${type}`;const icons={danger:'🚨',warn:'⚠️',success:'✅',info:'ℹ️'};t.innerHTML=`<div class="toast-icon">${icons[type]||'ℹ️'}</div><div><div class="toast-title">${title}</div><div class="toast-msg">${msg}</div></div>`;t.onclick=()=>{t.classList.add('toast-out');setTimeout(()=>t.remove(),300)};c.appendChild(t);setTimeout(()=>{if(t.parentNode){t.classList.add('toast-out');setTimeout(()=>t.remove(),300)}},dur);}
+
+// ========================================================================
+// INIT
+// ========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    // Set header immediately before any renders
+    const z = getZone();
+    document.getElementById('locationBadge').textContent = `📍 ${z.name}`;
+    document.getElementById('headerLocationSub').textContent = `${z.name} · ${state.environments.map(e=>ENV_MODIFIERS[e].icon).join(' ')}`;
+    document.getElementById('currentMonthBadge').textContent = MONTH_NAMES[new Date().getMonth()];
+    document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('lmUrl').value = state.lmUrl || 'http://127.0.0.1:1234/v1/chat/completions';
+    const sel = document.getElementById('logVeg');
+    VEGETABLES.forEach(v => { const o=document.createElement('option'); o.value=v.name; o.textContent=v.icon+' '+v.name; sel.appendChild(o); });
+    renderAll(); runStartupChecks();
+  } catch(err) {
+    console.error('Init error:', err);
+    // Fallback — at least show location
+    try { document.getElementById('locationBadge').textContent = `📍 ${getZone().name}`; } catch(e2) {}
+  }
+});
+
+function runStartupChecks() {
+  const warnings = getWarnings(), dangers = warnings.filter(w=>w.type==='danger');
+  if (dangers.length>0) {
+    document.getElementById('alertText').innerHTML = `<strong>${dangers.length} CRITICAL:</strong> ${dangers.slice(0,2).map(d=>d.title).join(' · ')}`;
+    document.getElementById('alertBanner').classList.add('visible');
+    document.getElementById('navAlertWarnings').classList.remove('hidden');
+    dangers.filter(w=>w.title.includes('OVERDUE')).slice(0,2).forEach((w,i)=>setTimeout(()=>showToast(w.title,w.detail,'danger',8000),500+i*800));
+  }
+  if (warnings.filter(w=>w.type==='warn').length>0) document.getElementById('navAlertWarnings').classList.remove('hidden');
+  updateHeader();
+}
+
+function updateHeader() {
+  const zone = getZone(), score = getFoodSecurityScore(), warnings = getWarnings(), dangers = warnings.filter(w=>w.type==='danger').length;
+  document.getElementById('locationBadge').textContent = `📍 ${zone.name}`;
+  document.getElementById('headerLocationSub').textContent = `${zone.name} · ${state.environments.map(e=>ENV_MODIFIERS[e].icon).join(' ')}`;
+  document.getElementById('envBadges').innerHTML = state.environments.filter(e=>e!=='outdoor').map(e => `<span class="env-badge env-${e}">${ENV_MODIFIERS[e].icon} ${ENV_MODIFIERS[e].label}</span>`).join(' ');
+  const tb = document.getElementById('threatBadge');
+  if (dangers>0){tb.className='threat-badge threat-red';tb.textContent=`🚨 ${dangers} CRITICAL`;}
+  else if(score<40){tb.className='threat-badge threat-amber';tb.textContent=`⚠️ ${score}/100`;}
+  else{tb.className='threat-badge threat-green';tb.textContent=`✅ ${score}/100`;}
+}
+
+function dismissAlert(){document.getElementById('alertBanner').classList.remove('visible');}
+function renderAll(){populateLogLocations();renderCalendar();renderBeds();renderLog();renderHarvest();renderRotation();renderDashboard();renderWarnings();renderPipeline();renderSettings();updateHeader();}
+
+function populateLogLocations(){
+  const sel=document.getElementById('logLocation');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='';
+  state.beds.forEach(b=>{const o=document.createElement('option');o.value=b.id;o.textContent=(b.env==='greenhouse'?'🏡 ':b.env==='polytunnel'?'🫧 ':'🌱 ')+b.name;sel.appendChild(o);});
+  ['greenhouse','polytunnel','pot','other'].forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent={greenhouse:'🏡 Greenhouse (general)',polytunnel:'🫧 Polytunnel (general)',pot:'🪴 Pot',other:'📍 Other'}[v];sel.appendChild(o);});
+  if(cur)sel.value=cur;
+}
+function showPanel(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');if(btn)btn.classList.add('active');}
+
+// ========================================================================
+// CALENDAR — zone & environment aware
+// ========================================================================
+let calEnv = 'outdoor';
+function setCalEnv(env){calEnv=env;state.calendarEnv=env;save();renderCalendar();}
+
+function renderCalendar() {
+  const env = calEnv;
+  const zone = getZone();
+  document.getElementById('calZoneName').textContent = `${zone.name} — ${ENV_MODIFIERS[env]?.label || 'Outdoor'}`;
+
+  // Env tabs
+  const tabsEl = document.getElementById('calEnvTabs');
+  tabsEl.innerHTML = state.environments.map(e => `<div class="cal-env-tab tab-${e} ${e===env?'active':''}" onclick="setCalEnv('${e}')">${ENV_MODIFIERS[e].icon} ${ENV_MODIFIERS[e].label}</div>`).join('');
+
+  // Legend
+  const leg = document.getElementById('calLegend');
+  const isProtected = env !== 'outdoor';
+  leg.innerHTML = `
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(90,159,212,0.75)"></div>Sow Indoors</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(106,170,94,0.75)"></div>Sow Out</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(224,148,58,0.75)"></div>Harvest</div>
+    ${isProtected ? `<div class="legend-item"><div class="legend-dot" style="background:${env==='greenhouse'?'rgba(42,138,90,0.7)':'rgba(90,122,191,0.6)'}"></div>${ENV_MODIFIERS[env].label} Extended</div>` : ''}`;
+
+  const tbody = document.getElementById('calBody');
+  tbody.innerHTML = '';
+  const now = new Date().getMonth() + 1;
+  const vegs = getVegForZone(env);
+
+  vegs.forEach(v => {
+    const tr = document.createElement('tr');
+    const adjSowIn = getAdjustedMonths(v.sowIn, env);
+    const adjSowOut = getAdjustedMonths(v.sowOut, env);
+    const adjHarvest = getAdjustedHarvest(v.harvest, env);
+    let html = `<td class="veg-name">${v.icon} ${v.name}${v.coldHardy?' ❄️':''}${v.fastGrow?' ⚡':''}</td>`;
+    for(let m=1;m<=12;m++){
+      const isCur=m===now;
+      let cls='',label='';
+      if(adjSowIn.includes(m)){cls='dot-sow-in';label='SOW';}
+      else if(adjSowOut.includes(m)){cls=env==='greenhouse'?'dot-gh-sow':env==='polytunnel'?'dot-pt-sow':'dot-sow-out';label='OUT';}
+      else if(adjHarvest.includes(m)){cls=env==='greenhouse'?'dot-gh-harv':env==='polytunnel'?'dot-pt-harv':'dot-harvest';label='🍴';}
+      html+=`<td class="cal-cell" style="${isCur?'background:rgba(232,168,79,0.06);':''}">`;
+      if(cls)html+=`<div class="cal-dot ${cls}" ${isCur?'style="outline:2px solid var(--accent-light);outline-offset:1px;"':''}>${label}</div>`;
+      html+=`</td>`;
+    }
+    tr.innerHTML=html;
+    tbody.appendChild(tr);
+  });
+}
+
+// ========================================================================
+// DASHBOARD
+// ========================================================================
+function renderDashboard() {
+  const now=new Date(),month=now.getMonth()+1,proj=getHarvestProjections(),counts=getMonthlyHarvestCounts(),score=getFoodSecurityScore();
+  const allCells=state.beds.flatMap(b=>b.cells);
+  const planted=allCells.filter(c=>c&&!c.failed&&!c.harvested).length+state.pots.filter(p=>p.plant).length;
+  document.getElementById('statPlanted').textContent=planted;
+  document.getElementById('statHarvested').textContent=state.log.filter(e=>e.action==='harvest').length;
+  document.getElementById('statDueSoon').textContent=proj.filter(p=>p.isSoon||p.isImminent).length;
+  const od=proj.filter(p=>p.isOverdue).length;
+  document.getElementById('statOverdue').textContent=od;
+  document.getElementById('statOverdue').style.color=od>0?'var(--red-light)':'';
+  document.getElementById('statVarieties').textContent=[...new Set(state.log.map(e=>e.veg))].length;
+  const ec=allCells.filter(c=>!c).length;
+  document.getElementById('statEmptyCells').textContent=ec;
+  document.getElementById('statEmptyCells').style.color=ec>60?'var(--red-light)':ec>30?'var(--yellow)':'';
+  const gm=counts.filter(c=>c===0).length;
+  document.getElementById('statGapMonths').textContent=gm;
+  document.getElementById('statGapMonths').style.color=gm>4?'var(--red-light)':gm>2?'var(--yellow)':'';
+  document.getElementById('statScore').textContent=score+'/100';
+  document.getElementById('statScore').style.color=score<30?'var(--red-light)':score<60?'var(--yellow)':'var(--green-light)';
+
+  // Timeline
+  const tl=document.getElementById('foodTimeline'); tl.innerHTML='';
+  for(let i=0;i<12;i++){const mi=(now.getMonth()+i)%12,c=counts[mi];const cls=c===0?'tm-empty':c<=2?'tm-low':c<=5?'tm-good':'tm-great';
+    const d=document.createElement('div');d.className=`timeline-month ${cls} ${i===0?'tm-current':''}`;d.innerHTML=`<div class="tm-label">${MONTH_SHORT[mi]}</div><div class="tm-count">${c}</div><div class="tm-sub">${c===0?'NONE':'crops'}</div>`;tl.appendChild(d);}
+
+  // Alerts
+  const ae=document.getElementById('dashAlerts'),wn=getWarnings().filter(w=>w.type==='danger');
+  ae.innerHTML=wn.length?`<div class="card card-danger"><h2 style="color:var(--red-light);">🚨 Critical</h2>${wn.slice(0,3).map(w=>`<div class="hw-card hw-overdue" style="margin-bottom:6px;"><div style="font-size:18px;">${w.icon}</div><div class="hw-info"><div class="hw-name">${w.title}</div><div class="hw-detail">${w.detail}</div></div></div>`).join('')}</div>`:'';
+
+  // Zone advice
+  const zone=getZone();
+
+  // Month tasks — zone adjusted
+  const vegs=getVegForZone('outdoor');
+  const tasks=vegs.filter(v=>{
+    const si=getAdjustedMonths(v.sowIn,'outdoor'),so=getAdjustedMonths(v.sowOut,'outdoor'),h=getAdjustedHarvest(v.harvest,'outdoor');
+    return si.includes(month)||so.includes(month)||h.includes(month);
+  });
+  document.getElementById('thisMonthTasks').innerHTML=tasks.map(v=>{
+    const isSow=getAdjustedMonths(v.sowIn,'outdoor').includes(month)||getAdjustedMonths(v.sowOut,'outdoor').includes(month);
+    const isH=getAdjustedHarvest(v.harvest,'outdoor').includes(month);
+    return`<div class="task-item ${isH?'urgent':''}" style="margin-bottom:5px;"><div class="task-veg">${v.icon} ${v.name}</div><div class="task-action">${isSow?(getAdjustedMonths(v.sowIn,'outdoor').includes(month)?'🏠 Sow indoors':'🌱 Sow out'):''}${isSow&&isH?' · ':''}${isH?'🍴 Harvest':''}</div></div>`;
+  }).join('')||`<p style="color:var(--text-muted);padding:8px;font-size:11px;">${zone.advice}</p>`;
+
+  // Harvests
+  const hi=proj.filter(p=>p.daysLeft>0&&p.daysLeft<=90).slice(0,6);
+  document.getElementById('dashHarvests').innerHTML=hi.length?hi.map(h=>{const cls=h.isImminent?'hw-imminent':h.isSoon?'hw-soon':'hw-upcoming',dc=h.isImminent?'d-imminent':h.isSoon?'d-soon':'d-upcoming';return`<div class="hw-card ${cls}" style="margin-bottom:5px;"><div class="hw-days ${dc}">${h.daysLeft}<small>days</small></div><div class="hw-info"><div class="hw-name">${h.icon} ${h.veg}</div><div class="hw-detail">📍 ${h.location}</div></div></div>`;}).join(''):'<p style="color:var(--text-muted);padding:8px;font-size:11px;">Log plantings to see countdowns.</p>';
+
+  // Succession
+  const succEl=document.getElementById('successionTips');
+  const succVegs=vegs.filter(v=>getAdjustedMonths(v.sowOut,'outdoor').includes(month));
+  succEl.innerHTML=succVegs.slice(0,6).map(v=>`<div class="rotation-card" style="padding:8px;"><div style="font-size:20px;">${v.icon}</div><div style="font-weight:700;font-size:11px;">${v.name}</div><div style="font-size:9px;color:var(--text-dim);margin-top:2px;">${getAdjustedDays(v.days,'outdoor')}d${v.fastGrow?' ⚡':''}${v.store?' 📦':''}${v.coldHardy?' ❄️':''}</div></div>`).join('')||'<p style="color:var(--text-muted);font-size:11px;">Nothing to succession-sow this month outdoors.</p>';
+}
+
+// ========================================================================
+// WARNINGS
+// ========================================================================
+function renderWarnings() {
+  const warnings=getWarnings(),counts=getMonthlyHarvestCounts(),now=new Date(),month=now.getMonth()+1;
+  const le=document.getElementById('warningsList');
+  le.innerHTML=warnings.length?warnings.map(w=>{const cls=w.type==='danger'?'hw-overdue':w.type==='warn'?'hw-soon':'hw-upcoming';return`<div class="hw-card ${cls}" style="margin-bottom:6px;"><div style="font-size:18px;">${w.icon}</div><div class="hw-info"><div class="hw-name">${w.title}</div><div class="hw-detail">${w.detail}</div></div></div>`;}).join(''):'<div class="card card-success" style="text-align:center;padding:24px;"><div style="font-size:36px;">✅</div><div style="font-weight:700;color:var(--green-light);margin-top:6px;">All Clear</div></div>';
+
+  // Gap
+  const ge=document.getElementById('gapAnalysis');
+  let gh='<div class="gap-bar">';
+  for(let i=0;i<12;i++){const mi=(now.getMonth()+i)%12,c=counts[mi];gh+=`<div class="gap-segment ${c===0?'gap-empty':c<=2?'gap-partial':'gap-filled'}" style="flex:1;" title="${MONTH_NAMES[mi]}: ${c}">${MONTH_SHORT[mi]}</div>`;}
+  gh+='</div>';
+  const em=[];for(let i=0;i<12;i++){const mi=(now.getMonth()+i)%12;if(counts[mi]===0)em.push(MONTH_NAMES[mi]);}
+  gh+=em.length?`<p style="font-size:11px;color:var(--red-light);margin-top:6px;">⚠️ <strong>Zero harvest:</strong> ${em.join(', ')}</p>`:`<p style="font-size:11px;color:var(--green-light);margin-top:6px;">✅ Every month covered.</p>`;
+  ge.innerHTML=gh;
+
+  // Emergency sowing
+  const ee=document.getElementById('emergencySowing');
+  const fast=VEGETABLES.filter(v=>v.fastGrow&&getAdjustedMonths(v.sowOut,'outdoor').includes(month)).sort((a,b)=>a.days-b.days);
+  // Also include greenhouse options
+  const ghFast=state.environments.includes('greenhouse')?VEGETABLES.filter(v=>v.fastGrow&&getAdjustedMonths(v.sowOut,'greenhouse').includes(month)&&!fast.find(f=>f.name===v.name)).map(v=>({...v,envLabel:'🏡 GH'})):[];
+  const all=[...fast.map(v=>({...v,envLabel:'🌤️'})),...ghFast];
+  ee.innerHTML=all.length?all.map(v=>`<div class="task-item" style="border-left-color:var(--green);"><div class="task-veg">${v.icon} ${v.name} ${v.emergency?'<span style="font-size:8px;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px;">FAST</span>':''} <span style="font-size:8px;opacity:0.6;">${v.envLabel}</span></div><div class="task-action">⚡ ${getAdjustedDays(v.days,v.envLabel.includes('GH')?'greenhouse':'outdoor')}d · ${v.calories}cal/100g</div></div>`).join(''):'<p style="color:var(--text-muted);font-size:11px;">No fast crops available now.</p>';
+}
+
+// ========================================================================
+// PIPELINE
+// ========================================================================
+function renderPipeline() {
+  const now=new Date(),proj=getHarvestProjections(),allCells=state.beds.flatMap(b=>b.cells).filter(Boolean);
+  const sowing=state.log.filter(e=>['sow-in'].includes(e.action)&&(now-new Date(e.date))<30*864e5).length;
+  const growingBeds=allCells.filter(c=>!c.failed&&!c.harvested).length;
+  const growingPots=state.pots.filter(p=>p.plant&&p.plantedDate).length;
+  const growing=growingBeds+growingPots;
+  const ready=proj.filter(p=>p.daysLeft<=7&&p.daysLeft>=-14).length;
+  const stages=[{l:'🌱 Sowing',c:sowing,w:sowing===0},{l:'🌿 Growing',c:growing,w:growing===0,sub:growingPots>0?`(${growingBeds} beds + ${growingPots} pots)`:''},{l:'🍴 Ready',c:ready,w:false},{l:'📦 Storable',c:proj.filter(p=>p.store&&p.daysLeft<=30).length,w:false}];
+  document.getElementById('pipelineView').innerHTML=`<div class="grid-4" style="margin-bottom:12px;">${stages.map(s=>`<div class="stat-card" ${s.w?'style="border-color:rgba(196,64,64,0.3);"':''}><div class="stat-num" style="font-size:22px;${s.w?'color:var(--red-light);':''}">${s.c}</div><div class="stat-lbl">${s.l}</div>${s.sub?`<div style="font-size:7px;color:var(--text-dim);margin-top:2px;">${s.sub}</div>`:''}${s.w?'<div style="font-size:8px;color:var(--red-light);margin-top:3px;">⚠️ EMPTY</div>':''}</div>`).join('')}</div>`;
+
+  // Crop timelines — include pot crops too
+  const ce=document.getElementById('cropPipelines');
+  const bedCrops=[...new Set(allCells.filter(c=>!c.failed).map(c=>c.veg))];
+  const potCrops=state.pots.filter(p=>p.plant&&p.plantedDate).map(p=>p.plant);
+  const allActiveCrops=[...new Set([...bedCrops,...potCrops])];
+  ce.innerHTML=allActiveCrops.length?allActiveCrops.map(cn=>{const v=VEGETABLES.find(vv=>vv.name===cn);if(!v)return'';
+    // Find earliest planting across beds AND pots
+    let earliestDate=new Date();
+    const bedMatches=allCells.filter(c=>c.veg===cn&&!c.failed);
+    bedMatches.forEach(c=>{const d=new Date(c.date);if(d<earliestDate)earliestDate=d;});
+    const potMatches=state.pots.filter(p=>p.plant===cn&&p.plantedDate);
+    potMatches.forEach(p=>{const d=new Date(p.plantedDate);if(d<earliestDate)earliestDate=d;});
+    const elapsed=Math.max(0,Math.ceil((now-earliestDate)/864e5));const ad=getAdjustedDays(v.days,'outdoor');const pct=Math.min(100,Math.round(elapsed/ad*100));const dl=ad-elapsed;
+    const locLabel=bedMatches.length>0&&potMatches.length>0?'beds+pots':potMatches.length>0?'🪴 pot':'bed';
+    return`<div style="display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);"><div style="font-size:10px;font-weight:600;color:var(--text-dim);">${v.icon} ${cn} <span style="font-size:7px;opacity:0.5;">${locLabel}</span></div><div><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);margin-bottom:1px;"><span>${pct}%</span><span>${dl>0?dl+'d':'🍴 READY'}</span></div><div style="height:12px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct>=100?'var(--accent)':'var(--green)'};border-radius:3px;"></div></div></div></div>`;}).join(''):'<p style="color:var(--text-muted);padding:8px;font-size:10px;">Plant crops to see timelines.</p>';
+
+  const month=now.getMonth()+1,we=document.getElementById('weeklyActions');
+  const sowable=getVegForZone('outdoor').filter(v=>getAdjustedMonths(v.sowOut,'outdoor').includes(month)||getAdjustedMonths(v.sowIn,'outdoor').includes(month));
+  we.innerHTML=sowable.slice(0,8).map(v=>`<div class="task-item" style="border-left-color:${v.fastGrow?'var(--green)':'var(--accent2)'}"><div class="task-veg">${v.icon} ${v.name}</div><div class="task-action">${getAdjustedMonths(v.sowIn,'outdoor').includes(month)?'🏠 Indoors':'🌱 Sow out'} · ${getAdjustedDays(v.days,'outdoor')}d</div></div>`).join('')||'<p style="color:var(--text-muted);font-size:10px;">All caught up.</p>';
+}
+
+// ========================================================================
+// SETTINGS
+// ========================================================================
+function renderSettings() {
+  // Zone selector
+  const zs=document.getElementById('zoneSelector');
+  zs.innerHTML=Object.entries(ZONES).map(([id,z])=>`<div class="zone-card ${state.location===id?'active':''}" onclick="setZone('${id}')"><div class="zone-name">${z.icon} ${z.name}</div><div class="zone-desc">${z.desc}</div><div>${z.tags.map(t=>`<span class="zone-tag" style="background:rgba(74,158,187,0.12);color:var(--accent2-light);border:1px solid rgba(74,158,187,0.2);">${t}</span>`).join(' ')}</div></div>`).join('');
+
+  // Env selector
+  const es=document.getElementById('envSelector');
+  es.innerHTML=Object.entries(ENV_MODIFIERS).map(([id,e])=>`<div class="env-card ${state.environments.includes(id)?'active':''}" onclick="toggleEnv('${id}')"><div class="env-icon">${e.icon}</div><div class="env-name">${e.label}</div><div class="env-desc">${e.desc}</div>${state.environments.includes(id)?'<div style="font-size:9px;color:var(--green-light);margin-top:6px;font-weight:700;">✅ ENABLED</div>':'<div style="font-size:9px;color:var(--text-muted);margin-top:6px;">Click to add</div>'}</div>`).join('');
+
+  // Notif
+  const n=state.notifications, ne=document.getElementById('notifSettings');
+  const items=[{key:'overdueAlert',l:'Overdue Alerts',d:'Warn about past-due harvests'},{key:'harvestReminder',l:'Harvest Reminders',d:`Alert ${n.harvestDaysBefore}d before harvest`},{key:'gapWarning',l:'Gap Warnings',d:'Warn about hungry months'},{key:'sowingReminder',l:'Sowing Reminders',d:'Crops ready to sow'},{key:'emptyBedWarning',l:'Empty Bed Warnings',d:'Unused bed space'}];
+  ne.innerHTML=items.map(i=>`<div class="notif-row"><div class="toggle-switch ${n[i.key]?'on':''}" onclick="toggleNotif('${i.key}',this)"></div><div><div class="notif-label">${i.l}</div><div class="notif-desc">${i.d}</div></div></div>`).join('');
+}
+
+function setZone(id) {
+  state.location = id; save(); renderAll();
+  const z = ZONES[id];
+  showToast(`📍 ${z.name}`, `Calendar and advice updated. ${z.tags[0]}. Last frost: ${z.lastFrost}.`, 'info', 5000);
+}
+
+function toggleEnv(id) {
+  if (id === 'outdoor') return; // outdoor is always on
+  if (state.environments.includes(id)) state.environments = state.environments.filter(e => e !== id);
+  else state.environments.push(id);
+  // Ensure outdoor is always there
+  if (!state.environments.includes('outdoor')) state.environments.unshift('outdoor');
+  // Reset calendar env if removed
+  if (!state.environments.includes(calEnv)) calEnv = 'outdoor';
+  save(); renderAll();
+  showToast(state.environments.includes(id) ? `${ENV_MODIFIERS[id].icon} Added` : 'Removed', state.environments.includes(id) ? `${ENV_MODIFIERS[id].label} calendar now available. Check the Calendar tab.` : `${ENV_MODIFIERS[id].label} removed.`, state.environments.includes(id) ? 'success' : 'info');
+}
+
+function toggleNotif(key,el){state.notifications[key]=!state.notifications[key];el.classList.toggle('on');save();}
+
+// ========================================================================
+// BEDS (same logic, condensed)
+// ========================================================================
+let selectionMode=false,selectedCells={},isDragging=false,dragBedId=null;
+function toggleSelectionMode(){selectionMode=!selectionMode;document.getElementById('selModeBtn').textContent=selectionMode?'✅ Select':'⬜ Select';if(!selectionMode)cancelSelection();else updateSelectionUI();}
+function cancelSelection(){selectedCells={};selectionMode=false;document.getElementById('selModeBtn').textContent='⬜ Select';updateSelectionUI();renderBeds();}
+function updateSelectionUI(){const t=Object.values(selectedCells).reduce((s,set)=>s+set.size,0);document.getElementById('selCountBadge').textContent=t;document.getElementById('selCountBadge').style.display=selectionMode?'':'none';['plantSelBtn','clearSelBtn','failSelBtn'].forEach(id=>document.getElementById(id).style.display=selectionMode&&t>0?'':'none');document.getElementById('cancelSelBtn').style.display=selectionMode?'':'none';}
+function toggleCellSelection(b,i){if(!selectedCells[b])selectedCells[b]=new Set();if(selectedCells[b].has(i))selectedCells[b].delete(i);else selectedCells[b].add(i);updateSelectionUI();}
+
+function openMultiPlantModal(){const t=Object.values(selectedCells).reduce((s,set)=>s+set.size,0);document.getElementById('modalTitle').textContent=`Plant ${t} Cells`;document.getElementById('modalBody').innerHTML=`<div class="form-group"><label>Vegetable</label><select id="multiVeg">${VEGETABLES.map(v=>`<option value="${v.name}">${v.icon} ${v.name}${v.fastGrow?' ⚡':''}${v.coldHardy?' ❄️':''}</option>`).join('')}</select></div><div class="form-group"><label>Method</label><select id="multiSow"><option value="direct">Direct</option><option value="transplant">Transplant</option></select></div><div class="form-group"><label>Date</label><input type="date" id="multiDate" value="${new Date().toISOString().split('T')[0]}"></div><div class="form-group"><label>Notes</label><textarea id="multiNotes"></textarea></div>`;document.getElementById('modalBtns').innerHTML=`<button class="btn btn-primary" onclick="confirmMultiPlant()">🌱 Plant</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;document.getElementById('modalOverlay').classList.add('open');}
+function confirmMultiPlant(){const d={veg:document.getElementById('multiVeg').value,sowType:document.getElementById('multiSow').value,date:document.getElementById('multiDate').value,notes:document.getElementById('multiNotes').value,harvested:false};Object.entries(selectedCells).forEach(([bid,indices])=>{const bed=state.beds.find(b=>b.id===bid);indices.forEach(idx=>{bed.cells[idx]={...d};});});save();closeModal();cancelSelection();renderAll();showToast('Planted!',d.veg+' planted.','success');}
+function clearSelectedCells(){Object.entries(selectedCells).forEach(([bid,indices])=>{const bed=state.beds.find(b=>b.id===bid);indices.forEach(idx=>{bed.cells[idx]=null;});});save();cancelSelection();renderAll();}
+function markSelectedFailed(){Object.entries(selectedCells).forEach(([bid,indices])=>{const bed=state.beds.find(b=>b.id===bid);indices.forEach(idx=>{if(bed.cells[idx])bed.cells[idx].failed=true;else bed.cells[idx]={veg:'Failed',date:new Date().toISOString().split('T')[0],failed:true,harvested:false};});});save();cancelSelection();renderAll();}
+
+function renderBeds(){const now=new Date(),cont=document.getElementById('bedsContainer');cont.innerHTML='';
+  state.beds.forEach(bed=>{
+    const cols=bed.cols||8, rows=bed.rows||4, total=cols*rows;
+    const env=bed.env||'outdoor';
+    const envMod=ENV_MODIFIERS[env]||ENV_MODIFIERS.outdoor;
+    const div=document.createElement('div');div.className='bed-card';
+    if(env==='greenhouse') div.style.borderColor='rgba(42,138,90,0.3)';
+    else if(env==='polytunnel') div.style.borderColor='rgba(90,122,191,0.3)';
+    const empty=bed.cells.filter(c=>!c).length,planted=bed.cells.filter(c=>c&&!c.failed).length;
+    const sizeLabel=`${cols}×${rows}ft · ${total} cells`;
+    const envBadge=env!=='outdoor'?`<span style="font-size:8px;padding:2px 6px;border-radius:8px;font-weight:600;${env==='greenhouse'?'background:rgba(42,138,90,0.2);color:var(--greenhouse-light);':'background:rgba(90,122,191,0.2);color:var(--polytunnel-light);'}">${envMod.icon} ${envMod.label}</span>`:'';
+    div.innerHTML=`
+      <div class="bed-header">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="bed-title">${env==='greenhouse'?'🏡':env==='polytunnel'?'🫧':'🌱'} ${bed.name}</span>
+          ${envBadge}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="bed-size">${planted}/${total} · ${sizeLabel}</span>
+          <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:9px;" onclick="openEditBedModal('${bed.id}')" title="Edit bed">✏️</button>
+        </div>
+      </div>
+      <div class="bed-grid" id="grid-${bed.id}" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);"></div>`;
+    cont.appendChild(div);
+    const grid=div.querySelector('#grid-'+bed.id);
+    bed.cells.forEach((cell,i)=>{
+      if(i>=total) return; // safety
+      const c=document.createElement('div');
+      let hDue=false;
+      if(cell&&!cell.failed&&!cell.harvested){
+        const v=VEGETABLES.find(vv=>vv.name===cell.veg);
+        if(v?.days){const dl=Math.ceil((new Date(cell.date).getTime()+getAdjustedDays(v.days,env)*864e5-now)/864e5);hDue=dl<=7;}
+      }
+      c.className='bed-cell'+(cell&&!cell.failed?' planted':'')+(cell?.harvested?' harvested':'')+(cell?.failed?' failed':'')+(hDue?' harvest-due':'')+(selectedCells[bed.id]?.has(i)?' selected':'');
+      c.title=cell?`${cell.veg} · ${cell.date}`:'Empty';
+      if(cell?.failed)c.innerHTML='💀';
+      else if(hDue)c.innerHTML='🍴';
+      else if(cell)c.innerHTML=(VEGETABLES.find(v=>v.name===cell.veg)||{icon:'🌿'}).icon;
+      c.addEventListener('mousedown',e=>{if(selectionMode){isDragging=true;dragBedId=bed.id;toggleCellSelection(bed.id,i);e.preventDefault();}else openCellModal(bed.id,i);});
+      c.addEventListener('mouseenter',()=>{if(selectionMode&&isDragging&&dragBedId===bed.id){if(!selectedCells[bed.id])selectedCells[bed.id]=new Set();selectedCells[bed.id].add(i);c.classList.add('selected');updateSelectionUI();}});
+      grid.appendChild(c);
+    });
+  });
+  document.addEventListener('mouseup',()=>{isDragging=false;});
+  // Add Bed card
+  const addCard=document.createElement('div');
+  addCard.className='bed-card';
+  addCard.style.cssText='display:flex;align-items:center;justify-content:center;min-height:140px;cursor:pointer;border-style:dashed;opacity:0.6;transition:all 0.2s;';
+  addCard.onmouseenter=()=>{addCard.style.opacity='1';addCard.style.borderColor='var(--accent2)';};
+  addCard.onmouseleave=()=>{addCard.style.opacity='0.6';addCard.style.borderColor='';};
+  addCard.onclick=()=>openAddBedModal();
+  addCard.innerHTML='<div style="text-align:center;"><div style="font-size:28px;margin-bottom:4px;">➕</div><div style="font-size:11px;font-weight:600;color:var(--text-dim);">Add Bed</div></div>';
+  cont.appendChild(addCard);
+  const pg=document.getElementById('potsGrid');pg.innerHTML='';state.pots.forEach(pot=>{const d=document.createElement('div');d.className='pot-item'+(pot.plant?' has-plant':'');d.onclick=()=>openPotModal(pot.id);d.innerHTML=`<div class="pot-emoji">${pot.emoji}</div><div class="pot-plant">${pot.plant||'—'}</div><div class="pot-label">${pot.name}</div>${pot.plantedDate?`<div class="pot-planted">${pot.plantedDate}</div>`:''}`;pg.appendChild(d);});const ap=document.createElement('div');ap.className='pot-item add-pot';ap.textContent='+ Add Pot';ap.onclick=()=>openAddPotModal();pg.appendChild(ap);
+}
+
+// Cell modal
+let activeCellBed=null,activeCellIdx=null;
+function openCellModal(bid,idx){activeCellBed=bid;activeCellIdx=idx;const bed=state.beds.find(b=>b.id===bid),cell=bed.cells[idx];document.getElementById('modalTitle').textContent=cell?`${cell.veg}`:` Plant Cell ${idx+1}`;if(cell){const v=VEGETABLES.find(vv=>vv.name===cell.veg);let hi='';if(v?.days&&!cell.failed&&!cell.harvested){const dl=Math.ceil((new Date(cell.date).getTime()+getAdjustedDays(v.days,'outdoor')*864e5-Date.now())/864e5);hi=`<p style="margin-top:6px;font-size:11px;padding:5px 8px;border-radius:5px;${dl<=7?'background:rgba(224,148,58,0.15);color:var(--accent-light);':'color:var(--text-dim);'}">${dl<=0?'🍴 READY!':'🕐 ~'+dl+'d left'}</p>`;}document.getElementById('modalBody').innerHTML=`<p><strong>${cell.veg}</strong> <span style="font-size:11px;color:${cell.failed?'var(--red-light)':cell.harvested?'var(--accent-light)':'var(--green-light)'};">${cell.failed?'💀 Failed':cell.harvested?'🍴 Harvested':'🌱 Growing'}</span></p><p style="font-size:10px;color:var(--text-dim);">Planted ${cell.date}</p>${hi}`;document.getElementById('modalBtns').innerHTML=`<button class="btn btn-harvest btn-sm" onclick="markHarvested()">🍴 Harvest</button><button class="btn btn-danger btn-sm" onclick="markCellFailed()">💀 Failed</button><button class="btn btn-danger btn-sm" onclick="clearCell()">🗑</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>`;}else{document.getElementById('modalBody').innerHTML=`<div class="form-group"><label>Vegetable</label><select id="cellVeg">${VEGETABLES.map(v=>`<option value="${v.name}">${v.icon} ${v.name}${v.coldHardy?' ❄️':''}</option>`).join('')}</select></div><div class="form-group"><label>Method</label><select id="cellSow"><option value="direct">Direct</option><option value="transplant">Transplant</option></select></div><div class="form-group"><label>Date</label><input type="date" id="cellDate" value="${new Date().toISOString().split('T')[0]}"></div>`;document.getElementById('modalBtns').innerHTML=`<button class="btn btn-primary" onclick="confirmCellPlant()">🌱 Plant</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;}document.getElementById('modalOverlay').classList.add('open');}
+function markCellFailed(){state.beds.find(b=>b.id===activeCellBed).cells[activeCellIdx].failed=true;save();closeModal();renderAll();}
+function confirmCellPlant(){state.beds.find(b=>b.id===activeCellBed).cells[activeCellIdx]={veg:document.getElementById('cellVeg').value,sowType:document.getElementById('cellSow').value,date:document.getElementById('cellDate').value,harvested:false};save();closeModal();renderAll();}
+function markHarvested(){const bed=state.beds.find(b=>b.id===activeCellBed);if(bed.cells[activeCellIdx])bed.cells[activeCellIdx].harvested=true;save();closeModal();renderAll();showToast('Harvested!','Replant this cell!','success');}
+function clearCell(){state.beds.find(b=>b.id===activeCellBed).cells[activeCellIdx]=null;save();closeModal();renderAll();}
+
+// ========================================================================
+// BED MANAGEMENT — Add, Edit, Resize, Delete
+// ========================================================================
+const BED_PRESETS=[
+  {name:'Raised Bed (8×4)',cols:8,rows:4,env:'outdoor',desc:'Standard 8×4ft raised bed'},
+  {name:'Raised Bed (6×4)',cols:6,rows:4,env:'outdoor',desc:'Compact 6×4ft raised bed'},
+  {name:'Raised Bed (4×4)',cols:4,rows:4,env:'outdoor',desc:'Square 4×4ft raised bed'},
+  {name:'Raised Bed (10×4)',cols:10,rows:4,env:'outdoor',desc:'Large 10×4ft raised bed'},
+  {name:'Long Bed (12×3)',cols:12,rows:3,env:'outdoor',desc:'Long narrow 12×3ft bed'},
+  {name:'Greenhouse Bed (8×4)',cols:8,rows:4,env:'greenhouse',desc:'8×4ft bed inside greenhouse — extended season'},
+  {name:'Greenhouse Bed (6×3)',cols:6,rows:3,env:'greenhouse',desc:'Compact greenhouse bed'},
+  {name:'Polytunnel Bed (10×4)',cols:10,rows:4,env:'polytunnel',desc:'10×4ft polytunnel bed — extended season'},
+  {name:'Polytunnel Bed (8×4)',cols:8,rows:4,env:'polytunnel',desc:'Standard polytunnel bed'},
+  {name:'Small Plot (3×3)',cols:3,rows:3,env:'outdoor',desc:'Tiny 3×3ft plot or square'},
+];
+
+function openAddBedModal(){
+  document.getElementById('modalTitle').textContent='Add New Bed / Growing Area';
+  document.getElementById('modalBody').innerHTML=`
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Choose a preset or create a custom bed. Greenhouse and polytunnel beds use extended growing times automatically.</p>
+    <div style="max-height:200px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:4px;" id="bedPresetList">
+      ${BED_PRESETS.map((p,i)=>{
+        const envIcon=p.env==='greenhouse'?'🏡':p.env==='polytunnel'?'🫧':'🌱';
+        const envColor=p.env==='greenhouse'?'rgba(42,138,90,0.15)':p.env==='polytunnel'?'rgba(90,122,191,0.15)':'transparent';
+        return`<div style="padding:8px 10px;border:2px solid var(--border);border-radius:8px;cursor:pointer;background:${envColor};transition:all 0.15s;" onclick="selectBedPreset(this,${i})" data-idx="${i}">
+          <div style="font-weight:600;font-size:12px;">${envIcon} ${p.name}</div>
+          <div style="font-size:9px;color:var(--text-dim);">${p.desc} · ${p.cols*p.rows} cells</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:10px;">
+      <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Or custom:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <div class="form-group"><label>Name</label><input type="text" id="newBedName" placeholder="My Bed"></div>
+        <div class="form-group"><label>Width (cols)</label><input type="number" id="newBedCols" value="8" min="2" max="16"></div>
+        <div class="form-group"><label>Depth (rows)</label><input type="number" id="newBedRows" value="4" min="2" max="8"></div>
+      </div>
+      <div class="form-group"><label>Environment</label>
+        <select id="newBedEnv">
+          <option value="outdoor">🌱 Outdoor</option>
+          <option value="greenhouse">🏡 Greenhouse (extended season)</option>
+          <option value="polytunnel">🫧 Polytunnel (extended season)</option>
+        </select>
+      </div>
+    </div>
+    <input type="hidden" id="bedPresetIdx" value="-1">`;
+  document.getElementById('modalBtns').innerHTML=`
+    <button class="btn btn-primary" onclick="confirmAddBed()">➕ Add Bed</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function selectBedPreset(el,idx){
+  document.querySelectorAll('#bedPresetList > div').forEach(d=>{d.style.borderColor='var(--border)';});
+  el.style.borderColor='var(--accent-light)';
+  document.getElementById('bedPresetIdx').value=idx;
+  const p=BED_PRESETS[idx];
+  document.getElementById('newBedName').value=p.name;
+  document.getElementById('newBedCols').value=p.cols;
+  document.getElementById('newBedRows').value=p.rows;
+  document.getElementById('newBedEnv').value=p.env;
+}
+
+function confirmAddBed(){
+  const name=document.getElementById('newBedName').value.trim()||'New Bed';
+  const cols=Math.max(2,Math.min(16,parseInt(document.getElementById('newBedCols').value)||8));
+  const rows=Math.max(2,Math.min(8,parseInt(document.getElementById('newBedRows').value)||4));
+  const env=document.getElementById('newBedEnv').value||'outdoor';
+  const id='bed_'+Date.now();
+  state.beds.push({id,name,cols,rows,env,cells:new Array(cols*rows).fill(null)});
+  // Ensure env is in environments list
+  if(env!=='outdoor'&&!state.environments.includes(env)){state.environments.push(env);}
+  save();closeModal();renderAll();
+  const envLabel=ENV_MODIFIERS[env]?.label||'Outdoor';
+  showToast('Bed Added',`${name} (${cols}×${rows}, ${envLabel}) — ${cols*rows} cells ready to plant!`,'success');
+}
+
+function openEditBedModal(bedId){
+  const bed=state.beds.find(b=>b.id===bedId);if(!bed)return;
+  const cols=bed.cols||8,rows=bed.rows||4,total=cols*rows;
+  const planted=bed.cells.filter(c=>c&&!c.failed).length;
+  document.getElementById('modalTitle').textContent=`Edit: ${bed.name}`;
+  document.getElementById('modalBody').innerHTML=`
+    <div class="form-group"><label>Name</label><input type="text" id="editBedName" value="${bed.name}"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div class="form-group"><label>Width (cols)</label><input type="number" id="editBedCols" value="${cols}" min="2" max="16"></div>
+      <div class="form-group"><label>Depth (rows)</label><input type="number" id="editBedRows" value="${rows}" min="2" max="8"></div>
+    </div>
+    <div class="form-group"><label>Environment</label>
+      <select id="editBedEnv">
+        <option value="outdoor" ${bed.env==='outdoor'?'selected':''}>🌱 Outdoor</option>
+        <option value="greenhouse" ${bed.env==='greenhouse'?'selected':''}>🏡 Greenhouse</option>
+        <option value="polytunnel" ${bed.env==='polytunnel'?'selected':''}>🫧 Polytunnel</option>
+      </select>
+    </div>
+    <p style="font-size:10px;color:var(--text-dim);margin-top:6px;">Currently: ${planted}/${total} planted. ${planted>0?'⚠️ Resizing smaller will lose cells from the end.':''}</p>`;
+  document.getElementById('modalBtns').innerHTML=`
+    <button class="btn btn-primary btn-sm" onclick="confirmEditBed('${bedId}')">💾 Save</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteBed('${bedId}')">🗑 Delete Bed</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function confirmEditBed(bedId){
+  const bed=state.beds.find(b=>b.id===bedId);if(!bed)return;
+  bed.name=document.getElementById('editBedName').value.trim()||'Unnamed Bed';
+  const newCols=Math.max(2,Math.min(16,parseInt(document.getElementById('editBedCols').value)||8));
+  const newRows=Math.max(2,Math.min(8,parseInt(document.getElementById('editBedRows').value)||4));
+  bed.env=document.getElementById('editBedEnv').value||'outdoor';
+  const newTotal=newCols*newRows;
+  // Resize cells array
+  if(newTotal>bed.cells.length) bed.cells=bed.cells.concat(new Array(newTotal-bed.cells.length).fill(null));
+  else if(newTotal<bed.cells.length) bed.cells=bed.cells.slice(0,newTotal);
+  bed.cols=newCols;bed.rows=newRows;
+  // Ensure env is in environments list
+  if(bed.env!=='outdoor'&&!state.environments.includes(bed.env)){state.environments.push(bed.env);}
+  save();closeModal();renderAll();
+  showToast('Bed Updated',`${bed.name} is now ${newCols}×${newRows} (${bed.env}).`,'success');
+}
+
+function deleteBed(bedId){
+  const bed=state.beds.find(b=>b.id===bedId);if(!bed)return;
+  const planted=bed.cells.filter(c=>c&&!c.failed).length;
+  const msg=planted>0
+    ?`Delete "${bed.name}"? It has ${planted} planted cells — ALL will be lost!`
+    :`Delete "${bed.name}"? This cannot be undone.`;
+  if(!confirm(msg))return;
+  state.beds=state.beds.filter(b=>b.id!==bedId);
+  save();closeModal();renderAll();
+  showToast('Bed Deleted',`${bed.name} removed.`,'info');
+}
+
+// Pot modal
+let activePotId=null;
+function openPotModal(id){activePotId=id;const p=state.pots.find(pp=>pp.id===id);
+  const POT_EMOJIS=['🪴','🪣','🧺','📦','🏺','🫙','🛢️','🪻','🌻','🥀','🗑️','☕'];
+  // Calculate harvest info if planted
+  let harvestInfo='';
+  if(p.plant&&p.plantedDate){const veg=VEGETABLES.find(v=>v.name===p.plant);if(veg?.days){const dl=Math.ceil((new Date(p.plantedDate).getTime()+getAdjustedDays(veg.days,'outdoor')*864e5-Date.now())/864e5);harvestInfo=`<div style="margin-top:8px;padding:6px 10px;border-radius:6px;font-size:11px;${dl<=7?'background:rgba(224,148,58,0.15);color:var(--accent-light);':'background:rgba(255,255,255,0.03);color:var(--text-dim);'}">${dl<=0?'🍴 READY TO HARVEST!':'🕐 ~'+dl+' days until harvest ('+new Date(new Date(p.plantedDate).getTime()+getAdjustedDays(veg.days,'outdoor')*864e5).toLocaleDateString('en-GB')+')'}</div>`;}}
+  document.getElementById('modalTitle').textContent=`${p.emoji} ${p.name}`;
+  document.getElementById('modalBody').innerHTML=`
+    <div class="form-group"><label>Pot Name</label><input type="text" id="potName" value="${p.name}" placeholder="e.g. Large Terracotta, Window Box..."></div>
+    <div class="form-group"><label>Type / Icon</label>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;" id="potEmojiPicker">${POT_EMOJIS.map(e=>`<div style="width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;border:2px solid ${e===p.emoji?'var(--accent-light)':'var(--border)'};background:${e===p.emoji?'rgba(240,165,74,0.12)':'var(--surface2)'};" onclick="document.querySelectorAll('#potEmojiPicker div').forEach(d=>{d.style.borderColor='var(--border)';d.style.background='var(--surface2)';});this.style.borderColor='var(--accent-light)';this.style.background='rgba(240,165,74,0.12)';document.getElementById('potEmojiVal').value='${e}';">${e}</div>`).join('')}
+      <input type="hidden" id="potEmojiVal" value="${p.emoji}">
+      </div>
+    </div>
+    <div class="form-group"><label>Plant</label><select id="potVeg"><option value="">— Empty —</option>${VEGETABLES.map(v=>`<option value="${v.name}" ${p.plant===v.name?'selected':''}>${v.icon} ${v.name}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Planted Date</label><input type="date" id="potDate" value="${p.plantedDate||new Date().toISOString().split('T')[0]}"></div>
+    ${harvestInfo}`;
+  document.getElementById('modalBtns').innerHTML=`
+    <button class="btn btn-primary btn-sm" onclick="savePot()">💾 Save</button>
+    <button class="btn btn-harvest btn-sm" onclick="clearPot()">🔄 Clear Plant</button>
+    <button class="btn btn-danger btn-sm" onclick="deletePot()">🗑 Delete Pot</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');}
+
+function savePot(){const p=state.pots.find(pp=>pp.id===activePotId);
+  p.name=document.getElementById('potName').value.trim()||'Unnamed Pot';
+  p.emoji=document.getElementById('potEmojiVal').value||'🪴';
+  p.plant=document.getElementById('potVeg').value||null;
+  p.plantedDate=p.plant?document.getElementById('potDate').value:null;
+  save();closeModal();renderAll();showToast('Pot Saved',`${p.emoji} ${p.name} updated.`,'success');}
+
+function clearPot(){const p=state.pots.find(pp=>pp.id===activePotId);p.plant=null;p.plantedDate=null;save();closeModal();renderAll();}
+
+function deletePot(){const p=state.pots.find(pp=>pp.id===activePotId);
+  if(!confirm(`Delete "${p.name}"? This removes the pot and any plant in it.`))return;
+  state.pots=state.pots.filter(pp=>pp.id!==activePotId);
+  save();closeModal();renderAll();showToast('Pot Deleted',`${p.emoji} ${p.name} removed.`,'info');}
+
+function openAddPotModal(){
+  const POT_TYPES=[
+    {name:'Large Pot',emoji:'🪴',desc:'Standard large plant pot'},
+    {name:'Small Pot',emoji:'🪻',desc:'Smaller pot for herbs'},
+    {name:'Grow Bag',emoji:'🪣',desc:'Grow bag for tomatoes, potatoes etc'},
+    {name:'Hanging Basket',emoji:'🧺',desc:'Hanging basket for trailing plants'},
+    {name:'Window Box',emoji:'📦',desc:'Window box or trough'},
+    {name:'Raised Planter',emoji:'🏺',desc:'Raised planter or urn'},
+    {name:'Bucket / Tub',emoji:'🛢️',desc:'Repurposed bucket or large tub'},
+    {name:'Jar / Indoor',emoji:'🫙',desc:'Jar, indoor pot, or sprouter'},
+  ];
+  document.getElementById('modalTitle').textContent='Add New Pot / Container';
+  document.getElementById('modalBody').innerHTML=`
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Pick a type or create a custom one. Every pot is growing space — don't leave it empty!</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-bottom:12px;" id="potTypeGrid">
+      ${POT_TYPES.map((t,i)=>`<div style="background:var(--surface2);border:2px solid var(--border);border-radius:8px;padding:8px;text-align:center;cursor:pointer;transition:all 0.15s;" onclick="selectPotType(this,${i})" data-idx="${i}">
+        <div style="font-size:22px;">${t.emoji}</div>
+        <div style="font-size:11px;font-weight:600;margin-top:2px;">${t.name}</div>
+      </div>`).join('')}
+    </div>
+    <div class="form-group"><label>Custom Name (optional)</label><input type="text" id="newPotName" placeholder="Leave blank to use type name"></div>
+    <div class="form-group"><label>Plant it now?</label><select id="newPotVeg"><option value="">— Plant later —</option>${VEGETABLES.map(v=>`<option value="${v.name}">${v.icon} ${v.name}${v.fastGrow?' ⚡':''}${v.coldHardy?' ❄️':''}</option>`).join('')}</select></div>
+    <input type="hidden" id="newPotTypeIdx" value="0">`;
+  document.getElementById('modalBtns').innerHTML=`
+    <button class="btn btn-primary" onclick="confirmAddPot()">🪴 Add Pot</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  // Pre-select first type
+  setTimeout(()=>{const first=document.querySelector('#potTypeGrid > div');if(first)selectPotType(first,0);},50);
+}
+
+const ADD_POT_TYPES=[
+  {name:'Large Pot',emoji:'🪴'},{name:'Small Pot',emoji:'🪻'},{name:'Grow Bag',emoji:'🪣'},
+  {name:'Hanging Basket',emoji:'🧺'},{name:'Window Box',emoji:'📦'},{name:'Raised Planter',emoji:'🏺'},
+  {name:'Bucket / Tub',emoji:'🛢️'},{name:'Jar / Indoor',emoji:'🫙'},
+];
+
+function selectPotType(el,idx){
+  document.querySelectorAll('#potTypeGrid > div').forEach(d=>{d.style.borderColor='var(--border)';d.style.background='var(--surface2)';});
+  el.style.borderColor='var(--accent-light)';el.style.background='rgba(240,165,74,0.1)';
+  document.getElementById('newPotTypeIdx').value=idx;
+}
+
+function confirmAddPot(){
+  const idx=parseInt(document.getElementById('newPotTypeIdx').value)||0;
+  const type=ADD_POT_TYPES[idx]||ADD_POT_TYPES[0];
+  const customName=document.getElementById('newPotName').value.trim();
+  const plantNow=document.getElementById('newPotVeg').value;
+  const id='pot_'+Date.now();
+  const newPot={
+    id, name:customName||type.name, emoji:type.emoji,
+    plant:plantNow||null, plantedDate:plantNow?new Date().toISOString().split('T')[0]:null
+  };
+  state.pots.push(newPot);save();closeModal();renderAll();
+  showToast('Pot Added',`${newPot.emoji} ${newPot.name}${plantNow?' with '+plantNow:''}`,plantNow?'success':'info');
+}
+function closeModal(e){if(e&&e.target!==document.getElementById('modalOverlay'))return;document.getElementById('modalOverlay').classList.remove('open');}
+
+// ========================================================================
+// LOG
+// ========================================================================
+function addLogEntry(){const entry={id:Date.now(),veg:document.getElementById('logVeg').value,action:document.getElementById('logAction').value,location:document.getElementById('logLocation').value,date:document.getElementById('logDate').value,qty:document.getElementById('logQty').value,notes:document.getElementById('logNotes').value};state.log.unshift(entry);save();renderAll();document.getElementById('logNotes').value='';document.getElementById('logQty').value='';showToast('Logged',entry.veg+' — '+entry.action,'info');}
+function renderLog(){const s=(document.getElementById('logSearch')?.value||'').toLowerCase(),list=document.getElementById('logList'),f=state.log.filter(e=>!s||e.veg.toLowerCase().includes(s)||(e.notes||'').toLowerCase().includes(s));list.innerHTML=f.length?'':'<div style="color:var(--text-muted);text-align:center;padding:16px;font-size:11px;">No entries.</div>';f.forEach(e=>{const el=document.createElement('div');el.className='log-entry';const badge={'sow-in':'badge-sow','sow-out':'badge-sow','plant-out':'badge-plant','harvest':'badge-harvest'}[e.action]||'badge-note';const label={'sow-in':'Sow In','sow-out':'Sow Out','plant-out':'Transplant','harvest':'Harvest','compost':'Compost','feed':'Feed','note':'Note'}[e.action]||e.action;el.innerHTML=`<div><div class="log-veg">${(VEGETABLES.find(v=>v.name===e.veg)||{icon:'🌿'}).icon} ${e.veg}${e.qty?' <span style="font-size:9px;color:var(--text-dim);">(${e.qty})</span>':''}</div><div class="log-meta"><span class="log-badge ${badge}">${label}</span><span class="log-loc">📍 ${e.location}</span><span class="log-date">${e.date}</span></div>${e.notes?`<div class="log-notes">${e.notes}</div>`:''}</div><button class="btn btn-danger btn-sm" onclick="deleteLog(${e.id})">✕</button>`;list.appendChild(el);});}
+function deleteLog(id){state.log=state.log.filter(e=>e.id!==id);save();renderAll();}
+
+// ========================================================================
+// HARVEST
+// ========================================================================
+function renderHarvest(){const proj=getHarvestProjections(),ce=document.getElementById('harvestCountdowns');ce.innerHTML=proj.length?'':'<p style="color:var(--text-muted);text-align:center;padding:14px;font-size:11px;">No active plantings.</p>';proj.slice(0,20).forEach(p=>{const d=document.createElement('div');const cls=p.isOverdue?'hw-overdue':p.isImminent?'hw-imminent':p.isSoon?'hw-soon':'hw-upcoming';const dc=p.isOverdue?'d-overdue':p.isImminent?'d-imminent':p.isSoon?'d-soon':'d-upcoming';d.className='hw-card '+cls;d.style.marginBottom='5px';d.innerHTML=`<div class="hw-days ${dc}">${p.isOverdue?Math.abs(p.daysLeft)+'d':p.daysLeft<=0?'NOW':p.daysLeft+'d'}<small>${p.isOverdue?'late':'left'}</small></div><div class="hw-info"><div class="hw-name">${p.icon} ${p.veg}</div><div class="hw-detail">📍 ${p.location} · ${p.harvestDate.toLocaleDateString('en-GB')}</div></div>`;ce.appendChild(d);});
+  const re=document.getElementById('harvestRecords'),h=state.log.filter(e=>e.action==='harvest');re.innerHTML=h.length?'':'<p style="color:var(--text-muted);text-align:center;padding:14px;font-size:11px;">No harvests.</p>';h.forEach(e=>{const el=document.createElement('div');el.className='log-entry';el.innerHTML=`<div><div class="log-veg">${(VEGETABLES.find(v=>v.name===e.veg)||{icon:'🌿'}).icon} ${e.veg}</div><div class="log-meta"><span class="log-badge badge-harvest">Harvested</span><span class="log-loc">📍 ${e.location}</span><span class="log-date">${e.date}</span></div></div>`;re.appendChild(el);});}
+
+// ========================================================================
+// ROTATION
+// ========================================================================
+function renderRotation(){const pl=document.getElementById('rotationPlanner'),families=Object.keys(ROTATION_FAMILIES),cy=new Date().getFullYear();let html=`<div style="overflow-x:auto;"><table class="cal-table"><thead><tr><th>Bed</th>${[0,1,2,3].map(y=>`<th>${cy+y}</th>`).join('')}</tr></thead><tbody>`;state.beds.forEach((bed,bi)=>{html+=`<tr><td class="veg-name">${bed.name}</td>`;for(let y=0;y<4;y++){const fam=families[(bi+y)%families.length];const cols={Solanaceae:'#6a1010',Brassica:'#1a3a6a',Root:'#5a4020',Legume:'#1a4a1a'};html+=`<td style="text-align:center;"><div style="background:${cols[fam]};color:#fff;border-radius:4px;padding:3px;font-size:10px;font-weight:600;">${fam}</div></td>`;}html+='</tr>';});html+='</tbody></table></div>';pl.innerHTML=html;
+  document.getElementById('companionGuide').innerHTML=COMPANIONS.map(c=>`<div class="rotation-card" style="text-align:left;padding:8px;"><div style="font-weight:700;font-size:12px;">🤝 ${c.a} + ${c.b}</div><div style="font-size:10px;color:var(--text-dim);margin-top:3px;">${c.why}</div></div>`).join('');
+  const month=new Date().getMonth()+1,sv=VEGETABLES.filter(v=>(v.sowOut||[]).length>2);document.getElementById('successionSchedule').innerHTML=`<div class="grid-2">${sv.map(v=>{const adj=getAdjustedMonths(v.sowOut,'outdoor');const ns=adj.find(m=>m>=month)||adj[0];return`<div class="task-item"><div class="task-veg">${v.icon} ${v.name}</div><div class="task-action">${MONTH_SHORT[adj[0]-1]}–${MONTH_SHORT[adj[adj.length-1]-1]}</div><div class="task-location">Next: ${MONTH_SHORT[ns-1]}</div></div>`;}).join('')}</div>`;}
+
+// ========================================================================
+// EXPORT / IMPORT
+// ========================================================================
+function exportData(){const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`vegplot-${new Date().toISOString().split('T')[0]}.json`;a.click();showToast('Exported','Data saved.','success');}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.beds&&d.log){state=d;save();renderAll();showToast('Imported','Data restored.','success');}}catch{showToast('Error','Invalid file.','danger');}};r.readAsText(f);}
+
+// ========================================================================
+// AI
+// ========================================================================
+let chatHistory=[];
+
+// Extracts reply from LM Studio response, handling reasoning models (Qwen, DeepSeek etc)
+// where content can be empty and the thinking is in reasoning_content
+function extractLMReply(data) {
+  const choice = data.choices?.[0];
+  if (!choice) {
+    // Anthropic-style response
+    return data.content?.[0]?.text || 'No response received — check LM Studio.';
+  }
+  const msg = choice.message || {};
+  const content = (msg.content || '').trim();
+  const reasoning = (msg.reasoning_content || msg.reasoning || '').trim();
+  const finishReason = choice.finish_reason || '';
+
+  // If we got actual content, use it
+  if (content) return content;
+
+  // If content is empty but we have reasoning (reasoning model ran out of tokens)
+  if (reasoning && !content) {
+    if (finishReason === 'length') {
+      // Model used all tokens on thinking, never got to the answer
+      return '⚠️ The model ran out of tokens while thinking and couldn\'t produce a final answer. This happens with reasoning models (like Qwen, DeepSeek-R1). Try:\n\n• Asking a shorter, more specific question\n• Increasing max_tokens in LM Studio settings (try 8192+)\n• Using a non-reasoning model variant\n\nHere\'s what it was thinking about:\n\n' + reasoning.slice(0, 600) + (reasoning.length > 600 ? '...' : '');
+    }
+    // Has reasoning but empty content for other reasons — show reasoning as fallback
+    return reasoning;
+  }
+
+  // Truly empty
+  if (finishReason === 'length') {
+    return '⚠️ Response was cut off (token limit reached). Try asking a shorter question or increase max_tokens in LM Studio.';
+  }
+
+  return 'No response received — the model returned empty content. Check LM Studio logs.';
+}
+function askAIAboutEntry(){quickAsk(`I just ${document.getElementById('logAction').value} ${document.getElementById('logVeg').value} in ${getZone().name}. What next?`);}
+async function testConnection(){const url=document.getElementById('lmUrl').value;state.lmUrl=url;save();const b=document.getElementById('aiStatusBadge');b.textContent='⏳';b.className='ai-status status-off';try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:'Hello'}],max_tokens:50})});if(r.ok){b.textContent='🟢';b.className='ai-status status-ok';}else throw new Error('HTTP '+r.status);}catch(e){b.textContent='🔴 '+e.message;b.className='ai-status status-err';}}
+function addChatMsg(role,text){const ch=document.getElementById('aiChat'),el=document.createElement('div');el.className='chat-msg '+role;el.textContent=text;ch.appendChild(el);ch.scrollTop=ch.scrollHeight;return el;}
+function addTyping(){const ch=document.getElementById('aiChat'),el=document.createElement('div');el.className='chat-msg ai';el.innerHTML='<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';ch.appendChild(el);ch.scrollTop=ch.scrollHeight;return el;}
+function getGardenContext(){const z=getZone(),month=MONTH_NAMES[new Date().getMonth()],score=getFoodSecurityScore(),warnings=getWarnings();return`You are an expert vegetable gardening advisor. CRITICAL CONTEXT: The gardener is in ${z.name} (${z.desc}). Last frost: ${z.lastFrost}. First frost: ${z.firstFrost}. ${z.advice} They have 3 raised beds (8×4ft) plus pots. Environments: ${state.environments.join(', ')}. Month: ${month}. Score: ${score}/100. Warnings: ${warnings.slice(0,3).map(w=>w.title).join('; ')||'none'}. Recently planted: ${state.log.filter(e=>['sow-in','sow-out','plant-out'].includes(e.action)).slice(0,8).map(e=>`${e.veg} (${e.date})`).join(', ')||'nothing'}. Give practical, location-specific advice. Prioritise continuous food production.`;}
+async function sendChat(){const inp=document.getElementById('chatInput'),msg=inp.value.trim();if(!msg)return;inp.value='';await sendToLM(msg,false);}
+async function autoContextChat(){const inp=document.getElementById('chatInput'),msg=inp.value.trim()||`What should I focus on in ${getZone().name} this month?`;inp.value='';await sendToLM(msg,true);}
+async function quickAsk(msg){showPanel('ai');await sendToLM(msg,true);}
+async function sendToLM(userMsg,ctx){addChatMsg('user',userMsg);const typ=addTyping();const url=document.getElementById('lmUrl').value||state.lmUrl;chatHistory.push({role:'user',content:userMsg});try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:4096,messages:[{role:'system',content:ctx?getGardenContext():`Expert UK veg gardening advisor for ${getZone().name}. Give practical advice.`},...chatHistory.slice(-8)]})});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();const reply=extractLMReply(d);typ.remove();addChatMsg('ai',reply);chatHistory.push({role:'assistant',content:reply});}catch(e){typ.remove();addChatMsg('system','⚠️ '+e.message);}}
+
+function bedAIPreset(t){document.getElementById('bedAIInput').value=t;}
+function getBedSummaryText(){const beds=state.beds.map(b=>{const p=b.cells.filter(c=>c&&!c.failed),e=b.cells.filter(c=>!c).length;return`${b.name}: ${p.length?[...new Set(p.map(c=>c.veg))].join(', ')+` (${p.length} cells)`:' empty'}${e?'; '+e+' free':''}`;}).join('. ');const pots=state.pots.filter(p=>p.plant).map(p=>`${p.name}: ${p.plant} (since ${p.plantedDate})`);const emptyPots=state.pots.filter(p=>!p.plant).length;return beds+(pots.length?'. Pots: '+pots.join(', '):'')+(emptyPots>0?`. ${emptyPots} empty pot${emptyPots>1?'s':''}.`:'');}
+async function sendBedAIMessage(){const inp=document.getElementById('bedAIInput'),msg=inp.value.trim();if(!msg)return;const z=getZone(),resp=document.getElementById('bedAIResponse');resp.style.display='block';resp.textContent='⏳...';const url=document.getElementById('lmUrl')?.value||state.lmUrl;try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:4096,messages:[{role:'system',content:`UK gardening advisor. Location: ${z.name}. ${z.advice} Beds: ${getBedSummaryText()}. Envs: ${state.environments.join(', ')}. Acknowledge, advise, flag risks.`},{role:'user',content:msg}]})});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();resp.textContent=extractLMReply(d);}catch(e){resp.textContent='⚠️ '+e.message;}}
+function logBedAIMessage(){const msg=document.getElementById('bedAIInput').value.trim();if(!msg)return;let loc='other';if(/bed\s*1/i.test(msg))loc='bed1';else if(/bed\s*2/i.test(msg))loc='bed2';else if(/bed\s*3/i.test(msg))loc='bed3';state.log.unshift({id:Date.now(),veg:'[Note]',action:'note',location:loc,date:new Date().toISOString().split('T')[0],qty:'',notes:msg});save();renderAll();if(/bed\s*(\d)\s+(has\s+)?(completely\s+)?fail/i.test(msg)){const m=msg.match(/bed\s*(\d)/i);if(m){const bed=state.beds.find(b=>b.id==='bed'+m[1]);if(bed){bed.cells=bed.cells.map(c=>c?{...c,failed:true}:null);save();renderBeds();}}}document.getElementById('bedAIInput').value='';showToast('Logged','Note added.','info');}
+function sendFullBedStatus(){quickAsk(`Location: ${getZone().name}. Envs: ${state.environments.join(', ')}. Beds: ${getBedSummaryText()}. Score: ${getFoodSecurityScore()}/100. What are the most critical actions?`);}
+
+// Periodic check
+setInterval(()=>{const proj=getHarvestProjections(),n=state.notifications,now=new Date(),last=n.lastCheck?new Date(n.lastCheck):new Date(0);if((now-last)/36e5>=1){n.lastCheck=now.toISOString();save();if(n.harvestReminder)proj.filter(p=>p.daysLeft<=n.harvestDaysBefore&&p.daysLeft>0).forEach(p=>showToast(`${p.icon} ${p.veg} — ${p.daysLeft}d`,`At ${p.location}`,'warn',6000));if(n.overdueAlert)proj.filter(p=>p.isOverdue).forEach(p=>showToast(`🚨 ${p.veg} OVERDUE`,`${Math.abs(p.daysLeft)}d late!`,'danger',8000));}updateHeader();},60000);
+</script>
+</body>
+</html>
