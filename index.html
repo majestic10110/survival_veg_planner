@@ -385,7 +385,7 @@
       <div style="display:flex;gap:5px;"><input type="text" id="bedAIInput" placeholder="What's happening in your beds..." style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-family:inherit;font-size:11px;" onkeydown="if(event.key==='Enter')sendBedAIMessage()"><button class="btn btn-ai btn-sm" onclick="sendBedAIMessage()">🤖</button><button class="btn btn-primary btn-sm" onclick="logBedAIMessage()">📋</button></div>
       <div id="bedAIResponse" style="display:none;margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;line-height:1.6;"></div>
     </div>
-    <div class="card mt"><h2>🪴 Pots</h2><div class="pots-grid" id="potsGrid"></div></div>
+    <div class="card mt"><h2>🪴 Pots, Containers & Ground Plots</h2><p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Track anything outside your raised beds — pots, grow bags, fruit trees in the ground, berry patches, rhubarb crowns, etc.</p><div class="pots-grid" id="potsGrid"></div></div>
   </div>
 
   <!-- CALENDAR -->
@@ -534,45 +534,111 @@ const ENV_MODIFIERS = {
 // VEGETABLE DATA — base months are for south-coast/south-england
 // ========================================================================
 const VEGETABLES = [
-  {name:'Basil',family:'Herb',sowIn:[3,4],sowOut:[5,6],harvest:[6,7,8,9],days:60,icon:'🌿',calories:23,fastGrow:true,minZone:'south-england',ghOnly:false},
+  // ===== HERBS =====
+  {name:'Basil',family:'Herb',sowIn:[3,4],sowOut:[5,6],harvest:[6,7,8,9],days:60,icon:'🌿',calories:23,fastGrow:true,minZone:'south-england',ghBetter:true},
+  {name:'Coriander',family:'Herb',sowIn:[],sowOut:[4,5,6,7,8],harvest:[6,7,8,9,10],days:45,icon:'🌿',calories:23,fastGrow:true},
+  {name:'Dill',family:'Herb',sowIn:[],sowOut:[4,5,6,7],harvest:[6,7,8,9],days:40,icon:'🌿',calories:43,fastGrow:true},
+  {name:'Mint',family:'Herb',sowIn:[3],sowOut:[4,5],harvest:[5,6,7,8,9,10],days:90,icon:'🌿',calories:44,coldHardy:true,perennial:true},
+  {name:'Parsley',family:'Herb',sowIn:[],sowOut:[3,4,5],harvest:[5,6,7,8,9,10,11],days:70,icon:'🌿',calories:36,coldHardy:true},
+  {name:'Chives',family:'Herb',sowIn:[3],sowOut:[4,5],harvest:[4,5,6,7,8,9,10],days:60,icon:'🌿',calories:30,coldHardy:true,perennial:true},
+  {name:'Rosemary',family:'Herb',sowIn:[],sowOut:[4,5],harvest:[1,2,3,4,5,6,7,8,9,10,11,12],days:365,icon:'🌿',calories:131,coldHardy:true,perennial:true},
+  {name:'Thyme',family:'Herb',sowIn:[3,4],sowOut:[5],harvest:[1,2,3,4,5,6,7,8,9,10,11,12],days:365,icon:'🌿',calories:101,coldHardy:true,perennial:true},
+  {name:'Sage',family:'Herb',sowIn:[3],sowOut:[5],harvest:[1,2,3,4,5,6,7,8,9,10,11,12],days:365,icon:'🌿',calories:315,coldHardy:true,perennial:true},
+  {name:'Oregano',family:'Herb',sowIn:[3,4],sowOut:[5],harvest:[6,7,8,9,10],days:80,icon:'🌿',calories:265,coldHardy:true,perennial:true},
+
+  // ===== LEGUMES =====
   {name:'Beans (French)',family:'Legume',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9],days:60,icon:'🫘',calories:31,fastGrow:true},
   {name:'Beans (Broad)',family:'Legume',sowIn:[1,2],sowOut:[2,3,10,11],harvest:[5,6,7],days:90,icon:'🫘',calories:88,store:true,coldHardy:true},
+  {name:'Beans (Runner)',family:'Legume',sowIn:[4],sowOut:[5,6],harvest:[7,8,9,10],days:60,icon:'🫘',calories:25,fastGrow:true},
+  {name:'Peas',family:'Legume',sowIn:[2,3],sowOut:[3,4,5,6],harvest:[6,7,8,9],days:60,icon:'🟢',calories:81,fastGrow:true},
+  {name:'Mangetout / Sugar Snap',family:'Legume',sowIn:[2,3],sowOut:[3,4,5],harvest:[6,7,8],days:65,icon:'🟢',calories:42,fastGrow:true},
+
+  // ===== ROOTS =====
   {name:'Beetroot',family:'Root',sowIn:[],sowOut:[3,4,5,6],harvest:[6,7,8,9,10],days:90,icon:'🫐',calories:43,store:true},
+  {name:'Carrot',family:'Root',sowIn:[],sowOut:[3,4,5,6,7],harvest:[6,7,8,9,10],days:70,icon:'🥕',calories:41,store:true,fastGrow:true},
+  {name:'Parsnip',family:'Root',sowIn:[],sowOut:[3,4,5],harvest:[10,11,12,1,2],days:150,icon:'🥕',calories:75,store:true,coldHardy:true},
+  {name:'Swede',family:'Root',sowIn:[],sowOut:[5,6,7],harvest:[10,11,12,1],days:140,icon:'🥔',calories:38,store:true,coldHardy:true},
+  {name:'Turnips',family:'Root',sowIn:[],sowOut:[3,4,5,7,8],harvest:[5,6,7,9,10],days:50,icon:'🥔',calories:28,fastGrow:true,store:true,emergency:true,coldHardy:true},
+  {name:'Radish',family:'Root',sowIn:[],sowOut:[3,4,5,6,7,8,9],harvest:[4,5,6,7,8,9,10],days:25,icon:'🔴',calories:16,fastGrow:true,emergency:true},
+  {name:'Jerusalem Artichoke',family:'Root',sowIn:[],sowOut:[2,3],harvest:[10,11,12,1,2],days:200,icon:'🌻',calories:73,store:true,coldHardy:true},
+  {name:'Celeriac',family:'Root',sowIn:[2,3],sowOut:[5,6],harvest:[10,11,12,1],days:200,icon:'🥕',calories:42,store:true,coldHardy:true},
+  {name:'Sweet Potato',family:'Root',sowIn:[4,5],sowOut:[6],harvest:[9,10],days:120,icon:'🍠',calories:86,store:true,minZone:'south-england',ghBetter:true},
+
+  // ===== BRASSICAS =====
   {name:'Broccoli (PSB)',family:'Brassica',sowIn:[2],sowOut:[4,5],harvest:[1,2,3,6],days:200,icon:'🥦',calories:34,coldHardy:true},
+  {name:'Broccoli (Calabrese)',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9,10],days:80,icon:'🥦',calories:34},
   {name:'Brussels Sprouts',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[10,11,12,1,2],days:180,icon:'🌿',calories:43,store:true,coldHardy:true},
   {name:'Cabbage (Spring)',family:'Brassica',sowIn:[],sowOut:[7,8],harvest:[3,4,5],days:240,icon:'🥬',calories:25,coldHardy:true},
   {name:'Cabbage (Summer)',family:'Brassica',sowIn:[1,2],sowOut:[4,5],harvest:[6,7,8],days:90,icon:'🥬',calories:25},
   {name:'Cabbage (Winter)',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[10,11,12],days:180,icon:'🥬',calories:25,store:true,coldHardy:true},
-  {name:'Carrot',family:'Root',sowIn:[],sowOut:[3,4,5,6,7],harvest:[6,7,8,9,10],days:70,icon:'🥕',calories:41,store:true,fastGrow:true},
-  {name:'Chard / Spinach',family:'Leaf',sowIn:[],sowOut:[3,4,5,8,9],harvest:[5,6,7,8,9,10,11],days:60,icon:'🌿',calories:19,fastGrow:true,coldHardy:true},
-  {name:'Coriander',family:'Herb',sowIn:[],sowOut:[4,5,6,7,8],harvest:[6,7,8,9,10],days:45,icon:'🌿',calories:23,fastGrow:true},
-  {name:'Garlic',family:'Allium',sowIn:[],sowOut:[10,11],harvest:[6,7],days:240,store:true,icon:'🧄',calories:149,coldHardy:true},
+  {name:'Cauliflower',family:'Brassica',sowIn:[1,2],sowOut:[4,5,6],harvest:[6,7,8,9,10],days:120,icon:'🥦',calories:25},
   {name:'Kale',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9,10,11,12],days:60,icon:'🥬',calories:49,fastGrow:true,coldHardy:true},
-  {name:'Leeks',family:'Allium',sowIn:[1,2],sowOut:[3,4,5],harvest:[9,10,11,12,1,2],days:140,icon:'🥬',calories:61,store:true,coldHardy:true},
-  {name:'Lettuce',family:'Leaf',sowIn:[2,3],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🥗',calories:15,fastGrow:true},
-  {name:'Onion',family:'Allium',sowIn:[1,2],sowOut:[3,4],harvest:[7,8,9],days:150,icon:'🧅',calories:40,store:true},
   {name:'Pak Choi',family:'Brassica',sowIn:[],sowOut:[4,5,6,7,8],harvest:[6,7,8,9,10],days:45,icon:'🥬',calories:13,fastGrow:true},
-  {name:'Parsley',family:'Herb',sowIn:[],sowOut:[3,4,5],harvest:[5,6,7,8,9,10,11],days:70,icon:'🌿',calories:36,coldHardy:true},
-  {name:'Peas',family:'Legume',sowIn:[2,3],sowOut:[3,4,5,6],harvest:[6,7,8,9],days:60,icon:'🟢',calories:81,fastGrow:true},
+  {name:'Kohlrabi',family:'Brassica',sowIn:[3],sowOut:[4,5,6,7],harvest:[6,7,8,9,10],days:55,icon:'🥬',calories:27,fastGrow:true,coldHardy:true},
+
+  // ===== ALLIUMS =====
+  {name:'Garlic',family:'Allium',sowIn:[],sowOut:[10,11],harvest:[6,7],days:240,store:true,icon:'🧄',calories:149,coldHardy:true},
+  {name:'Onion',family:'Allium',sowIn:[1,2],sowOut:[3,4],harvest:[7,8,9],days:150,icon:'🧅',calories:40,store:true},
+  {name:'Shallot',family:'Allium',sowIn:[],sowOut:[2,3,11,12],harvest:[7,8],days:150,icon:'🧅',calories:72,store:true,coldHardy:true},
+  {name:'Leeks',family:'Allium',sowIn:[1,2],sowOut:[3,4,5],harvest:[9,10,11,12,1,2],days:140,icon:'🥬',calories:61,store:true,coldHardy:true},
+  {name:'Spring Onions',family:'Allium',sowIn:[],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🌿',calories:32,fastGrow:true},
+
+  // ===== LEAF & SALAD =====
+  {name:'Lettuce',family:'Leaf',sowIn:[2,3],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🥗',calories:15,fastGrow:true},
+  {name:'Chard / Spinach',family:'Leaf',sowIn:[],sowOut:[3,4,5,8,9],harvest:[5,6,7,8,9,10,11],days:60,icon:'🌿',calories:19,fastGrow:true,coldHardy:true},
+  {name:'Rocket',family:'Leaf',sowIn:[],sowOut:[3,4,5,6,7,8,9,10],harvest:[4,5,6,7,8,9,10,11],days:21,icon:'🌿',calories:25,fastGrow:true,emergency:true,coldHardy:true},
+  {name:'Lamb\'s Lettuce (Corn Salad)',family:'Leaf',sowIn:[],sowOut:[3,4,8,9,10],harvest:[4,5,6,10,11,12,1,2],days:50,icon:'🥗',calories:21,fastGrow:true,coldHardy:true},
+  {name:'Land Cress',family:'Leaf',sowIn:[],sowOut:[3,4,8,9],harvest:[5,6,7,10,11,12,1],days:50,icon:'🌿',calories:32,fastGrow:true,coldHardy:true},
+
+  // ===== FRUITING VEG =====
+  {name:'Tomato',family:'Solanaceae',sowIn:[2,3],sowOut:[5,6],harvest:[7,8,9,10],days:80,icon:'🍅',calories:18,ghBetter:true},
   {name:'Peppers',family:'Fruiting',sowIn:[2,3,4],sowOut:[6],harvest:[8,9,10],days:90,icon:'🫑',calories:20,minZone:'south-england',ghBetter:true},
+  {name:'Chilli Peppers',family:'Fruiting',sowIn:[1,2,3],sowOut:[6],harvest:[8,9,10],days:100,icon:'🌶️',calories:40,minZone:'south-england',ghBetter:true},
+  {name:'Aubergine',family:'Solanaceae',sowIn:[2,3],sowOut:[6],harvest:[8,9,10],days:100,icon:'🍆',calories:25,minZone:'south-england',ghBetter:true},
+  {name:'Courgette / Marrow',family:'Cucurbit',sowIn:[4],sowOut:[5,6],harvest:[7,8,9,10],days:50,icon:'🥒',calories:17,fastGrow:true},
+  {name:'Cucumber',family:'Cucurbit',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9],days:60,icon:'🥒',calories:15,ghBetter:true},
+  {name:'Squash / Pumpkin',family:'Cucurbit',sowIn:[4],sowOut:[5,6],harvest:[8,9,10],days:90,icon:'🎃',calories:45,store:true},
+  {name:'Sweetcorn',family:'Grass',sowIn:[3,4],sowOut:[5,6],harvest:[8,9],days:80,icon:'🌽',calories:86,minZone:'midlands'},
+
+  // ===== POTATOES =====
   {name:'Potato (Early)',family:'Solanaceae',sowIn:[2],sowOut:[3,4],harvest:[6,7],days:70,icon:'🥔',calories:77,store:true},
   {name:'Potato (Main)',family:'Solanaceae',sowIn:[2],sowOut:[4,5],harvest:[8,9,10],days:120,icon:'🥔',calories:77,store:true},
-  {name:'Parsnip',family:'Root',sowIn:[],sowOut:[3,4,5],harvest:[10,11,12,1,2],days:150,icon:'🥕',calories:75,store:true,coldHardy:true},
-  {name:'Squash',family:'Cucurbit',sowIn:[4],sowOut:[5,6],harvest:[8,9,10],days:90,icon:'🎃',calories:45,store:true},
-  {name:'Spring Onions',family:'Allium',sowIn:[],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🌿',calories:32,fastGrow:true},
-  {name:'Swede',family:'Root',sowIn:[],sowOut:[5,6,7],harvest:[10,11,12,1],days:140,icon:'🥔',calories:38,store:true,coldHardy:true},
-  {name:'Sweetcorn',family:'Grass',sowIn:[3,4],sowOut:[5,6],harvest:[8,9],days:80,icon:'🌽',calories:86,minZone:'midlands'},
-  {name:'Tomato',family:'Solanaceae',sowIn:[2,3],sowOut:[5,6],harvest:[7,8,9,10],days:80,icon:'🍅',calories:18,ghBetter:true},
-  {name:'Turnips',family:'Root',sowIn:[],sowOut:[3,4,5,7,8],harvest:[5,6,7,9,10],days:50,icon:'🥔',calories:28,fastGrow:true,store:true,emergency:true,coldHardy:true},
-  {name:'Radish',family:'Root',sowIn:[],sowOut:[3,4,5,6,7,8,9],harvest:[4,5,6,7,8,9,10],days:25,icon:'🔴',calories:16,fastGrow:true,emergency:true},
-  {name:'Rocket',family:'Leaf',sowIn:[],sowOut:[3,4,5,6,7,8,9,10],harvest:[4,5,6,7,8,9,10,11],days:21,icon:'🌿',calories:25,fastGrow:true,emergency:true,coldHardy:true},
+
+  // ===== PERENNIALS / OTHER VEG =====
+  {name:'Globe Artichoke',family:'Perennial',sowIn:[3,4],sowOut:[5],harvest:[6,7,8,9],days:365,icon:'🌸',calories:47,perennial:true},
+  {name:'Asparagus',family:'Perennial',sowIn:[],sowOut:[3,4],harvest:[4,5,6],days:730,icon:'🌿',calories:20,perennial:true,coldHardy:true},
+  {name:'Rhubarb',family:'Perennial',sowIn:[],sowOut:[11,12,1,2,3],harvest:[4,5,6],days:365,icon:'🌿',calories:21,perennial:true,coldHardy:true},
+  {name:'Celery',family:'Leaf',sowIn:[2,3],sowOut:[5,6],harvest:[8,9,10,11],days:120,icon:'🌿',calories:14},
+  {name:'Florence Fennel',family:'Herb',sowIn:[],sowOut:[5,6,7],harvest:[8,9,10],days:65,icon:'🌿',calories:31},
+
+  // ===== SOFT FRUIT / BERRIES =====
+  {name:'Strawberry',family:'Fruit',sowIn:[],sowOut:[3,4,8,9],harvest:[6,7,8],days:120,icon:'🍓',calories:32,perennial:true},
+  {name:'Strawberry (Everbearing)',family:'Fruit',sowIn:[],sowOut:[3,4],harvest:[6,7,8,9,10],days:90,icon:'🍓',calories:32,perennial:true},
+  {name:'Raspberry (Summer)',family:'Fruit',sowIn:[],sowOut:[11,12,2,3],harvest:[6,7,8],days:365,icon:'🫐',calories:52,perennial:true,coldHardy:true},
+  {name:'Raspberry (Autumn)',family:'Fruit',sowIn:[],sowOut:[11,12,2,3],harvest:[8,9,10],days:365,icon:'🫐',calories:52,perennial:true,coldHardy:true},
+  {name:'Blackcurrant',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[7,8],days:365,icon:'⚫',calories:63,perennial:true,coldHardy:true,store:true},
+  {name:'Redcurrant',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[7,8],days:365,icon:'🔴',calories:56,perennial:true,coldHardy:true,store:true},
+  {name:'Whitecurrant',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[7,8],days:365,icon:'⚪',calories:56,perennial:true,coldHardy:true},
+  {name:'Gooseberry',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[6,7,8],days:365,icon:'🟢',calories:44,perennial:true,coldHardy:true,store:true},
+  {name:'Blueberry',family:'Fruit',sowIn:[],sowOut:[10,11,3,4],harvest:[7,8,9],days:365,icon:'🫐',calories:57,perennial:true,coldHardy:true},
+  {name:'Blackberry',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[8,9,10],days:365,icon:'⬛',calories:43,perennial:true,coldHardy:true},
+
+  // ===== FRUIT TREES (pot/dwarf/trained) =====
+  {name:'Apple (Dwarf/Trained)',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[8,9,10,11],days:365,icon:'🍎',calories:52,perennial:true,coldHardy:true,store:true},
+  {name:'Pear (Dwarf/Trained)',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[9,10,11],days:365,icon:'🍐',calories:57,perennial:true,coldHardy:true,store:true},
+  {name:'Plum / Damson',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8,9],days:365,icon:'🟣',calories:46,perennial:true,coldHardy:true,store:true},
+  {name:'Cherry',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[6,7,8],days:365,icon:'🍒',calories:50,perennial:true,coldHardy:true},
+  {name:'Peach / Nectarine',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8,9],days:365,icon:'🍑',calories:39,perennial:true,minZone:'south-england',ghBetter:true},
+  {name:'Apricot',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8],days:365,icon:'🟠',calories:48,perennial:true,minZone:'south-coast',ghBetter:true},
+  {name:'Fig',family:'Fruit Tree',sowIn:[],sowOut:[3,4,11],harvest:[8,9,10],days:365,icon:'🟤',calories:74,perennial:true,minZone:'south-england',ghBetter:true},
+  {name:'Lemon (Container)',family:'Citrus',sowIn:[],sowOut:[],harvest:[11,12,1,2],days:365,icon:'🍋',calories:29,perennial:true,ghBetter:true},
 ];
 
 const MONTHS=['J','F','M','A','M','J','J','A','S','O','N','D'];
 const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTH_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const ROTATION_FAMILIES={Solanaceae:{note:'Potatoes, Tomatoes, Peppers → follow with legumes.',after:'Legume'},Brassica:{note:'Cabbages, Kale, Broccoli → follow with roots.',after:'Root'},Root:{note:'Carrots, Parsnips, Beetroot → follow with solanaceae.',after:'Solanaceae'},Legume:{note:'Beans, Peas → follow with brassicas.',after:'Brassica'}};
-const COMPANIONS=[{a:'Tomato',b:'Basil',why:'Basil repels aphids and whitefly.'},{a:'Carrot',b:'Onion',why:'Onion masks carrot fly.'},{a:'Brassicas',b:'Nasturtium',why:'Trap crop for aphids.'},{a:'Beans',b:'Sweetcorn',why:'Three Sisters nitrogen fixing.'},{a:'Lettuce',b:'Beetroot',why:'Lettuce finishes before beets need space.'},{a:'Kale',b:'Dill',why:'Dill attracts hoverflies.'}];
+const COMPANIONS=[{a:'Tomato',b:'Basil',why:'Basil repels aphids and whitefly.'},{a:'Carrot',b:'Onion',why:'Onion masks carrot fly.'},{a:'Brassicas',b:'Nasturtium',why:'Trap crop for aphids.'},{a:'Beans',b:'Sweetcorn',why:'Three Sisters nitrogen fixing.'},{a:'Lettuce',b:'Beetroot',why:'Lettuce finishes before beets need space.'},{a:'Kale',b:'Dill',why:'Dill attracts hoverflies.'},{a:'Strawberry',b:'Garlic',why:'Garlic deters aphids and grey mould from strawberries.'},{a:'Raspberry',b:'Garlic',why:'Garlic planted nearby helps deter raspberry beetle.'},{a:'Apple Tree',b:'Chives',why:'Chives help prevent apple scab when planted at the base.'},{a:'Courgette',b:'Beans',why:'Beans fix nitrogen that feeds hungry courgettes.'},{a:'Cucumber',b:'Dill',why:'Dill attracts pollinators and predatory insects for cucumbers.'},{a:'Blueberry',b:'Strawberry',why:'Both thrive in acidic soil — good companions in pots.'}];
 
 // ========================================================================
 // ZONE-AWARE FUNCTIONS
@@ -1114,7 +1180,7 @@ function renderBeds(){const now=new Date(),cont=document.getElementById('bedsCon
   addCard.onclick=()=>openAddBedModal();
   addCard.innerHTML='<div style="text-align:center;"><div style="font-size:28px;margin-bottom:4px;">➕</div><div style="font-size:11px;font-weight:600;color:var(--text-dim);">Add Bed</div></div>';
   cont.appendChild(addCard);
-  const pg=document.getElementById('potsGrid');pg.innerHTML='';state.pots.forEach(pot=>{const d=document.createElement('div');d.className='pot-item'+(pot.plant?' has-plant':'');d.onclick=()=>openPotModal(pot.id);d.innerHTML=`<div class="pot-emoji">${pot.emoji}</div><div class="pot-plant">${pot.plant||'—'}</div><div class="pot-label">${pot.name}</div>${pot.plantedDate?`<div class="pot-planted">${pot.plantedDate}</div>`:''}`;pg.appendChild(d);});const ap=document.createElement('div');ap.className='pot-item add-pot';ap.textContent='+ Add Pot';ap.onclick=()=>openAddPotModal();pg.appendChild(ap);
+  const pg=document.getElementById('potsGrid');pg.innerHTML='';state.pots.forEach(pot=>{const d=document.createElement('div');d.className='pot-item'+(pot.plant?' has-plant':'');d.onclick=()=>openPotModal(pot.id);d.innerHTML=`<div class="pot-emoji">${pot.emoji}</div><div class="pot-plant">${pot.plant||'—'}</div><div class="pot-label">${pot.name}</div>${pot.plantedDate?`<div class="pot-planted">${pot.plantedDate}</div>`:''}`;pg.appendChild(d);});const ap=document.createElement('div');ap.className='pot-item add-pot';ap.innerHTML='<div style="font-size:18px;">➕</div><div style="font-size:9px;margin-top:2px;">Add Pot / Ground</div>';ap.onclick=()=>openAddPotModal();pg.appendChild(ap);
 }
 
 // Cell modal
@@ -1260,7 +1326,7 @@ function deleteBed(bedId){
 // Pot modal
 let activePotId=null;
 function openPotModal(id){activePotId=id;const p=state.pots.find(pp=>pp.id===id);
-  const POT_EMOJIS=['🪴','🪣','🧺','📦','🏺','🫙','🛢️','🪻','🌻','🥀','🗑️','☕'];
+  const POT_EMOJIS=['🪴','🪣','🧺','📦','🏺','🫙','🛢️','🪻','🌳','🫐','🍓','🌱','🟫','🌻','🍎','🍐','☕'];
   // Calculate harvest info if planted
   let harvestInfo='';
   if(p.plant&&p.plantedDate){const veg=VEGETABLES.find(v=>v.name===p.plant);if(veg?.days){const dl=Math.ceil((new Date(p.plantedDate).getTime()+getAdjustedDays(veg.days,'outdoor')*864e5-Date.now())/864e5);harvestInfo=`<div style="margin-top:8px;padding:6px 10px;border-radius:6px;font-size:11px;${dl<=7?'background:rgba(224,148,58,0.15);color:var(--accent-light);':'background:rgba(255,255,255,0.03);color:var(--text-dim);'}">${dl<=0?'🍴 READY TO HARVEST!':'🕐 ~'+dl+' days until harvest ('+new Date(new Date(p.plantedDate).getTime()+getAdjustedDays(veg.days,'outdoor')*864e5).toLocaleDateString('en-GB')+')'}</div>`;}}
@@ -1306,24 +1372,29 @@ function openAddPotModal(){
     {name:'Raised Planter',emoji:'🏺',desc:'Raised planter or urn'},
     {name:'Bucket / Tub',emoji:'🛢️',desc:'Repurposed bucket or large tub'},
     {name:'Jar / Indoor',emoji:'🫙',desc:'Jar, indoor pot, or sprouter'},
+    {name:'Ground — Fruit Tree',emoji:'🌳',desc:'Fruit tree planted in the ground (apple, pear, plum, etc.)'},
+    {name:'Ground — Berry Patch',emoji:'🫐',desc:'Berry bush or cane in the ground (raspberry, currant, gooseberry)'},
+    {name:'Ground — Strawberry Bed',emoji:'🍓',desc:'Dedicated strawberry patch or row'},
+    {name:'Ground — Perennial',emoji:'🌱',desc:'Perennial veg in the ground (rhubarb, asparagus, artichoke)'},
+    {name:'Ground — Open Plot',emoji:'🟫',desc:'A spot of open ground — not in a raised bed'},
   ];
-  document.getElementById('modalTitle').textContent='Add New Pot / Container';
+  document.getElementById('modalTitle').textContent='Add Pot, Container or Ground Plot';
   document.getElementById('modalBody').innerHTML=`
-    <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Pick a type or create a custom one. Every pot is growing space — don't leave it empty!</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-bottom:12px;" id="potTypeGrid">
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Track anything you're growing — in a pot, in the ground, or up a wall. Every growing spot counts.</p>
+    <div style="max-height:220px;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-bottom:12px;" id="potTypeGrid">
       ${POT_TYPES.map((t,i)=>`<div style="background:var(--surface2);border:2px solid var(--border);border-radius:8px;padding:8px;text-align:center;cursor:pointer;transition:all 0.15s;" onclick="selectPotType(this,${i})" data-idx="${i}">
         <div style="font-size:22px;">${t.emoji}</div>
         <div style="font-size:11px;font-weight:600;margin-top:2px;">${t.name}</div>
+        <div style="font-size:8px;color:var(--text-dim);margin-top:2px;">${t.desc}</div>
       </div>`).join('')}
     </div>
-    <div class="form-group"><label>Custom Name (optional)</label><input type="text" id="newPotName" placeholder="Leave blank to use type name"></div>
-    <div class="form-group"><label>Plant it now?</label><select id="newPotVeg"><option value="">— Plant later —</option>${VEGETABLES.map(v=>`<option value="${v.name}">${v.icon} ${v.name}${v.fastGrow?' ⚡':''}${v.coldHardy?' ❄️':''}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Custom Name (optional)</label><input type="text" id="newPotName" placeholder="e.g. 'Bramley by shed', 'Strawberry row 1'"></div>
+    <div class="form-group"><label>Plant it now?</label><select id="newPotVeg"><option value="">— Plant later —</option>${VEGETABLES.map(v=>`<option value="${v.name}">${v.icon} ${v.name}${v.perennial?' 🔄':''}${v.fastGrow?' ⚡':''}${v.coldHardy?' ❄️':''}</option>`).join('')}</select></div>
     <input type="hidden" id="newPotTypeIdx" value="0">`;
   document.getElementById('modalBtns').innerHTML=`
-    <button class="btn btn-primary" onclick="confirmAddPot()">🪴 Add Pot</button>
+    <button class="btn btn-primary" onclick="confirmAddPot()">➕ Add Growing Spot</button>
     <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
   document.getElementById('modalOverlay').classList.add('open');
-  // Pre-select first type
   setTimeout(()=>{const first=document.querySelector('#potTypeGrid > div');if(first)selectPotType(first,0);},50);
 }
 
@@ -1331,6 +1402,9 @@ const ADD_POT_TYPES=[
   {name:'Large Pot',emoji:'🪴'},{name:'Small Pot',emoji:'🪻'},{name:'Grow Bag',emoji:'🪣'},
   {name:'Hanging Basket',emoji:'🧺'},{name:'Window Box',emoji:'📦'},{name:'Raised Planter',emoji:'🏺'},
   {name:'Bucket / Tub',emoji:'🛢️'},{name:'Jar / Indoor',emoji:'🫙'},
+  {name:'Ground — Fruit Tree',emoji:'🌳'},{name:'Ground — Berry Patch',emoji:'🫐'},
+  {name:'Ground — Strawberry Bed',emoji:'🍓'},{name:'Ground — Perennial',emoji:'🌱'},
+  {name:'Ground — Open Plot',emoji:'🟫'},
 ];
 
 function selectPotType(el,idx){
