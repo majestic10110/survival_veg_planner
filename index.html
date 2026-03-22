@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌿 The Veg Plot — Survival Edition</title>
+<title>🌿 The Smallholding — Survival Edition</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
@@ -36,6 +36,15 @@
     --greenhouse-light: #40c080;
     --polytunnel: #5a7abf;
     --polytunnel-light: #7a9adf;
+    --livestock: #b07030;
+    --livestock-light: #d4943a;
+    --livestock-glow: rgba(176,112,48,0.25);
+    --woodland: #2d6b3f;
+    --woodland-light: #4a9a5f;
+    --honey: #d4a520;
+    --honey-light: #f0c040;
+    --fish: #3a7a9a;
+    --fish-light: #5aa0c0;
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -284,6 +293,50 @@
   .toast-success { border-left:3px solid var(--green); }
   .toast-info { border-left:3px solid var(--accent2); }
 
+  /* Woodland & Resources */
+  .resource-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+  .resource-card { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:all 0.15s; }
+  .resource-card:hover { border-color:var(--border-light); }
+  .resource-header { padding:10px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
+  .resource-body { padding:12px 14px; }
+  .resource-actions { display:flex; gap:4px; padding:8px 14px; border-top:1px solid var(--border); }
+  .fuel-gauge { height:24px; border-radius:6px; overflow:hidden; background:rgba(255,255,255,0.05); border:1px solid var(--border); margin:8px 0; position:relative; }
+  .fuel-gauge-fill { height:100%; border-radius:5px; transition:width 0.3s; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff; }
+  .fuel-gauge-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:var(--text); pointer-events:none; }
+  .coppice-badge { display:inline-block; font-size:8px; padding:1px 6px; border-radius:8px; font-weight:600; }
+  .coppice-yes { background:rgba(90,173,106,0.15); color:var(--green-light); border:1px solid rgba(90,173,106,0.25); }
+  .coppice-no { background:rgba(196,64,64,0.12); color:var(--red-light); border:1px solid rgba(196,64,64,0.2); }
+
+  /* Livestock */
+  .livestock-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  .livestock-card { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:all 0.15s; }
+  .livestock-card:hover { border-color:var(--livestock); }
+  .livestock-header { background:linear-gradient(135deg,rgba(176,112,48,0.15),rgba(176,112,48,0.05)); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
+  .livestock-icon { font-size:28px; margin-right:8px; }
+  .livestock-name { font-family:'Bitter',serif; font-weight:700; color:var(--livestock-light); font-size:14px; }
+  .livestock-type-badge { font-size:9px; padding:2px 8px; border-radius:10px; font-weight:600; }
+  .livestock-type-eggs { background:rgba(212,192,64,0.15); color:var(--yellow); border:1px solid rgba(212,192,64,0.25); }
+  .livestock-type-meat { background:rgba(196,64,64,0.15); color:var(--red-light); border:1px solid rgba(196,64,64,0.25); }
+  .livestock-type-dairy { background:rgba(74,158,187,0.15); color:var(--accent2-light); border:1px solid rgba(74,158,187,0.25); }
+  .livestock-body { padding:12px 14px; }
+  .livestock-stat { display:flex; justify-content:space-between; padding:4px 0; font-size:11px; border-bottom:1px solid rgba(255,255,255,0.03); }
+  .livestock-stat:last-child { border:none; }
+  .livestock-stat-label { color:var(--text-dim); }
+  .livestock-stat-value { font-weight:600; }
+  .livestock-production { background:rgba(176,112,48,0.1); border:1px solid rgba(176,112,48,0.2); border-radius:8px; padding:8px 12px; margin-top:8px; }
+  .livestock-production-title { font-size:9px; text-transform:uppercase; letter-spacing:1px; color:var(--livestock-light); font-weight:700; margin-bottom:4px; }
+  .livestock-production-value { font-family:'Bitter',serif; font-size:20px; font-weight:800; color:var(--livestock-light); }
+  .livestock-production-unit { font-size:10px; color:var(--text-dim); }
+  .livestock-actions { display:flex; gap:4px; padding:8px 14px; border-top:1px solid var(--border); }
+  .livestock-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:14px; }
+  .livestock-summary-card { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:10px; text-align:center; }
+  .livestock-summary-card .stat-num { color:var(--livestock-light); font-size:20px; }
+  .add-livestock-card { border:1px dashed rgba(176,112,48,0.3); background:transparent; display:flex; align-items:center; justify-content:center; min-height:120px; cursor:pointer; border-radius:var(--radius); transition:all 0.2s; opacity:0.6; }
+  .add-livestock-card:hover { opacity:1; border-color:var(--livestock-light); }
+  .breed-option { padding:8px 10px; border:2px solid var(--border); border-radius:8px; cursor:pointer; transition:all 0.15s; }
+  .breed-option:hover { border-color:var(--livestock); }
+  .breed-option.selected { border-color:var(--livestock-light); background:rgba(176,112,48,0.1); }
+
   ::-webkit-scrollbar { width:4px; height:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:var(--surface2); border-radius:3px; }
@@ -309,7 +362,7 @@
 
 <header>
   <div>
-    <div class="logo">🌿 The <span>Veg Plot</span></div>
+    <div class="logo">🌿 The <span>Smallholding</span></div>
     <div class="logo-sub" id="headerLocationSub">Survival Edition</div>
   </div>
   <div class="header-right">
@@ -330,6 +383,10 @@
   <button onclick="showPanel('harvest',this)">🍅 Harvest</button>
   <button onclick="showPanel('pipeline',this)">🔄 Pipeline</button>
   <button onclick="showPanel('rotation',this)">♻️ Rotation</button>
+  <button onclick="showPanel('livestock',this)">🐔 Livestock</button>
+  <button onclick="showPanel('woodland',this)">🌳 Woodland</button>
+  <button onclick="showPanel('bees',this)">🐝 Bees</button>
+  <button onclick="showPanel('pond',this)">🐟 Pond</button>
   <button onclick="showPanel('settings',this)">⚙️ Settings</button>
   <button onclick="showPanel('ai',this)">🤖 AI</button>
 </nav>
@@ -345,6 +402,7 @@
       <div class="stat-card"><div class="stat-num" id="statVarieties">0</div><div class="stat-lbl">Varieties</div></div>
       <div class="stat-card"><div class="stat-num" id="statEmptyCells">0</div><div class="stat-lbl">Empty Cells</div></div>
       <div class="stat-card"><div class="stat-num" id="statGapMonths">0</div><div class="stat-lbl">Hungry Months</div></div>
+      <div class="stat-card"><div class="stat-num" id="statLivestock" style="color:var(--livestock-light);">0</div><div class="stat-lbl">🐔 Animals</div></div>
       <div class="stat-card"><div class="stat-num" id="statScore" style="font-size:22px;">—</div><div class="stat-lbl">Continuity</div></div>
     </div>
     <div class="card" id="timelineCard"><h2>📊 12-Month Food Security</h2><p style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Projected harvests per month. Red = nothing coming.</p><div class="timeline-bar" id="foodTimeline"></div></div>
@@ -432,6 +490,76 @@
     <div class="card"><h2>♻️ Rotation Planner</h2><div id="rotationPlanner"></div></div>
     <div class="card mt"><h2>🌿 Companions</h2><div id="companionGuide" class="grid-2"></div></div>
     <div class="card mt"><h2>📋 Succession Schedule</h2><div id="successionSchedule"></div></div>
+  </div>
+
+  <!-- LIVESTOCK -->
+  <div class="panel" id="panel-livestock">
+    <div class="livestock-summary" id="livestockSummary"></div>
+    <div class="card">
+      <h2>🐔 Smallholding Livestock</h2>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Track your animals and their contribution to the food pipeline. Egg layers average ~1 egg/day/bird. Dairy cows produce ~20L/day. All production factors into your food security score.</p>
+      <div class="livestock-grid" id="livestockGrid"></div>
+    </div>
+    <div class="card mt">
+      <h2>📊 Monthly Animal Production</h2>
+      <p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Projected food output from your livestock over 12 months.</p>
+      <div class="timeline-bar" id="livestockTimeline"></div>
+      <div id="livestockProductionDetail" style="margin-top:10px;"></div>
+    </div>
+    <div class="card mt">
+      <h2>📋 Feed & Care Notes</h2>
+      <p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Key requirements for your current animals.</p>
+      <div id="livestockCareNotes"></div>
+    </div>
+  </div>
+
+  <!-- WOODLAND & FIREWOOD -->
+  <div class="panel" id="panel-woodland">
+    <div class="livestock-summary" id="woodlandSummary"></div>
+    <div class="card">
+      <h2>🌳 Woodland & Coppice Tracker</h2>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Track your trees. Coppice species regrow after cutting — a renewable firewood source. Non-coppice trees are one-cut only. Each tree entry tracks species, coppice cycle, and timber yield.</p>
+      <div class="resource-grid" id="woodlandGrid"></div>
+    </div>
+    <div class="card mt">
+      <h2>🪵 Firewood Store</h2>
+      <p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Track your seasoned firewood. An average UK family burns ~4-6 cubic metres per winter (Oct-Mar). Firewood should be seasoned 1-2 years before burning.</p>
+      <div id="firewoodGauge"></div>
+      <div class="grid-3" id="firewoodStats"></div>
+      <div style="display:flex;gap:4px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="openAddFirewoodModal()">🪵 Add Firewood</button>
+        <button class="btn btn-danger btn-sm" onclick="openBurnFirewoodModal()">🔥 Log Burn</button>
+      </div>
+      <div id="firewoodLog" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- BEEHIVES -->
+  <div class="panel" id="panel-bees">
+    <div class="livestock-summary" id="beeSummary"></div>
+    <div class="card">
+      <h2>🐝 Beehives</h2>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Track your hives, honey harvests, and colony health. A healthy hive produces 10-30kg honey/year in the UK. Bees also massively boost your garden pollination — fruit yields can double with hives nearby.</p>
+      <div class="resource-grid" id="beeGrid"></div>
+    </div>
+    <div class="card mt">
+      <h2>🍯 Honey Harvest Log</h2>
+      <div id="honeyLog"></div>
+    </div>
+  </div>
+
+  <!-- FISH POND -->
+  <div class="panel" id="panel-pond">
+    <div class="livestock-summary" id="pondSummary"></div>
+    <div class="card">
+      <h2>🐟 Fish Ponds</h2>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Track ponds stocked with edible fish. Trout need flowing/oxygenated water; carp and tilapia tolerate still ponds. A well-managed 1/4 acre pond can yield 50-100kg fish/year.</p>
+      <div class="resource-grid" id="pondGrid"></div>
+    </div>
+    <div class="card mt">
+      <h2>🎣 Harvest Log</h2>
+      <div id="fishHarvestLog"></div>
+    </div>
   </div>
 
   <!-- SETTINGS -->
@@ -641,6 +769,300 @@ const ROTATION_FAMILIES={Solanaceae:{note:'Potatoes, Tomatoes, Peppers → follo
 const COMPANIONS=[{a:'Tomato',b:'Basil',why:'Basil repels aphids and whitefly.'},{a:'Carrot',b:'Onion',why:'Onion masks carrot fly.'},{a:'Brassicas',b:'Nasturtium',why:'Trap crop for aphids.'},{a:'Beans',b:'Sweetcorn',why:'Three Sisters nitrogen fixing.'},{a:'Lettuce',b:'Beetroot',why:'Lettuce finishes before beets need space.'},{a:'Kale',b:'Dill',why:'Dill attracts hoverflies.'},{a:'Strawberry',b:'Garlic',why:'Garlic deters aphids and grey mould from strawberries.'},{a:'Raspberry',b:'Garlic',why:'Garlic planted nearby helps deter raspberry beetle.'},{a:'Apple Tree',b:'Chives',why:'Chives help prevent apple scab when planted at the base.'},{a:'Courgette',b:'Beans',why:'Beans fix nitrogen that feeds hungry courgettes.'},{a:'Cucumber',b:'Dill',why:'Dill attracts pollinators and predatory insects for cucumbers.'},{a:'Blueberry',b:'Strawberry',why:'Both thrive in acidic soil — good companions in pots.'}];
 
 // ========================================================================
+// LIVESTOCK DATA — with sex/breeding logic
+// ========================================================================
+// Sex terminology per species
+const SEX_LABELS = {
+  chicken: { male: 'Cockerel', female: 'Hen', maleIcon: '🐓', femaleIcon: '🐔', breedNote: 'Need 1 cockerel per 6-10 hens for fertile eggs. Hens lay without a male but eggs won\'t hatch.' },
+  duck:    { male: 'Drake', female: 'Duck', maleIcon: '🦆', femaleIcon: '🦆', breedNote: 'Need 1 drake per 4-6 ducks for fertile eggs. Ducks lay without a drake but eggs won\'t hatch.' },
+  cow:     { male: 'Bull', female: 'Cow', maleIcon: '🐂', femaleIcon: '🐄', breedNote: 'Need a bull for breeding. Most smallholders use AI (artificial insemination) instead of keeping a bull — bulls are dangerous. Dairy cows MUST calve annually to keep producing milk.' },
+  pig:     { male: 'Boar', female: 'Sow', maleIcon: '🐗', femaleIcon: '🐷', breedNote: 'Need 1 boar per 6-8 sows for breeding. Without a boar you must buy replacement weaners. A sow produces 2 litters/year of 8-12 piglets.' },
+};
+
+const LIVESTOCK_TYPES = {
+  chicken: {
+    icon: '🐔', label: 'Chicken', plural: 'Chickens',
+    purposes: {
+      eggs: {
+        label: 'Laying Flock',
+        icon: '🥚',
+        breeds: [
+          { name: 'ISA Brown', eggsPerYear: 300, peakMonths: [3,4,5,6,7,8,9], winterDrop: 0.3, desc: 'Prolific hybrid layer, 300+ eggs/yr. Docile and hardy.', lifespan: '3-4 yrs productive', space: '4 sq ft coop + 10 sq ft run per bird', feed: '~120g layer pellets/day + grit + oyster shell' },
+          { name: 'Sussex (Light)', eggsPerYear: 260, peakMonths: [3,4,5,6,7,8,9], winterDrop: 0.35, desc: 'Dual purpose heritage. Good layer, calm temperament.', lifespan: '4-5 yrs productive', space: '4 sq ft coop + 10 sq ft run per bird', feed: '~130g layer pellets/day' },
+          { name: 'Leghorn', eggsPerYear: 280, peakMonths: [3,4,5,6,7,8], winterDrop: 0.4, desc: 'White eggs, very productive. Flighty but efficient.', lifespan: '3-4 yrs productive', space: '3 sq ft coop + 8 sq ft run per bird', feed: '~110g layer pellets/day' },
+          { name: 'Maran', eggsPerYear: 200, peakMonths: [3,4,5,6,7,8], winterDrop: 0.5, desc: 'Beautiful dark brown eggs. Hardy, good forager.', lifespan: '4-5 yrs productive', space: '4 sq ft coop + 10 sq ft run per bird', feed: '~130g layer pellets/day' },
+          { name: 'Rhode Island Red', eggsPerYear: 250, peakMonths: [3,4,5,6,7,8,9], winterDrop: 0.35, desc: 'Classic dual-purpose. Reliable, hardy, good in UK climate.', lifespan: '4-5 yrs productive', space: '4 sq ft coop + 10 sq ft run per bird', feed: '~125g layer pellets/day' },
+          { name: 'Welsummer', eggsPerYear: 200, peakMonths: [3,4,5,6,7,8], winterDrop: 0.45, desc: 'Terracotta speckled eggs. Good free-ranger, friendly.', lifespan: '4-5 yrs productive', space: '4 sq ft coop + 10 sq ft run per bird', feed: '~125g layer pellets/day' },
+          { name: 'Cream Legbar', eggsPerYear: 230, peakMonths: [3,4,5,6,7,8,9], winterDrop: 0.4, desc: 'Blue/green eggs. Autosexing breed, alert and active.', lifespan: '4-5 yrs productive', space: '4 sq ft coop + 10 sq ft run per bird', feed: '~120g layer pellets/day' },
+        ],
+        caloriesPerUnit: 78, unitName: 'egg', unitPlural: 'eggs', proteinPerUnit: 6.3,
+      },
+      meat: {
+        label: 'Meat Birds',
+        icon: '🍗',
+        breeds: [
+          { name: 'Cornish Cross', daysToTable: 56, dressedWeight: 2.5, desc: 'Fast-growing commercial meat bird. Ready in 8 weeks.', space: '2 sq ft per bird min', feed: '~6kg feed per bird total', batchesPerYear: 4, note: 'Grow in batches of 10-25. Prone to leg issues if overfed.' },
+          { name: 'Hubbard/Ranger', daysToTable: 70, dressedWeight: 2.2, desc: 'Slower-grow alternative. Better welfare, more flavour. 10 weeks.', space: '3 sq ft per bird', feed: '~7kg feed per bird total', batchesPerYear: 3, note: 'Healthier bird, good foragers, excellent meat quality.' },
+          { name: 'Sussex (Table)', daysToTable: 120, dressedWeight: 2.8, desc: 'Heritage dual-purpose. Slower but self-sustaining flock potential.', space: '4 sq ft per bird', feed: '~10kg feed per bird total', batchesPerYear: 2, note: 'Can breed your own replacements. True smallholding bird.' },
+        ],
+        caloriesPerKg: 2390, proteinPerKg: 250,
+      }
+    },
+    care: 'Daily: collect eggs, fresh water, check feeders. Weekly: clean coop, check for mites/lice. Monthly: worm check. Seasonal: deep clean, supplemental light in winter for laying. Predator-proof housing essential (foxes!).',
+  },
+  duck: {
+    icon: '🦆', label: 'Duck', plural: 'Ducks',
+    purposes: {
+      eggs: {
+        label: 'Laying Flock',
+        icon: '🥚',
+        breeds: [
+          { name: 'Khaki Campbell', eggsPerYear: 300, peakMonths: [2,3,4,5,6,7,8,9,10], winterDrop: 0.25, desc: 'Best duck layer. 300+ eggs/yr. Hardy, active, great foragers.', lifespan: '4-5 yrs productive', space: '4 sq ft house + 15 sq ft run per bird', feed: '~150g layer pellets/day + water for dabbling' },
+          { name: 'Indian Runner', eggsPerYear: 250, peakMonths: [2,3,4,5,6,7,8,9], winterDrop: 0.3, desc: 'Upright, comical ducks. Excellent layers, brilliant slug control.', lifespan: '4-5 yrs productive', space: '4 sq ft house + 15 sq ft run per bird', feed: '~140g layer pellets/day' },
+          { name: 'Welsh Harlequin', eggsPerYear: 280, peakMonths: [2,3,4,5,6,7,8,9,10], winterDrop: 0.25, desc: 'Calm, good layers. Dual purpose — reasonable meat bird too.', lifespan: '4-5 yrs productive', space: '4 sq ft house + 15 sq ft run per bird', feed: '~145g layer pellets/day' },
+        ],
+        caloriesPerUnit: 130, unitName: 'egg', unitPlural: 'eggs', proteinPerUnit: 9,
+      },
+      meat: {
+        label: 'Table Ducks',
+        icon: '🍖',
+        breeds: [
+          { name: 'Pekin (Aylesbury)', daysToTable: 56, dressedWeight: 2.0, desc: 'Fast-growing white table duck. Classic roasting duck.', space: '5 sq ft per bird', feed: '~8kg feed per bird total', batchesPerYear: 3, note: 'Need water for dabbling. Messier than chickens.' },
+          { name: 'Muscovy', daysToTable: 90, dressedWeight: 2.5, desc: 'Large, lean meat. Males much bigger. Quiet — no quacking.', space: '6 sq ft per bird', feed: '~9kg feed per bird total', batchesPerYear: 2, note: 'Can fly (clip wings). Excellent pest control.' },
+        ],
+        caloriesPerKg: 2370, proteinPerKg: 190,
+      }
+    },
+    care: 'Daily: fresh water (deep enough to submerge head), collect eggs before dawn, check feeders. Weekly: clean house, refresh straw bedding. Ducks are hardier than chickens, rarely get mites, excellent slug/snail control. Predator-proof housing at night.',
+  },
+  cow: {
+    icon: '🐄', label: 'Cow', plural: 'Cattle',
+    purposes: {
+      dairy: {
+        label: 'Dairy',
+        icon: '🥛',
+        breeds: [
+          { name: 'Jersey', litresPerDay: 20, lactationMonths: 10, dryMonths: 2, fatContent: 5.2, desc: 'Small, gentle. Rich creamy milk ideal for butter and cheese.', space: '1-2 acres grazing min', feed: '~12kg hay/silage + 4kg concentrate/day lactating', note: 'Milking 2x daily. Must calve annually for milk.' },
+          { name: 'Dexter', litresPerDay: 10, lactationMonths: 10, dryMonths: 2, fatContent: 4.0, desc: 'Smallest British breed. Perfect smallholding — dual purpose (milk & beef).', space: '0.5-1 acre grazing', feed: '~8kg hay/silage + 2kg concentrate/day', note: 'Ideal smallholder cow. Hardy, easy calving.' },
+          { name: 'Friesian/Holstein', litresPerDay: 28, lactationMonths: 10, dryMonths: 2, fatContent: 3.5, desc: 'High volume — more than most smallholdings need.', space: '2-3 acres grazing', feed: '~15kg hay/silage + 6kg concentrate/day', note: 'Produces far more than a family needs. Sell surplus or make cheese.' },
+        ],
+        caloriesPerLitre: 620, proteinPerLitre: 33, unitName: 'litre', unitPlural: 'litres',
+      },
+      meat: {
+        label: 'Beef',
+        icon: '🥩',
+        breeds: [
+          { name: 'Dexter', monthsToTable: 24, dressedWeight: 150, desc: 'Small dual-purpose. 150kg dressed. Ideal smallholding size.', space: '0.5-1 acre per animal', feed: 'Mainly grass/hay, minimal concentrate', note: 'Slow-growing but excellent quality beef.' },
+          { name: 'Highland', monthsToTable: 30, dressedWeight: 200, desc: 'Very hardy. Lean, well-marbled beef. Thrives on poor land.', space: '1-2 acres per animal', feed: 'Grass/hay, very low input', note: 'Extremely low-maintenance. Long horns need careful handling.' },
+          { name: 'Hereford', monthsToTable: 20, dressedWeight: 280, desc: 'Classic beef breed. Docile, good conversion, marbled meat.', space: '1.5-2 acres per animal', feed: 'Grass + hay/silage, moderate concentrate in winter', note: 'Good temperament but needs more space than Dexter.' },
+        ],
+        caloriesPerKg: 2500, proteinPerKg: 260,
+      }
+    },
+    care: 'Dairy: milk 2x daily (5am + 5pm). All: daily water check, pasture rotation 1-3 weeks. Hay/silage in winter. Annual TB test (UK legal). Hoof trimming 2-3x/year. Worming programme. BCMS registration + cattle passports. MAJOR commitment — 365 days/year, no holidays without relief milker.',
+  },
+  pig: {
+    icon: '🐷', label: 'Pig', plural: 'Pigs',
+    purposes: {
+      meat: {
+        label: 'Pork / Bacon',
+        icon: '🥓',
+        breeds: [
+          { name: 'Gloucestershire Old Spots', monthsToTable: 8, dressedWeight: 65, desc: 'Classic UK smallholder pig. Hardy, docile, great on pasture.', space: '400 sq ft per pair (pigs need company)', feed: '~2.5kg grower pellets/day + scraps, windfall fruit', note: 'Buy 2 weaners spring, slaughter autumn. Traditional approach.' },
+          { name: 'Berkshire', monthsToTable: 7, dressedWeight: 60, desc: 'Premium pork. Excellent marbling and flavour. Good temperament.', space: '400 sq ft per pair', feed: '~2.5kg grower pellets/day', note: 'Slightly faster finish than GOS. Outstanding meat quality.' },
+          { name: 'Saddleback', monthsToTable: 8, dressedWeight: 65, desc: 'Hardy outdoor breed. Good bacon pig — longer body.', space: '400 sq ft per pair + wallowing area', feed: '~2.5kg grower pellets/day + foraging', note: 'Excellent bacon breed. Very hardy in all UK conditions.' },
+          { name: 'Tamworth', monthsToTable: 9, dressedWeight: 60, desc: 'Ginger pig. Brilliant forager, ideal for woodland/clearing ground.', space: '400 sq ft per pair', feed: '~2.3kg grower pellets/day + extensive foraging', note: 'Slower growing but incredible flavour. Clears brambles.' },
+          { name: 'Large Black', monthsToTable: 8, dressedWeight: 70, desc: 'Rare breed. Docile, great mothers, excellent outdoor pig.', space: '400 sq ft per pair', feed: '~2.5kg grower pellets/day', note: 'Endangered — keeping them helps conservation. Superb pork.' },
+          { name: 'Kunekune', monthsToTable: 14, dressedWeight: 40, desc: 'Small, friendly grass pig. Almost entirely on grazing.', space: '250 sq ft per pair', feed: 'Mainly grazing + small supplement', note: 'Very low input but small carcass. Great for tiny smallholdings.' },
+        ],
+        caloriesPerKg: 2420, proteinPerKg: 270,
+      }
+    },
+    care: 'Daily: feed 2x, fresh water, check fencing (escape artists!). Pigs MUST be kept in pairs minimum. Legal: register with APHA, movement licences, 20-day standstill. Wallowing area for sunburn. Rotate paddocks. Electric fencing essential. Buy weaners spring, slaughter autumn — pigs do NOT overwinter cheaply.',
+  },
+};
+
+// ========================================================================
+// LIVESTOCK HELPER — sex-aware production
+// ========================================================================
+
+// Only females produce eggs. Males consume feed but contribute NO eggs.
+function getMonthlyEggProduction(animal) {
+  if (!animal || animal.purpose !== 'eggs') return new Array(12).fill(0);
+  const females = animal.females || 0;
+  if (females <= 0) return new Array(12).fill(0);
+  const typeData = LIVESTOCK_TYPES[animal.type];
+  const purposeData = typeData?.purposes?.eggs;
+  const breed = purposeData?.breeds?.find(b => b.name === animal.breed);
+  if (!breed) return new Array(12).fill(0);
+  const dailyAvg = breed.eggsPerYear / 365;
+  const counts = [];
+  for (let m = 0; m < 12; m++) {
+    const monthNum = m + 1;
+    const isPeak = breed.peakMonths.includes(monthNum);
+    const isWinter = [11, 12, 1, 2].includes(monthNum);
+    let rate = dailyAvg;
+    if (isPeak) rate *= 1.15;
+    else if (isWinter) rate *= (1 - breed.winterDrop);
+    const daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31][m];
+    counts.push(Math.round(rate * females * daysInMonth)); // ONLY females lay
+  }
+  return counts;
+}
+
+// Only female cows produce milk. A bull produces nothing but enables breeding.
+function getMonthlyMilkProduction(animal) {
+  if (!animal || animal.purpose !== 'dairy') return new Array(12).fill(0);
+  const females = animal.females || 0;
+  if (females <= 0) return new Array(12).fill(0);
+  const breed = LIVESTOCK_TYPES.cow?.purposes?.dairy?.breeds?.find(b => b.name === animal.breed);
+  if (!breed) return new Array(12).fill(0);
+  const counts = [];
+  for (let m = 0; m < 12; m++) {
+    const daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31][m];
+    const isDry = [11, 12].includes(m + 1);
+    const isPeak = [4,5,6,7].includes(m + 1);
+    let dailyRate = isDry ? 0 : breed.litresPerDay;
+    if (isPeak) dailyRate *= 1.1;
+    if ([1,2,3,10].includes(m+1) && !isDry) dailyRate *= 0.85;
+    counts.push(Math.round(dailyRate * females * daysInMonth)); // ONLY cows milk
+  }
+  return counts;
+}
+
+// Meat: ALL animals (male + female) contribute dressed weight when dispatched.
+function getAnnualMeatKg(animal) {
+  if (!animal || animal.purpose !== 'meat') return 0;
+  const typeData = LIVESTOCK_TYPES[animal.type];
+  const purposeData = typeData?.purposes?.meat;
+  const breed = purposeData?.breeds?.find(b => b.name === animal.breed);
+  if (!breed) return 0;
+  const totalHeads = (animal.males || 0) + (animal.females || 0);
+  if (breed.batchesPerYear) {
+    return breed.dressedWeight * totalHeads * breed.batchesPerYear;
+  } else {
+    return breed.dressedWeight * totalHeads;
+  }
+}
+
+// Breeding status check
+function getBreedingStatus(animal) {
+  const males = animal.males || 0;
+  const females = animal.females || 0;
+  const total = males + females;
+  const sexLabels = SEX_LABELS[animal.type] || { male:'Male', female:'Female' };
+  const warnings = [];
+  const canBreed = males > 0 && females > 0;
+
+  if (total === 0) return { canBreed: false, warnings: ['No animals!'], status: 'empty' };
+
+  if (animal.purpose === 'eggs') {
+    if (females === 0) warnings.push(`No ${sexLabels.female.toLowerCase()}s — ZERO egg production! Only ${sexLabels.male.toLowerCase()}s don't lay.`);
+    if (males === 0) warnings.push(`No ${sexLabels.male.toLowerCase()} — hens still lay but eggs won't be fertile. Cannot breed replacements.`);
+  } else if (animal.purpose === 'dairy') {
+    if (females === 0) warnings.push(`No ${sexLabels.female.toLowerCase()}s — ZERO milk production! ${sexLabels.male}s don't produce milk.`);
+    if (males === 0 && females > 0) warnings.push(`No ${sexLabels.male.toLowerCase()} — cows must calve annually to lactate. Use AI or add a bull. Without breeding, milk will eventually stop.`);
+  } else if (animal.purpose === 'meat') {
+    if (males === 0 && females > 0) warnings.push(`No ${sexLabels.male.toLowerCase()} — cannot breed replacement stock. Must buy in new animals.`);
+    if (females === 0 && males > 0) warnings.push(`No ${sexLabels.female.toLowerCase()}s — cannot breed. ${sexLabels.male}s can still be dispatched for meat.`);
+  }
+
+  const status = warnings.length === 0 ? 'good' : (females === 0 && animal.purpose !== 'meat') ? 'critical' : 'warning';
+  return { canBreed, warnings, status, males, females, total };
+}
+
+// What happens when you dispatch an animal
+function getDispatchImpact(animal, sex) {
+  const sexLabels = SEX_LABELS[animal.type] || { male:'Male', female:'Female' };
+  const impacts = [];
+
+  if (sex === 'female') {
+    if (animal.purpose === 'eggs') {
+      const breed = LIVESTOCK_TYPES[animal.type]?.purposes?.eggs?.breeds?.find(b => b.name === animal.breed);
+      const dailyEggs = breed ? Math.round(breed.eggsPerYear / 365 * 10) / 10 : 1;
+      impacts.push({ type: 'danger', text: `Lose ~${dailyEggs} eggs/day (${Math.round(dailyEggs*365)} eggs/year)` });
+      const calLoss = Math.round(dailyEggs * (LIVESTOCK_TYPES[animal.type]?.purposes?.eggs?.caloriesPerUnit || 78));
+      impacts.push({ type: 'warn', text: `Lose ~${calLoss} kcal/day from food supply` });
+    } else if (animal.purpose === 'dairy') {
+      const breed = LIVESTOCK_TYPES.cow?.purposes?.dairy?.breeds?.find(b => b.name === animal.breed);
+      impacts.push({ type: 'danger', text: `Lose ~${breed?.litresPerDay||10}L milk/day` });
+      impacts.push({ type: 'warn', text: `Lose ~${Math.round((breed?.litresPerDay||10) * 620)} kcal/day from food supply` });
+    }
+    if ((animal.females || 0) <= 1) {
+      impacts.push({ type: 'danger', text: `Last ${sexLabels.female.toLowerCase()}! Flock/herd will have NO production.` });
+    }
+    if ((animal.females || 0) <= 1 && (animal.males || 0) > 0) {
+      impacts.push({ type: 'danger', text: `No breeding capability — ${sexLabels.male.toLowerCase()} without ${sexLabels.female.toLowerCase()}s.` });
+    }
+  } else {
+    // Male dispatch
+    if (animal.purpose === 'eggs') {
+      impacts.push({ type: 'info', text: `No egg production lost — ${sexLabels.male.toLowerCase()}s don't lay.` });
+    } else if (animal.purpose === 'dairy') {
+      impacts.push({ type: 'info', text: `No milk production lost — ${sexLabels.male.toLowerCase()}s don't produce milk.` });
+    }
+    if ((animal.males || 0) <= 1) {
+      impacts.push({ type: 'warn', text: `Last ${sexLabels.male.toLowerCase()}! No breeding capability — cannot produce replacements.` });
+      if (animal.purpose === 'dairy') {
+        impacts.push({ type: 'danger', text: `Dairy cows need to calve annually. Without a bull (or AI), milk production will eventually cease.` });
+      }
+    }
+  }
+
+  // Meat gained from dispatch
+  const typeData = LIVESTOCK_TYPES[animal.type];
+  const meatPurpose = typeData?.purposes?.meat;
+  if (meatPurpose) {
+    const breed = meatPurpose.breeds.find(b => b.name === animal.breed) || meatPurpose.breeds[0];
+    if (breed) {
+      const weight = sex === 'male' ? Math.round(breed.dressedWeight * 1.1) : breed.dressedWeight; // males often slightly heavier
+      impacts.push({ type: 'success', text: `Gain ~${weight}kg ${typeData.label.toLowerCase()} meat (${Math.round(weight * meatPurpose.caloriesPerKg)} kcal)` });
+    }
+  }
+
+  return impacts;
+}
+
+// Get total livestock food contribution per month (in approximate kcal)
+function getLivestockMonthlyCalories() {
+  const monthlyCals = new Array(12).fill(0);
+  if (!state.livestock) return monthlyCals;
+  state.livestock.forEach(animal => {
+    if (animal.purpose === 'eggs') {
+      const eggCounts = getMonthlyEggProduction(animal);
+      const purposeData = LIVESTOCK_TYPES[animal.type]?.purposes?.eggs;
+      const calPerUnit = purposeData?.caloriesPerUnit || 78;
+      eggCounts.forEach((c, i) => { monthlyCals[i] += c * calPerUnit; });
+    } else if (animal.purpose === 'dairy') {
+      const milkLitres = getMonthlyMilkProduction(animal);
+      const calPerLitre = LIVESTOCK_TYPES.cow?.purposes?.dairy?.caloriesPerLitre || 620;
+      milkLitres.forEach((l, i) => { monthlyCals[i] += l * calPerLitre; });
+    } else if (animal.purpose === 'meat') {
+      const totalKg = getAnnualMeatKg(animal);
+      const typeData = LIVESTOCK_TYPES[animal.type];
+      const calPerKg = typeData?.purposes?.meat?.caloriesPerKg || 2400;
+      const perMonth = (totalKg * calPerKg) / 12;
+      monthlyCals.forEach((_, i) => { monthlyCals[i] += Math.round(perMonth); });
+    }
+  });
+  return monthlyCals;
+}
+
+// Livestock warnings for the main warnings panel
+function getLivestockWarnings() {
+  const w = [];
+  if (!state.livestock) return w;
+  state.livestock.forEach(animal => {
+    const bs = getBreedingStatus(animal);
+    const typeData = LIVESTOCK_TYPES[animal.type];
+    bs.warnings.forEach(warn => {
+      w.push({ type: bs.status === 'critical' ? 'danger' : 'warn', icon: typeData.icon, title: `${typeData.icon} ${animal.breed}: ${bs.status === 'critical' ? 'CRITICAL' : 'Warning'}`, detail: warn });
+    });
+  });
+  return w;
+}
+
+// ========================================================================
 // ZONE-AWARE FUNCTIONS
 // ========================================================================
 function getZone() { return ZONES[state.location] || ZONES['south-coast']; }
@@ -720,6 +1142,19 @@ let state = JSON.parse(localStorage.getItem('vegplot') || 'null') || {
 if (!state.location) state.location = 'south-coast';
 if (!state.environments) state.environments = ['outdoor'];
 if (!state.calendarEnv) state.calendarEnv = 'outdoor';
+if (!state.livestock) state.livestock = [];
+// Migrate livestock from old count-based format to male/female
+state.livestock.forEach(a => {
+  if (a.count !== undefined && a.males === undefined) {
+    a.females = a.count; a.males = 0; delete a.count;
+  }
+  if (a.males === undefined) a.males = 0;
+  if (a.females === undefined) a.females = 0;
+});
+if (!state.woodland) state.woodland = [];
+if (!state.firewood) state.firewood = { storeM3: 0, log: [] };
+if (!state.beehives) state.beehives = [];
+if (!state.ponds) state.ponds = [];
 // Migrate beds to have cols, rows, env
 state.beds.forEach(b => {
   if (!b.cols) b.cols = 8;
@@ -813,6 +1248,11 @@ function getFoodSecurityScore() {
   const usedSlots = (totalCells - emptyCells) + (totalPots - emptyPots);
   const util = totalSlots > 0 ? usedSlots / totalSlots : 0;
   let score = (filled/12)*40 + util*30 + Math.max(0,20-overdue*5) + Math.min(10,proj.length);
+  // Livestock bonus — animals providing food year-round boost score
+  const livestockCals = getLivestockMonthlyCalories();
+  const livestockMonths = livestockCals.filter(c => c > 0).length;
+  const livestockBonus = Math.min(15, (livestockMonths / 12) * 10 + Math.min(5, (state.livestock || []).length * 1.5));
+  score += livestockBonus;
   return Math.round(Math.min(100,Math.max(0,score)));
 }
 
@@ -820,7 +1260,12 @@ function getWarnings() {
   const w=[], now=new Date(), month=now.getMonth()+1, proj=getHarvestProjections(), counts=getMonthlyHarvestCounts();
   proj.filter(p=>p.isOverdue).forEach(p => { w.push({type:'danger',icon:'🚨',title:`${p.icon} ${p.veg} — OVERDUE ${Math.abs(p.daysLeft)}d!`,detail:`At ${p.location}. Harvest NOW.`}); });
   proj.filter(p=>p.isImminent&&!p.isOverdue).forEach(p => { w.push({type:'warn',icon:'⏰',title:`${p.icon} ${p.veg} — ${p.daysLeft<=0?'READY':p.daysLeft+'d left'}`,detail:`At ${p.location}. Prepare to harvest.`}); });
-  for(let i=0;i<12;i++){const mi=(now.getMonth()+i)%12;if(counts[mi]===0&&i<=6)w.push({type:i<=2?'danger':'warn',icon:'📉',title:`NO FOOD in ${MONTH_NAMES[mi]}${i<=2?' — CRITICAL':''}`,detail:`Sow fast-growing crops NOW.`});}
+  for(let i=0;i<12;i++){const mi=(now.getMonth()+i)%12;if(counts[mi]===0&&i<=6){
+    const livestockCals=getLivestockMonthlyCalories();
+    const hasLivestock=livestockCals[mi]>0;
+    if(!hasLivestock) w.push({type:i<=2?'danger':'warn',icon:'📉',title:`NO FOOD in ${MONTH_NAMES[mi]}${i<=2?' — CRITICAL':''}`,detail:`Sow fast-growing crops NOW.`});
+    else w.push({type:'warn',icon:'📉',title:`No veg harvest in ${MONTH_NAMES[mi]} (livestock only)`,detail:`Only animal products this month. Consider sowing catch crops.`});
+  }}
   state.beds.forEach(bed=>{const total=bed.cells.length;const empty=bed.cells.filter(c=>!c).length;if(empty>=total*0.75)w.push({type:'warn',icon:'🪴',title:`${bed.name} is ${Math.round(empty/total*100)}% empty`,detail:`${empty}/${total} cells unused.`});});
   // Empty pots warning
   const emptyPots=state.pots.filter(p=>!p.plant);
@@ -842,6 +1287,20 @@ function getWarnings() {
   if(zone.adjust>=2&&!state.environments.includes('greenhouse')&&!state.environments.includes('polytunnel')){
     w.push({type:'warn',icon:'🏔️',title:'No protection in a cold zone!',detail:`${zone.name} has a very short season. A greenhouse or polytunnel would massively extend your growing capability. Consider adding one in Settings.`});
   }
+  // Livestock warnings
+  try { getLivestockWarnings().forEach(lw => w.push(lw)); } catch(e) { console.error('Livestock warnings:', e); }
+  // Firewood winter warning
+  try {
+    const fw = state.firewood || { storeM3: 0, log: [] };
+    const hasWoodland = (state.woodland||[]).length > 0;
+    const hasFirewoodHistory = (fw.log||[]).length > 0;
+    // Only warn if user is actually tracking firewood (has trees or has added/burned wood)
+    if ((hasWoodland || hasFirewoodHistory) && fw.storeM3 < 4) w.push({ type: fw.storeM3 < 2 ? 'danger' : 'warn', icon: '🪵', title: `Firewood: ${fw.storeM3}m³ — ${fw.storeM3 < 2 ? 'CRITICALLY LOW' : 'Low stock'}`, detail: `A family needs ~4-6m³ seasoned wood per winter. You have ${fw.storeM3}m³.` });
+  } catch(e) { console.error('Firewood warnings:', e); }
+  // Bee warnings
+  try {
+    (state.beehives||[]).forEach(h => { if(h.health==='weak') w.push({type:'warn',icon:'🐝',title:`Hive "${h.name}" is weak`,detail:'Inspect for disease, varroa, or queenlessness.'}); if(h.health==='dead') w.push({type:'danger',icon:'🐝',title:`Hive "${h.name}" has died`,detail:'Colony lost. Remove and clean equipment.'}); });
+  } catch(e) { console.error('Bee warnings:', e); }
   return w;
 }
 
@@ -896,7 +1355,23 @@ function updateHeader() {
 }
 
 function dismissAlert(){document.getElementById('alertBanner').classList.remove('visible');}
-function renderAll(){populateLogLocations();renderCalendar();renderBeds();renderLog();renderHarvest();renderRotation();renderDashboard();renderWarnings();renderPipeline();renderSettings();updateHeader();}
+function renderAll(){
+  try{populateLogLocations();}catch(e){console.error('populateLogLocations:',e);}
+  try{renderCalendar();}catch(e){console.error('renderCalendar:',e);}
+  try{renderBeds();}catch(e){console.error('renderBeds:',e);}
+  try{renderLog();}catch(e){console.error('renderLog:',e);}
+  try{renderHarvest();}catch(e){console.error('renderHarvest:',e);}
+  try{renderRotation();}catch(e){console.error('renderRotation:',e);}
+  try{renderDashboard();}catch(e){console.error('renderDashboard:',e);}
+  try{renderWarnings();}catch(e){console.error('renderWarnings:',e);}
+  try{renderPipeline();}catch(e){console.error('renderPipeline:',e);}
+  try{renderSettings();}catch(e){console.error('renderSettings:',e);}
+  try{renderLivestock();}catch(e){console.error('renderLivestock:',e);}
+  try{renderWoodland();}catch(e){console.error('renderWoodland:',e);}
+  try{renderBees();}catch(e){console.error('renderBees:',e);}
+  try{renderPonds();}catch(e){console.error('renderPonds:',e);}
+  try{updateHeader();}catch(e){console.error('updateHeader:',e);}
+}
 
 function populateLogLocations(){
   const sel=document.getElementById('logLocation');if(!sel)return;
@@ -978,13 +1453,19 @@ function renderDashboard() {
   const gm=counts.filter(c=>c===0).length;
   document.getElementById('statGapMonths').textContent=gm;
   document.getElementById('statGapMonths').style.color=gm>4?'var(--red-light)':gm>2?'var(--yellow)':'';
+  const totalAnimals = (state.livestock||[]).reduce((s,a) => s + (a.males||0) + (a.females||0), 0);
+  document.getElementById('statLivestock').textContent = totalAnimals;
   document.getElementById('statScore').textContent=score+'/100';
   document.getElementById('statScore').style.color=score<30?'var(--red-light)':score<60?'var(--yellow)':'var(--green-light)';
 
   // Timeline
   const tl=document.getElementById('foodTimeline'); tl.innerHTML='';
-  for(let i=0;i<12;i++){const mi=(now.getMonth()+i)%12,c=counts[mi];const cls=c===0?'tm-empty':c<=2?'tm-low':c<=5?'tm-good':'tm-great';
-    const d=document.createElement('div');d.className=`timeline-month ${cls} ${i===0?'tm-current':''}`;d.innerHTML=`<div class="tm-label">${MONTH_SHORT[mi]}</div><div class="tm-count">${c}</div><div class="tm-sub">${c===0?'NONE':'crops'}</div>`;tl.appendChild(d);}
+  const livestockCals = getLivestockMonthlyCalories();
+  for(let i=0;i<12;i++){const mi=(now.getMonth()+i)%12,c=counts[mi];
+    const hasLivestock = livestockCals[mi] > 0;
+    const cls=c===0&&!hasLivestock?'tm-empty':c<=2&&!hasLivestock?'tm-low':c<=5?'tm-good':'tm-great';
+    const lsLabel = hasLivestock ? ' +🐔' : '';
+    const d=document.createElement('div');d.className=`timeline-month ${cls} ${i===0?'tm-current':''}`;d.innerHTML=`<div class="tm-label">${MONTH_SHORT[mi]}</div><div class="tm-count">${c}${lsLabel}</div><div class="tm-sub">${c===0&&!hasLivestock?'NONE':hasLivestock&&c===0?'animals':'crops'}</div>`;tl.appendChild(d);}
 
   // Alerts
   const ae=document.getElementById('dashAlerts'),wn=getWarnings().filter(w=>w.type==='danger');
@@ -1205,6 +1686,11 @@ const BED_PRESETS=[
   {name:'Polytunnel Bed (10×4)',cols:10,rows:4,env:'polytunnel',desc:'10×4ft polytunnel bed — extended season'},
   {name:'Polytunnel Bed (8×4)',cols:8,rows:4,env:'polytunnel',desc:'Standard polytunnel bed'},
   {name:'Small Plot (3×3)',cols:3,rows:3,env:'outdoor',desc:'Tiny 3×3ft plot or square'},
+  {name:'Field — ⅛ Acre',cols:16,rows:8,env:'outdoor',desc:'⅛ acre field plot (~5,400 sq ft). 128 planting zones for crops, potatoes, etc.'},
+  {name:'Field — ¼ Acre',cols:16,rows:8,env:'outdoor',desc:'¼ acre field (~10,800 sq ft). Each cell ≈ 85 sq ft. Ideal for potatoes, brassicas, roots.'},
+  {name:'Field — ½ Acre',cols:16,rows:8,env:'outdoor',desc:'½ acre field (~21,600 sq ft). Each cell ≈ 170 sq ft. Market garden scale.'},
+  {name:'Field — 1 Acre',cols:16,rows:8,env:'outdoor',desc:'Full 1 acre field (~43,560 sq ft). Each cell ≈ 340 sq ft. Serious smallholding.'},
+  {name:'Paddock / Pasture',cols:8,rows:4,env:'outdoor',desc:'Grazing paddock — track grass/forage rotation or animal grazing areas.'},
 ];
 
 function openAddBedModal(){
@@ -1452,7 +1938,7 @@ function renderRotation(){const pl=document.getElementById('rotationPlanner'),fa
 // EXPORT / IMPORT
 // ========================================================================
 function exportData(){const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`vegplot-${new Date().toISOString().split('T')[0]}.json`;a.click();showToast('Exported','Data saved.','success');}
-function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.beds&&d.log){state=d;save();renderAll();showToast('Imported','Data restored.','success');}}catch{showToast('Error','Invalid file.','danger');}};r.readAsText(f);}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.beds&&d.log){if(!d.livestock)d.livestock=[];if(!d.woodland)d.woodland=[];if(!d.firewood)d.firewood={storeM3:0,log:[]};if(!d.beehives)d.beehives=[];if(!d.ponds)d.ponds=[];state=d;save();renderAll();showToast('Imported','Data restored.','success');}}catch{showToast('Error','Invalid file.','danger');}};r.readAsText(f);}
 
 // ========================================================================
 // AI
@@ -1496,7 +1982,9 @@ function askAIAboutEntry(){quickAsk(`I just ${document.getElementById('logAction
 async function testConnection(){const url=document.getElementById('lmUrl').value;state.lmUrl=url;save();const b=document.getElementById('aiStatusBadge');b.textContent='⏳';b.className='ai-status status-off';try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:'Hello'}],max_tokens:50})});if(r.ok){b.textContent='🟢';b.className='ai-status status-ok';}else throw new Error('HTTP '+r.status);}catch(e){b.textContent='🔴 '+e.message;b.className='ai-status status-err';}}
 function addChatMsg(role,text){const ch=document.getElementById('aiChat'),el=document.createElement('div');el.className='chat-msg '+role;el.textContent=text;ch.appendChild(el);ch.scrollTop=ch.scrollHeight;return el;}
 function addTyping(){const ch=document.getElementById('aiChat'),el=document.createElement('div');el.className='chat-msg ai';el.innerHTML='<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';ch.appendChild(el);ch.scrollTop=ch.scrollHeight;return el;}
-function getGardenContext(){const z=getZone(),month=MONTH_NAMES[new Date().getMonth()],score=getFoodSecurityScore(),warnings=getWarnings();return`You are an expert vegetable gardening advisor. CRITICAL CONTEXT: The gardener is in ${z.name} (${z.desc}). Last frost: ${z.lastFrost}. First frost: ${z.firstFrost}. ${z.advice} They have 3 raised beds (8×4ft) plus pots. Environments: ${state.environments.join(', ')}. Month: ${month}. Score: ${score}/100. Warnings: ${warnings.slice(0,3).map(w=>w.title).join('; ')||'none'}. Recently planted: ${state.log.filter(e=>['sow-in','sow-out','plant-out'].includes(e.action)).slice(0,8).map(e=>`${e.veg} (${e.date})`).join(', ')||'nothing'}. Give practical, location-specific advice. Prioritise continuous food production.`;}
+function getGardenContext(){const z=getZone(),month=MONTH_NAMES[new Date().getMonth()],score=getFoodSecurityScore(),warnings=getWarnings();
+  const livestockCtx = (state.livestock||[]).length > 0 ? ' Livestock: ' + state.livestock.map(a => `${a.count}× ${a.breed} (${LIVESTOCK_TYPES[a.type]?.purposes[a.purpose]?.label || a.purpose})`).join(', ') + '.' : '';
+  return`You are an expert vegetable gardening and smallholding advisor. CRITICAL CONTEXT: The gardener is in ${z.name} (${z.desc}). Last frost: ${z.lastFrost}. First frost: ${z.firstFrost}. ${z.advice} They have 3 raised beds (8×4ft) plus pots. Environments: ${state.environments.join(', ')}. Month: ${month}. Score: ${score}/100. Warnings: ${warnings.slice(0,3).map(w=>w.title).join('; ')||'none'}. Recently planted: ${state.log.filter(e=>['sow-in','sow-out','plant-out'].includes(e.action)).slice(0,8).map(e=>`${e.veg} (${e.date})`).join(', ')||'nothing'}.${livestockCtx} Give practical, location-specific advice. Prioritise continuous food production.`;}
 async function sendChat(){const inp=document.getElementById('chatInput'),msg=inp.value.trim();if(!msg)return;inp.value='';await sendToLM(msg,false);}
 async function autoContextChat(){const inp=document.getElementById('chatInput'),msg=inp.value.trim()||`What should I focus on in ${getZone().name} this month?`;inp.value='';await sendToLM(msg,true);}
 async function quickAsk(msg){showPanel('ai');await sendToLM(msg,true);}
@@ -1507,6 +1995,828 @@ function getBedSummaryText(){const beds=state.beds.map(b=>{const p=b.cells.filte
 async function sendBedAIMessage(){const inp=document.getElementById('bedAIInput'),msg=inp.value.trim();if(!msg)return;const z=getZone(),resp=document.getElementById('bedAIResponse');resp.style.display='block';resp.textContent='⏳...';const url=document.getElementById('lmUrl')?.value||state.lmUrl;try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:4096,messages:[{role:'system',content:`UK gardening advisor. Location: ${z.name}. ${z.advice} Beds: ${getBedSummaryText()}. Envs: ${state.environments.join(', ')}. Acknowledge, advise, flag risks.`},{role:'user',content:msg}]})});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();resp.textContent=extractLMReply(d);}catch(e){resp.textContent='⚠️ '+e.message;}}
 function logBedAIMessage(){const msg=document.getElementById('bedAIInput').value.trim();if(!msg)return;let loc='other';if(/bed\s*1/i.test(msg))loc='bed1';else if(/bed\s*2/i.test(msg))loc='bed2';else if(/bed\s*3/i.test(msg))loc='bed3';state.log.unshift({id:Date.now(),veg:'[Note]',action:'note',location:loc,date:new Date().toISOString().split('T')[0],qty:'',notes:msg});save();renderAll();if(/bed\s*(\d)\s+(has\s+)?(completely\s+)?fail/i.test(msg)){const m=msg.match(/bed\s*(\d)/i);if(m){const bed=state.beds.find(b=>b.id==='bed'+m[1]);if(bed){bed.cells=bed.cells.map(c=>c?{...c,failed:true}:null);save();renderBeds();}}}document.getElementById('bedAIInput').value='';showToast('Logged','Note added.','info');}
 function sendFullBedStatus(){quickAsk(`Location: ${getZone().name}. Envs: ${state.environments.join(', ')}. Beds: ${getBedSummaryText()}. Score: ${getFoodSecurityScore()}/100. What are the most critical actions?`);}
+
+// ========================================================================
+// LIVESTOCK
+// ========================================================================
+function renderLivestock() {
+  const grid = document.getElementById('livestockGrid');
+  const summary = document.getElementById('livestockSummary');
+  const timeline = document.getElementById('livestockTimeline');
+  const detail = document.getElementById('livestockProductionDetail');
+  const careNotes = document.getElementById('livestockCareNotes');
+  if (!grid) return;
+
+  const animals = state.livestock || [];
+  const totalAnimals = animals.reduce((s,a) => (a.males||0) + (a.females||0) + s, 0);
+  const totalMales = animals.reduce((s,a) => (a.males||0) + s, 0);
+  const totalFemales = animals.reduce((s,a) => (a.females||0) + s, 0);
+  const totalEggsMonth = animals.filter(a=>a.purpose==='eggs').reduce((s,a) => {
+    return s + getMonthlyEggProduction(a)[new Date().getMonth()];
+  }, 0);
+  const totalMilkMonth = animals.filter(a=>a.purpose==='dairy').reduce((s,a) => {
+    return s + getMonthlyMilkProduction(a)[new Date().getMonth()];
+  }, 0);
+  const totalMeatYear = animals.filter(a=>a.purpose==='meat').reduce((s,a) => s + getAnnualMeatKg(a), 0);
+  const livestockCals = getLivestockMonthlyCalories();
+  const totalMonthCals = livestockCals[new Date().getMonth()];
+  const breedingIssues = animals.filter(a => getBreedingStatus(a).status !== 'good').length;
+
+  // Summary cards
+  summary.innerHTML = `
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--livestock-light);">${totalAnimals}</div><div class="stat-lbl">${totalMales}♂ ${totalFemales}♀ Total</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--yellow);">${totalEggsMonth}</div><div class="stat-lbl">🥚 Eggs/Month</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--accent2-light);">${totalMilkMonth}L</div><div class="stat-lbl">🥛 Milk/Month</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--red-light);">${Math.round(totalMeatYear)}kg</div><div class="stat-lbl">🥩 Meat/Year</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--green-light);">${Math.round(totalMonthCals/1000)}k</div><div class="stat-lbl">kcal This Month</div></div>
+    ${breedingIssues > 0 ? `<div class="livestock-summary-card" style="border-color:rgba(196,64,64,0.3);"><div class="stat-num" style="color:var(--red-light);">⚠️ ${breedingIssues}</div><div class="stat-lbl">Breeding Issues</div></div>` : ''}
+  `;
+
+  // Grid of animal cards
+  grid.innerHTML = '';
+  animals.forEach((animal, idx) => {
+    const typeData = LIVESTOCK_TYPES[animal.type];
+    if (!typeData) return;
+    const purposeData = typeData.purposes[animal.purpose];
+    const sexLabels = SEX_LABELS[animal.type];
+    const bs = getBreedingStatus(animal);
+    let breed, productionHtml = '';
+
+    if (animal.purpose === 'eggs') {
+      breed = purposeData.breeds.find(b => b.name === animal.breed);
+      const monthlyEggs = getMonthlyEggProduction(animal);
+      const thisMonth = monthlyEggs[new Date().getMonth()];
+      const dailyAvg = Math.round(thisMonth / 30 * 10) / 10;
+      productionHtml = `
+        <div class="livestock-production">
+          <div class="livestock-production-title">This Month (${animal.females||0} ${sexLabels.female.toLowerCase()}s laying)</div>
+          <div class="livestock-production-value">${thisMonth} <span class="livestock-production-unit">eggs (~${dailyAvg}/day)</span></div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">${Math.round(thisMonth * purposeData.caloriesPerUnit)} kcal · ${Math.round(thisMonth * purposeData.proteinPerUnit)}g protein</div>
+          ${(animal.males||0) === 0 ? '<div style="font-size:9px;color:var(--yellow);margin-top:3px;">⚠️ No '+sexLabels.male.toLowerCase()+' — eggs infertile, cannot breed replacements</div>' : '<div style="font-size:9px;color:var(--green-light);margin-top:3px;">✅ '+sexLabels.male+' present — can breed replacements</div>'}
+        </div>`;
+    } else if (animal.purpose === 'dairy') {
+      breed = purposeData.breeds.find(b => b.name === animal.breed);
+      const monthlyMilk = getMonthlyMilkProduction(animal);
+      const thisMonth = monthlyMilk[new Date().getMonth()];
+      const dailyAvg = Math.round(thisMonth / 30 * 10) / 10;
+      productionHtml = `
+        <div class="livestock-production">
+          <div class="livestock-production-title">This Month (${animal.females||0} ${sexLabels.female.toLowerCase()}s milking)</div>
+          <div class="livestock-production-value">${thisMonth}L <span class="livestock-production-unit">milk (~${dailyAvg}L/day)</span></div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">${Math.round(thisMonth * purposeData.caloriesPerLitre)} kcal · ${Math.round(thisMonth * purposeData.proteinPerLitre)}g protein · ${breed?.fatContent||'?'}% fat</div>
+          ${(animal.males||0) === 0 ? '<div style="font-size:9px;color:var(--yellow);margin-top:3px;">⚠️ No '+sexLabels.male.toLowerCase()+' — cows must calve annually to lactate. Use AI or add a bull.</div>' : '<div style="font-size:9px;color:var(--green-light);margin-top:3px;">✅ '+sexLabels.male+' present — natural breeding available</div>'}
+        </div>`;
+    } else if (animal.purpose === 'meat') {
+      breed = purposeData.breeds.find(b => b.name === animal.breed);
+      const totalKg = getAnnualMeatKg(animal);
+      const bpy = breed?.batchesPerYear;
+      productionHtml = `
+        <div class="livestock-production">
+          <div class="livestock-production-title">Annual Meat (${(animal.males||0)+(animal.females||0)} head total)</div>
+          <div class="livestock-production-value">${Math.round(totalKg)}kg <span class="livestock-production-unit">${bpy ? bpy + ' batches/yr' : 'dressed weight'}</span></div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">${Math.round(totalKg * purposeData.caloriesPerKg)} kcal · ${Math.round(totalKg * purposeData.proteinPerKg)}g protein</div>
+          ${bs.canBreed ? '<div style="font-size:9px;color:var(--green-light);margin-top:3px;">✅ Can breed replacements ('+sexLabels.male.toLowerCase()+' + '+sexLabels.female.toLowerCase()+'s)</div>' : '<div style="font-size:9px;color:var(--yellow);margin-top:3px;">⚠️ Cannot breed — must buy replacement stock</div>'}
+        </div>`;
+    }
+
+    const purposeBadgeClass = animal.purpose === 'eggs' ? 'livestock-type-eggs' : animal.purpose === 'dairy' ? 'livestock-type-dairy' : 'livestock-type-meat';
+    const borderColor = bs.status === 'critical' ? 'rgba(196,64,64,0.4)' : bs.status === 'warning' ? 'rgba(212,192,64,0.3)' : '';
+
+    const card = document.createElement('div');
+    card.className = 'livestock-card';
+    if (borderColor) card.style.borderColor = borderColor;
+    card.innerHTML = `
+      <div class="livestock-header">
+        <div style="display:flex;align-items:center;">
+          <span class="livestock-icon">${typeData.icon}</span>
+          <div>
+            <div class="livestock-name">${animal.breed}</div>
+            <div style="font-size:9px;color:var(--text-dim);">${sexLabels.maleIcon} ${animal.males||0} ${sexLabels.male}${(animal.males||0)!==1?'s':''} · ${sexLabels.femaleIcon} ${animal.females||0} ${sexLabels.female}${(animal.females||0)!==1?'s':''}</div>
+          </div>
+        </div>
+        <span class="livestock-type-badge ${purposeBadgeClass}">${purposeData.icon} ${purposeData.label}</span>
+      </div>
+      <div class="livestock-body">
+        ${bs.warnings.length > 0 ? bs.warnings.map(w => `<div style="font-size:10px;padding:5px 8px;border-radius:5px;margin-bottom:6px;background:${bs.status==='critical'?'rgba(196,64,64,0.15)':'rgba(212,192,64,0.1)'};color:${bs.status==='critical'?'var(--red-light)':'var(--yellow)'};">⚠️ ${w}</div>`).join('') : ''}
+        ${breed?.space ? `<div class="livestock-stat"><span class="livestock-stat-label">Space</span><span class="livestock-stat-value" style="font-size:9px;">${breed.space}</span></div>` : ''}
+        ${breed?.feed ? `<div class="livestock-stat"><span class="livestock-stat-label">Feed</span><span class="livestock-stat-value" style="font-size:9px;">${breed.feed}</span></div>` : ''}
+        ${breed?.desc ? `<div style="font-size:10px;color:var(--text-dim);margin-top:6px;line-height:1.5;font-style:italic;">${breed.desc}</div>` : ''}
+        ${productionHtml}
+      </div>
+      <div class="livestock-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editLivestockGroup(${idx})" style="flex:1;">✏️ Manage</button>
+        <button class="btn btn-danger btn-sm" onclick="openDispatchModal(${idx})" title="Dispatch animal for meat">🔪 Dispatch</button>
+        <button class="btn btn-danger btn-sm" onclick="removeLivestock(${idx})" title="Remove entire group">🗑</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  // Add animal card
+  const addCard = document.createElement('div');
+  addCard.className = 'add-livestock-card';
+  addCard.onclick = () => openAddLivestockModal();
+  addCard.innerHTML = '<div style="text-align:center;"><div style="font-size:28px;margin-bottom:4px;">➕</div><div style="font-size:11px;font-weight:600;color:var(--text-dim);">Add Animals</div></div>';
+  grid.appendChild(addCard);
+
+  // Production timeline
+  timeline.innerHTML = '';
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const mi = (now.getMonth() + i) % 12;
+    const cal = livestockCals[mi];
+    const cls = cal === 0 ? 'tm-empty' : cal < 5000 ? 'tm-low' : cal < 20000 ? 'tm-good' : 'tm-great';
+    const d = document.createElement('div');
+    d.className = `timeline-month ${cls} ${i===0?'tm-current':''}`;
+    d.innerHTML = `<div class="tm-label">${MONTH_SHORT[mi]}</div><div class="tm-count">${cal > 0 ? Math.round(cal/1000)+'k' : '0'}</div><div class="tm-sub">${cal === 0 ? 'NONE' : 'kcal'}</div>`;
+    timeline.appendChild(d);
+  }
+
+  // Production detail
+  let detailHtml = '';
+  if (animals.length > 0) {
+    const eggAnimals = animals.filter(a => a.purpose === 'eggs');
+    const dairyAnimals = animals.filter(a => a.purpose === 'dairy');
+    const meatAnimals = animals.filter(a => a.purpose === 'meat');
+
+    if (eggAnimals.length) {
+      const totalEggsYear = eggAnimals.reduce((s,a) => s + getMonthlyEggProduction(a).reduce((ss,c)=>ss+c,0), 0);
+      const totalLayers = eggAnimals.reduce((s,a) => s + (a.females||0), 0);
+      detailHtml += `<div class="task-item" style="margin-bottom:5px;border-left-color:var(--yellow);"><div class="task-veg">🥚 Eggs (${totalLayers} layers)</div><div class="task-action">~${totalEggsYear} eggs/year · ${Math.round(totalEggsYear * 78 / 1000)}k kcal/year</div></div>`;
+    }
+    if (dairyAnimals.length) {
+      const totalMilkYear = dairyAnimals.reduce((s,a) => s + getMonthlyMilkProduction(a).reduce((ss,c)=>ss+c,0), 0);
+      const totalMilkers = dairyAnimals.reduce((s,a) => s + (a.females||0), 0);
+      detailHtml += `<div class="task-item" style="margin-bottom:5px;border-left-color:var(--accent2);"><div class="task-veg">🥛 Milk (${totalMilkers} cows milking)</div><div class="task-action">~${totalMilkYear}L/year · ${Math.round(totalMilkYear * 620 / 1000)}k kcal/year</div></div>`;
+    }
+    if (meatAnimals.length) {
+      detailHtml += `<div class="task-item" style="margin-bottom:5px;border-left-color:var(--red);"><div class="task-veg">🥩 Meat</div><div class="task-action">~${Math.round(totalMeatYear)}kg/year · ${Math.round(totalMeatYear * 2400 / 1000)}k kcal/year</div></div>`;
+    }
+  } else {
+    detailHtml = '<p style="color:var(--text-muted);font-size:11px;text-align:center;padding:8px;">Add livestock to see production projections.</p>';
+  }
+  detail.innerHTML = detailHtml;
+
+  // Care notes
+  const types = [...new Set(animals.map(a => a.type))];
+  careNotes.innerHTML = types.length > 0 ? types.map(t => {
+    const td = LIVESTOCK_TYPES[t];
+    const sl = SEX_LABELS[t];
+    return `<div class="task-item" style="margin-bottom:6px;border-left-color:var(--livestock);">
+      <div class="task-veg">${td.icon} ${td.plural} Care</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.6;">${td.care}</div>
+      <div style="font-size:10px;color:var(--accent2-light);margin-top:4px;line-height:1.5;">🔄 <strong>Breeding:</strong> ${sl.breedNote}</div>
+    </div>`;
+  }).join('') : '<p style="color:var(--text-muted);font-size:11px;text-align:center;padding:8px;">No animals yet.</p>';
+}
+
+// ========================================================================
+// LIVESTOCK MODALS — Add, Edit, Dispatch
+// ========================================================================
+
+// Step 1: Choose animal type
+function openAddLivestockModal() {
+  document.getElementById('modalTitle').textContent = '🐔 Add Livestock';
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Choose the type of animal to add to your smallholding.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
+      ${Object.entries(LIVESTOCK_TYPES).map(([key, t]) => `
+        <div class="breed-option" onclick="selectAnimalType('${key}')" style="text-align:center;padding:14px;">
+          <div style="font-size:32px;">${t.icon}</div>
+          <div style="font-weight:700;font-size:13px;margin-top:6px;">${t.plural}</div>
+          <div style="font-size:9px;color:var(--text-dim);">${Object.values(t.purposes).map(p=>p.label).join(' / ')}</div>
+        </div>
+      `).join('')}
+    </div>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// Step 2: Choose purpose
+function selectAnimalType(typeKey) {
+  const typeData = LIVESTOCK_TYPES[typeKey];
+  const purposes = Object.entries(typeData.purposes);
+  if (purposes.length === 1) { selectAnimalPurpose(typeKey, purposes[0][0]); return; }
+  document.getElementById('modalTitle').textContent = `${typeData.icon} ${typeData.plural} — Purpose`;
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">What will your ${typeData.plural.toLowerCase()} be for?</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      ${purposes.map(([key, p]) => `
+        <div class="breed-option" onclick="selectAnimalPurpose('${typeKey}','${key}')" style="text-align:center;padding:14px;">
+          <div style="font-size:28px;">${p.icon}</div>
+          <div style="font-weight:700;font-size:13px;margin-top:6px;">${p.label}</div>
+        </div>
+      `).join('')}
+    </div>`;
+  document.getElementById('modalBtns').innerHTML = `
+    <button class="btn btn-ghost btn-sm" onclick="openAddLivestockModal()">← Back</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+}
+
+// Step 3: Choose breed, males, females
+function selectAnimalPurpose(typeKey, purposeKey) {
+  const typeData = LIVESTOCK_TYPES[typeKey];
+  const purposeData = typeData.purposes[purposeKey];
+  const sl = SEX_LABELS[typeKey];
+  // Sensible defaults
+  let defMales = 0, defFemales = 4;
+  if (purposeKey === 'eggs') { defMales = 1; defFemales = 6; }
+  else if (purposeKey === 'dairy') { defMales = 0; defFemales = 1; }
+  else if (purposeKey === 'meat' && typeKey === 'pig') { defMales = 1; defFemales = 1; }
+  else if (purposeKey === 'meat' && typeKey === 'cow') { defMales = 0; defFemales = 2; }
+  else if (purposeKey === 'meat') { defMales = 0; defFemales = 10; }
+
+  document.getElementById('modalTitle').textContent = `${typeData.icon} ${purposeData.label} — Choose Breed`;
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Select a breed, then set the number of ${sl.male.toLowerCase()}s and ${sl.female.toLowerCase()}s.</p>
+    <div style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:12px;" id="breedList">
+      ${purposeData.breeds.map((b, i) => {
+        let statLine = '';
+        if (purposeKey === 'eggs') statLine = `${b.eggsPerYear} eggs/yr per ${sl.female.toLowerCase()} · Winter: -${Math.round(b.winterDrop*100)}%`;
+        else if (purposeKey === 'dairy') statLine = `${b.litresPerDay}L/day per ${sl.female.toLowerCase()} · ${b.fatContent}% fat`;
+        else if (purposeKey === 'meat') statLine = `${b.dressedWeight}kg dressed · ${b.daysToTable ? b.daysToTable + 'd' : b.monthsToTable + 'mo'} to table`;
+        return `<div class="breed-option" onclick="selectBreed(this,${i})" data-idx="${i}">
+          <div style="font-weight:700;font-size:12px;">${b.name}</div>
+          <div style="font-size:10px;color:var(--accent2-light);margin-top:2px;">${statLine}</div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:3px;line-height:1.4;">${b.desc}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:10px;">
+      <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">${sl.male}s & ${sl.female}s</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="form-group"><label>${sl.maleIcon} ${sl.male}s (males)</label>
+          <input type="number" id="lsMales" value="${defMales}" min="0" max="${typeKey==='cow'?5:50}">
+        </div>
+        <div class="form-group"><label>${sl.femaleIcon} ${sl.female}s (females)</label>
+          <input type="number" id="lsFemales" value="${defFemales}" min="0" max="${typeKey==='cow'?10:100}">
+        </div>
+      </div>
+      <div id="addLsBreedingNote" style="font-size:10px;color:var(--accent2-light);margin-top:6px;line-height:1.4;">🔄 ${sl.breedNote}</div>
+    </div>
+    <input type="hidden" id="lsType" value="${typeKey}">
+    <input type="hidden" id="lsPurpose" value="${purposeKey}">
+    <input type="hidden" id="lsBreedIdx" value="0">`;
+  document.getElementById('modalBtns').innerHTML = `
+    <button class="btn btn-primary" onclick="confirmAddLivestock()">➕ Add</button>
+    <button class="btn btn-ghost btn-sm" onclick="selectAnimalType('${typeKey}')">← Back</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => { const first = document.querySelector('#breedList .breed-option'); if(first) selectBreed(first, 0); }, 50);
+}
+
+function selectBreed(el, idx) {
+  // Find the parent list and deselect siblings
+  const parent = el.parentElement;
+  if (parent) parent.querySelectorAll('.breed-option').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+  const hidden = document.getElementById('lsBreedIdx');
+  if (hidden) hidden.value = idx;
+}
+
+function confirmAddLivestock() {
+  const typeKey = document.getElementById('lsType').value;
+  const purposeKey = document.getElementById('lsPurpose').value;
+  const breedIdx = parseInt(document.getElementById('lsBreedIdx').value) || 0;
+  const males = Math.max(0, parseInt(document.getElementById('lsMales').value) || 0);
+  const females = Math.max(0, parseInt(document.getElementById('lsFemales').value) || 0);
+  if (males + females === 0) { showToast('Error', 'Add at least one animal.', 'danger'); return; }
+  const typeData = LIVESTOCK_TYPES[typeKey];
+  const breed = typeData.purposes[purposeKey].breeds[breedIdx];
+  if (!breed) return;
+  const sl = SEX_LABELS[typeKey];
+
+  if (!state.livestock) state.livestock = [];
+  state.livestock.push({
+    id: 'ls_' + Date.now(),
+    type: typeKey,
+    purpose: purposeKey,
+    breed: breed.name,
+    males: males,
+    females: females,
+    dateAdded: new Date().toISOString().split('T')[0],
+  });
+  save(); closeModal(); renderAll();
+  showToast(`${typeData.icon} ${breed.name} Added`, `${males} ${sl.male.toLowerCase()}${males!==1?'s':''} + ${females} ${sl.female.toLowerCase()}${females!==1?'s':''} for ${typeData.purposes[purposeKey].label.toLowerCase()}.`, 'success');
+}
+
+// Edit group — adjust male/female counts
+function editLivestockGroup(idx) {
+  const animal = state.livestock[idx];
+  if (!animal) return;
+  const typeData = LIVESTOCK_TYPES[animal.type];
+  const sl = SEX_LABELS[animal.type];
+  const bs = getBreedingStatus(animal);
+
+  document.getElementById('modalTitle').textContent = `✏️ ${typeData.icon} ${animal.breed}`;
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Adjust the number of ${sl.male.toLowerCase()}s and ${sl.female.toLowerCase()}s. Production updates automatically.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div class="form-group"><label>${sl.maleIcon} ${sl.male}s</label>
+        <input type="number" id="editLsMales" value="${animal.males||0}" min="0" max="${animal.type==='cow'?5:50}">
+      </div>
+      <div class="form-group"><label>${sl.femaleIcon} ${sl.female}s</label>
+        <input type="number" id="editLsFemales" value="${animal.females||0}" min="0" max="${animal.type==='cow'?10:100}">
+      </div>
+    </div>
+    ${bs.warnings.length > 0 ? `<div style="margin-top:8px;">${bs.warnings.map(w => `<div style="font-size:10px;padding:5px 8px;border-radius:5px;margin-bottom:4px;background:${bs.status==='critical'?'rgba(196,64,64,0.15)':'rgba(212,192,64,0.1)'};color:${bs.status==='critical'?'var(--red-light)':'var(--yellow)'};">⚠️ ${w}</div>`).join('')}</div>` : ''}
+    <div style="font-size:10px;color:var(--accent2-light);margin-top:8px;line-height:1.4;">🔄 ${sl.breedNote}</div>
+    <p style="font-size:9px;color:var(--text-muted);margin-top:8px;">Added: ${animal.dateAdded}</p>`;
+  document.getElementById('modalBtns').innerHTML = `
+    <button class="btn btn-primary btn-sm" onclick="confirmEditLivestock(${idx})">💾 Save</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function confirmEditLivestock(idx) {
+  const males = Math.max(0, parseInt(document.getElementById('editLsMales').value) || 0);
+  const females = Math.max(0, parseInt(document.getElementById('editLsFemales').value) || 0);
+  if (males + females === 0) { showToast('Error', 'Must have at least one animal or remove the group.', 'danger'); return; }
+  state.livestock[idx].males = males;
+  state.livestock[idx].females = females;
+  save(); closeModal(); renderAll();
+  showToast('Updated', `Flock/herd updated.`, 'info');
+}
+
+// Dispatch modal — choose sex, see impact BEFORE confirming
+function openDispatchModal(idx) {
+  const animal = state.livestock[idx];
+  if (!animal) return;
+  const typeData = LIVESTOCK_TYPES[animal.type];
+  const sl = SEX_LABELS[animal.type];
+  const hasMales = (animal.males || 0) > 0;
+  const hasFemales = (animal.females || 0) > 0;
+
+  if (!hasMales && !hasFemales) { showToast('Error', 'No animals to dispatch.', 'danger'); return; }
+
+  document.getElementById('modalTitle').textContent = `🔪 Dispatch — ${animal.breed}`;
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Choose which animal to dispatch for meat. The impact on your food supply is shown below.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      ${hasMales ? `<div class="breed-option" id="dispatchMaleBtn" onclick="previewDispatch(${idx},'male')" style="text-align:center;padding:14px;cursor:pointer;">
+        <div style="font-size:28px;">${sl.maleIcon}</div>
+        <div style="font-weight:700;font-size:13px;margin-top:4px;">${sl.male}</div>
+        <div style="font-size:10px;color:var(--text-dim);">${animal.males} available</div>
+      </div>` : `<div style="text-align:center;padding:14px;opacity:0.3;border:2px solid var(--border);border-radius:8px;">
+        <div style="font-size:28px;">${sl.maleIcon}</div>
+        <div style="font-weight:700;font-size:13px;margin-top:4px;">${sl.male}</div>
+        <div style="font-size:10px;">None available</div>
+      </div>`}
+      ${hasFemales ? `<div class="breed-option" id="dispatchFemaleBtn" onclick="previewDispatch(${idx},'female')" style="text-align:center;padding:14px;cursor:pointer;">
+        <div style="font-size:28px;">${sl.femaleIcon}</div>
+        <div style="font-weight:700;font-size:13px;margin-top:4px;">${sl.female}</div>
+        <div style="font-size:10px;color:var(--text-dim);">${animal.females} available</div>
+      </div>` : `<div style="text-align:center;padding:14px;opacity:0.3;border:2px solid var(--border);border-radius:8px;">
+        <div style="font-size:28px;">${sl.femaleIcon}</div>
+        <div style="font-weight:700;font-size:13px;margin-top:4px;">${sl.female}</div>
+        <div style="font-size:10px;">None available</div>
+      </div>`}
+    </div>
+    <div id="dispatchImpactPreview" style="min-height:60px;"></div>
+    <input type="hidden" id="dispatchIdx" value="${idx}">
+    <input type="hidden" id="dispatchSex" value="">`;
+  document.getElementById('modalBtns').innerHTML = `
+    <button class="btn btn-danger btn-sm" id="confirmDispatchBtn" onclick="confirmDispatch()" style="display:none;">🔪 Confirm Dispatch</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function previewDispatch(idx, sex) {
+  const animal = state.livestock[idx];
+  if (!animal) return;
+  const sl = SEX_LABELS[animal.type];
+  const impacts = getDispatchImpact(animal, sex);
+
+  // Highlight selected
+  document.querySelectorAll('#dispatchMaleBtn,#dispatchFemaleBtn').forEach(el => { if(el) el.style.borderColor = 'var(--border)'; });
+  const btn = document.getElementById(sex === 'male' ? 'dispatchMaleBtn' : 'dispatchFemaleBtn');
+  if (btn) btn.style.borderColor = 'var(--red-light)';
+
+  document.getElementById('dispatchSex').value = sex;
+  document.getElementById('dispatchImpactPreview').innerHTML = `
+    <div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Impact of dispatching 1 ${sex === 'male' ? sl.male.toLowerCase() : sl.female.toLowerCase()}</div>
+    ${impacts.map(imp => {
+      const col = imp.type === 'danger' ? 'var(--red-light)' : imp.type === 'warn' ? 'var(--yellow)' : imp.type === 'success' ? 'var(--green-light)' : 'var(--text-dim)';
+      const bg = imp.type === 'danger' ? 'rgba(196,64,64,0.1)' : imp.type === 'warn' ? 'rgba(212,192,64,0.08)' : imp.type === 'success' ? 'rgba(90,173,106,0.08)' : 'rgba(255,255,255,0.03)';
+      const icon = imp.type === 'danger' ? '🚨' : imp.type === 'warn' ? '⚠️' : imp.type === 'success' ? '✅' : 'ℹ️';
+      return `<div style="font-size:10px;padding:5px 8px;border-radius:5px;margin-bottom:3px;background:${bg};color:${col};">${icon} ${imp.text}</div>`;
+    }).join('')}`;
+  document.getElementById('confirmDispatchBtn').style.display = '';
+}
+
+function confirmDispatch() {
+  const idx = parseInt(document.getElementById('dispatchIdx').value);
+  const sex = document.getElementById('dispatchSex').value;
+  const animal = state.livestock[idx];
+  if (!animal || !sex) return;
+  const sl = SEX_LABELS[animal.type];
+  const typeData = LIVESTOCK_TYPES[animal.type];
+
+  if (sex === 'male') {
+    if ((animal.males || 0) <= 0) { showToast('Error', 'No males to dispatch.', 'danger'); return; }
+    animal.males = (animal.males || 0) - 1;
+  } else {
+    if ((animal.females || 0) <= 0) { showToast('Error', 'No females to dispatch.', 'danger'); return; }
+    animal.females = (animal.females || 0) - 1;
+  }
+
+  // If both zero, remove the group entirely
+  if ((animal.males || 0) + (animal.females || 0) <= 0) {
+    state.livestock.splice(idx, 1);
+    showToast(`${typeData.icon} Group Removed`, `Last ${animal.breed} dispatched. Group removed.`, 'warn');
+  } else {
+    const label = sex === 'male' ? sl.male : sl.female;
+    showToast(`🔪 ${label} Dispatched`, `${animal.breed} ${label.toLowerCase()} dispatched. ${sex==='female' && animal.purpose==='eggs' ? 'Egg production reduced.' : sex==='male' ? 'No production lost.' : 'Milk production reduced.'}`, animal.purpose !== 'meat' && sex === 'female' ? 'warn' : 'info');
+  }
+
+  // Log the dispatch
+  state.log.unshift({
+    id: Date.now(), veg: `[${typeData.icon} ${animal.breed}]`, action: 'note', location: 'livestock',
+    date: new Date().toISOString().split('T')[0], qty: `1 ${sex === 'male' ? sl.male : sl.female}`,
+    notes: `Dispatched 1 ${sex === 'male' ? sl.male.toLowerCase() : sl.female.toLowerCase()} ${animal.breed} for meat.`
+  });
+
+  save(); closeModal(); renderAll();
+}
+
+function removeLivestock(idx) {
+  const animal = state.livestock[idx];
+  if (!animal) return;
+  const typeData = LIVESTOCK_TYPES[animal.type];
+  const sl = SEX_LABELS[animal.type];
+  if (!confirm(`Remove ALL ${animal.breed} (${animal.males||0} ${sl.male.toLowerCase()}s + ${animal.females||0} ${sl.female.toLowerCase()}s)?`)) return;
+  state.livestock.splice(idx, 1);
+  save(); renderAll();
+  showToast('Removed', `${animal.breed} removed.`, 'info');
+}
+
+// ========================================================================
+// WOODLAND & COPPICE DATA
+// ========================================================================
+const TREE_SPECIES = [
+  { name: 'Hazel', icon: '🌰', coppice: true, cycleYears: 7, m3PerCycle: 1.5, btu: 'medium', desc: 'Classic coppice. 7yr cycle. Good bean poles, hurdles, firewood.', notes: 'Best UK coppice species. Fast regrowth, multi-use.' },
+  { name: 'Sweet Chestnut', icon: '🌰', coppice: true, cycleYears: 12, m3PerCycle: 3.0, btu: 'high', desc: 'Excellent coppice. 12yr cycle. Superb firewood, fencing, building.', notes: 'Dense wood, splits well, long-lasting. Also produces edible chestnuts.' },
+  { name: 'Willow', icon: '🌿', coppice: true, cycleYears: 3, m3PerCycle: 0.8, btu: 'low', desc: 'Fast coppice. 3yr cycle. Low BTU but rapid growth. Good for weaving, biomass.', notes: 'Grows in wet ground. Useful for basket-making and living structures.' },
+  { name: 'Ash', icon: '🌳', coppice: true, cycleYears: 15, m3PerCycle: 3.5, btu: 'very-high', desc: 'Best firewood — burns well even green. 15yr coppice cycle.', notes: 'Can be burned unseasoned in emergency. Ash dieback (Chalara) risk — monitor health.' },
+  { name: 'Alder', icon: '🌳', coppice: true, cycleYears: 10, m3PerCycle: 1.5, btu: 'medium', desc: 'Coppices well. Fixes nitrogen. Loves wet ground.', notes: 'Improves soil nitrogen. Good charcoal wood. Wet-area specialist.' },
+  { name: 'Birch (Silver)', icon: '🌳', coppice: true, cycleYears: 10, m3PerCycle: 1.2, btu: 'medium', desc: 'Coppices OK. Burns fast and hot. Good kindling.', notes: 'Bark is excellent firelighter. Short-lived tree — coppice extends life.' },
+  { name: 'Oak', icon: '🌳', coppice: false, cycleYears: 0, m3PerCycle: 0, btu: 'very-high', desc: 'Does NOT coppice well. One-cut timber. Superb firewood when seasoned 2yr+.', notes: 'Needs 2 years seasoning minimum. Dense, long-burning. Major habitat tree.' },
+  { name: 'Beech', icon: '🌳', coppice: false, cycleYears: 0, m3PerCycle: 0, btu: 'very-high', desc: 'Does NOT coppice. One-cut. Excellent firewood — dense, clean burn.', notes: 'Needs 1-2 years seasoning. Produces beech mast for pigs.' },
+  { name: 'Scots Pine', icon: '🌲', coppice: false, cycleYears: 0, m3PerCycle: 0, btu: 'medium', desc: 'Conifer — does NOT coppice. Fast-growing. Resinous — spits in open fires.', notes: 'OK for wood-burners, not ideal for open fires. Creosote risk in chimney.' },
+  { name: 'Larch', icon: '🌲', coppice: false, cycleYears: 0, m3PerCycle: 0, btu: 'high', desc: 'Deciduous conifer — does NOT coppice. Hard softwood, good firewood.', notes: 'Better firewood than most conifers. Needs seasoning. Good fencing wood.' },
+  { name: 'Sycamore', icon: '🍁', coppice: true, cycleYears: 15, m3PerCycle: 2.5, btu: 'medium', desc: 'Coppices adequately. Moderate firewood. Fast growing.', notes: 'Often seen as a weed tree but decent firewood source.' },
+  { name: 'Hornbeam', icon: '🌳', coppice: true, cycleYears: 15, m3PerCycle: 2.0, btu: 'very-high', desc: 'Excellent coppice. Densest UK hardwood — outstanding firewood.', notes: 'Historically used for charcoal. Burns very hot and slow.' },
+];
+
+const BTU_RATINGS = { 'very-high': { label: 'Very High', color: 'var(--red-light)', sort: 4 }, 'high': { label: 'High', color: 'var(--accent-light)', sort: 3 }, 'medium': { label: 'Medium', color: 'var(--yellow)', sort: 2 }, 'low': { label: 'Low', color: 'var(--text-dim)', sort: 1 } };
+
+// Family firewood: ~5m³ per winter (Oct-Mar, 6 months)
+const WINTER_BURN_M3 = 5;
+
+function renderWoodland() {
+  try { _renderWoodlandInner(); } catch(e) { console.error('renderWoodland error:', e); }
+}
+function _renderWoodlandInner() {
+  const grid = document.getElementById('woodlandGrid');
+  const summary = document.getElementById('woodlandSummary');
+  const fwGauge = document.getElementById('firewoodGauge');
+  const fwStats = document.getElementById('firewoodStats');
+  const fwLog = document.getElementById('firewoodLog');
+  if (!grid) return;
+
+  const trees = state.woodland || [];
+  const totalTrees = trees.reduce((s,t) => s + (t.count||1), 0);
+  const coppiceTrees = trees.filter(t => { const sp = TREE_SPECIES.find(s=>s.name===t.species); return sp?.coppice; });
+  const nonCoppice = trees.filter(t => { const sp = TREE_SPECIES.find(s=>s.name===t.species); return !sp?.coppice; });
+  const annualM3 = coppiceTrees.reduce((s,t) => { const sp = TREE_SPECIES.find(ss=>ss.name===t.species); return s + (sp ? (sp.m3PerCycle / sp.cycleYears) * (t.count||1) : 0); }, 0);
+  const fw = state.firewood || { storeM3: 0, log: [] };
+  const winterPct = Math.min(100, Math.round((fw.storeM3 / WINTER_BURN_M3) * 100));
+
+  summary.innerHTML = `
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--woodland-light);">${totalTrees}</div><div class="stat-lbl">🌳 Trees</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--green-light);">${coppiceTrees.reduce((s,t)=>s+(t.count||1),0)}</div><div class="stat-lbl">♻️ Coppice</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--accent-light);">${Math.round(annualM3*10)/10}</div><div class="stat-lbl">m³/year renewable</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:${winterPct>=80?'var(--green-light)':winterPct>=40?'var(--yellow)':'var(--red-light)'};">${fw.storeM3}</div><div class="stat-lbl">🪵 m³ in store</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:${winterPct>=80?'var(--green-light)':winterPct>=40?'var(--yellow)':'var(--red-light)'};">${winterPct}%</div><div class="stat-lbl">Winter Ready</div></div>
+  `;
+
+  // Tree grid
+  grid.innerHTML = '';
+  trees.forEach((tree, idx) => {
+    const sp = TREE_SPECIES.find(s => s.name === tree.species) || {};
+    const btu = BTU_RATINGS[sp.btu] || { label: '?', color: 'var(--text-dim)' };
+    const card = document.createElement('div');
+    card.className = 'resource-card';
+    const yearsSinceCut = tree.lastCut ? Math.round((Date.now() - new Date(tree.lastCut).getTime()) / (365.25*864e5) * 10) / 10 : null;
+    const readyToCut = sp.coppice && sp.cycleYears && yearsSinceCut !== null && yearsSinceCut >= sp.cycleYears;
+    if (readyToCut) card.style.borderColor = 'rgba(90,173,106,0.5)';
+    card.innerHTML = `
+      <div class="resource-header" style="background:linear-gradient(135deg,rgba(45,107,63,0.15),transparent);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:24px;">${sp.icon||'🌳'}</span>
+          <div>
+            <div style="font-family:'Bitter',serif;font-weight:700;color:var(--woodland-light);font-size:13px;">${sp.name||tree.species}</div>
+            <div style="font-size:9px;color:var(--text-dim);">${tree.count||1} tree${(tree.count||1)>1?'s':''} ${tree.name?'· '+tree.name:''}</div>
+          </div>
+        </div>
+        <span class="coppice-badge ${sp.coppice?'coppice-yes':'coppice-no'}">${sp.coppice?'♻️ Coppice':'✂️ One-cut'}</span>
+      </div>
+      <div class="resource-body">
+        <div class="livestock-stat"><span class="livestock-stat-label">BTU Rating</span><span class="livestock-stat-value" style="color:${btu.color};">${btu.label}</span></div>
+        ${sp.coppice ? `<div class="livestock-stat"><span class="livestock-stat-label">Coppice Cycle</span><span class="livestock-stat-value">${sp.cycleYears} years</span></div>
+        <div class="livestock-stat"><span class="livestock-stat-label">Yield/Cycle</span><span class="livestock-stat-value">${sp.m3PerCycle}m³/tree</span></div>` : ''}
+        ${yearsSinceCut !== null ? `<div class="livestock-stat"><span class="livestock-stat-label">${sp.coppice?'Since last cut':'Age at felling'}</span><span class="livestock-stat-value" style="color:${readyToCut?'var(--green-light)':''};">${yearsSinceCut}yr${readyToCut?' ✅ READY':''}</span></div>` : ''}
+        ${!sp.coppice && tree.felled ? '<div style="font-size:10px;color:var(--red-light);margin-top:4px;">⚠️ Felled — this tree is gone.</div>' : ''}
+        <div style="font-size:9px;color:var(--text-dim);margin-top:6px;font-style:italic;">${sp.notes||''}</div>
+      </div>
+      <div class="resource-actions">
+        ${sp.coppice && !tree.felled ? `<button class="btn btn-primary btn-sm" onclick="coppiceTree(${idx})" style="flex:1;">✂️ Cut & Harvest</button>` : ''}
+        ${!sp.coppice && !tree.felled ? `<button class="btn btn-danger btn-sm" onclick="fellTree(${idx})" style="flex:1;">🪓 Fell</button>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="editTree(${idx})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="removeTree(${idx})">🗑</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+  const addCard = document.createElement('div');
+  addCard.className = 'add-livestock-card';
+  addCard.onclick = () => openAddTreeModal();
+  addCard.innerHTML = '<div style="text-align:center;"><div style="font-size:28px;">🌳</div><div style="font-size:11px;font-weight:600;color:var(--text-dim);">Add Trees</div></div>';
+  grid.appendChild(addCard);
+
+  // Firewood gauge
+  const gaugeCol = winterPct >= 80 ? 'var(--green)' : winterPct >= 40 ? 'var(--yellow)' : 'var(--red)';
+  fwGauge.innerHTML = `<div class="fuel-gauge"><div class="fuel-gauge-fill" style="width:${winterPct}%;background:${gaugeCol};">${winterPct}%</div><div class="fuel-gauge-label">${fw.storeM3}m³ / ${WINTER_BURN_M3}m³ (1 winter)</div></div>`;
+  fwStats.innerHTML = `
+    <div class="stat-card"><div class="stat-num" style="font-size:18px;color:var(--woodland-light);">${fw.storeM3}</div><div class="stat-lbl">m³ stored</div></div>
+    <div class="stat-card"><div class="stat-num" style="font-size:18px;color:${winterPct>=80?'var(--green-light)':'var(--red-light)'};">${winterPct>=100?'✅':'⚠️'} ${Math.round(fw.storeM3/WINTER_BURN_M3*100)/100}</div><div class="stat-lbl">winters covered</div></div>
+    <div class="stat-card"><div class="stat-num" style="font-size:18px;color:var(--accent-light);">${Math.round(annualM3*10)/10}</div><div class="stat-lbl">m³/yr from coppice</div></div>
+  `;
+  fwLog.innerHTML = (fw.log||[]).length ? (fw.log||[]).slice(0,10).map(e => `<div class="task-item" style="margin-bottom:4px;border-left-color:${e.action==='add'?'var(--green)':'var(--red)'};"><div class="task-veg">${e.action==='add'?'🪵 Added':'🔥 Burned'} ${e.amount}m³</div><div class="task-action">${e.source||''} · ${e.date}</div></div>`).join('') : '<p style="font-size:10px;color:var(--text-muted);">No firewood activity logged.</p>';
+}
+
+function openAddTreeModal() {
+  document.getElementById('modalTitle').textContent = '🌳 Add Trees';
+  document.getElementById('modalBody').innerHTML = `
+    <div style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:10px;" id="treeSpeciesList">
+      ${TREE_SPECIES.map((s,i) => `<div class="breed-option" onclick="selectBreed(this,${i})" data-idx="${i}">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-weight:700;font-size:12px;">${s.icon} ${s.name}</div>
+          <span class="coppice-badge ${s.coppice?'coppice-yes':'coppice-no'}">${s.coppice?'♻️ Coppice '+s.cycleYears+'yr':'✂️ One-cut'}</span>
+        </div>
+        <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">${s.desc}</div>
+      </div>`).join('')}
+    </div>
+    <div class="form-group"><label>How many trees</label><input type="number" id="treeCount" value="1" min="1" max="500"></div>
+    <div class="form-group"><label>Name / Location (optional)</label><input type="text" id="treeName" placeholder="e.g. 'North copse', 'Boundary hedge'"></div>
+    <div class="form-group"><label>Last cut / planted date</label><input type="date" id="treeDate" value="${new Date().toISOString().split('T')[0]}"></div>
+    <input type="hidden" id="lsBreedIdx" value="0">`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary" onclick="confirmAddTree()">🌳 Add</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(()=>{const f=document.querySelector('#treeSpeciesList .breed-option');if(f)selectBreed(f,0);},50);
+}
+function confirmAddTree() {
+  const idx = parseInt(document.getElementById('lsBreedIdx').value)||0;
+  const sp = TREE_SPECIES[idx]; if(!sp) return;
+  state.woodland.push({ species:sp.name, count:Math.max(1,parseInt(document.getElementById('treeCount').value)||1), name:document.getElementById('treeName').value.trim(), lastCut:document.getElementById('treeDate').value, felled:false });
+  save(); closeModal(); renderAll();
+  showToast(`${sp.icon} ${sp.name} Added`, `${sp.coppice?'Coppice — renewable firewood!':'One-cut timber.'}`, 'success');
+}
+function coppiceTree(idx) {
+  const tree = state.woodland[idx]; if(!tree) return;
+  const sp = TREE_SPECIES.find(s=>s.name===tree.species);
+  const harvest = sp ? sp.m3PerCycle * (tree.count||1) : 1;
+  state.firewood.storeM3 = Math.round((state.firewood.storeM3 + harvest)*10)/10;
+  state.firewood.log.unshift({ action:'add', amount:harvest, source:`Coppiced ${tree.species}`, date:new Date().toISOString().split('T')[0] });
+  tree.lastCut = new Date().toISOString().split('T')[0];
+  save(); renderAll();
+  showToast('✂️ Coppiced', `${harvest}m³ firewood added to store. Trees will regrow!`, 'success');
+}
+function fellTree(idx) {
+  const tree = state.woodland[idx]; if(!tree) return;
+  const sp = TREE_SPECIES.find(s=>s.name===tree.species);
+  if(!confirm(`Fell ${tree.count||1}× ${tree.species}? This tree will NOT regrow. Timber goes to firewood store.`)) return;
+  const harvest = Math.round((tree.count||1) * 1.5 * 10)/10; // est 1.5m³ per mature non-coppice tree
+  state.firewood.storeM3 = Math.round((state.firewood.storeM3 + harvest)*10)/10;
+  state.firewood.log.unshift({ action:'add', amount:harvest, source:`Felled ${tree.species}`, date:new Date().toISOString().split('T')[0] });
+  tree.felled = true;
+  save(); renderAll();
+  showToast('🪓 Felled', `${harvest}m³ timber → firewood. Tree gone permanently.`, 'warn');
+}
+function editTree(idx) {
+  const tree = state.woodland[idx]; if(!tree) return;
+  document.getElementById('modalTitle').textContent = `✏️ ${tree.species}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label>Count</label><input type="number" id="editTreeCount" value="${tree.count||1}" min="1"></div>
+    <div class="form-group"><label>Name</label><input type="text" id="editTreeName" value="${tree.name||''}"></div>
+    <div class="form-group"><label>Last cut date</label><input type="date" id="editTreeDate" value="${tree.lastCut||''}"></div>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary btn-sm" onclick="state.woodland[${idx}].count=Math.max(1,parseInt(document.getElementById('editTreeCount').value)||1);state.woodland[${idx}].name=document.getElementById('editTreeName').value;state.woodland[${idx}].lastCut=document.getElementById('editTreeDate').value;save();closeModal();renderAll();">💾 Save</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function removeTree(idx) { if(confirm('Remove this tree entry?')){state.woodland.splice(idx,1);save();renderAll();} }
+function openAddFirewoodModal() {
+  document.getElementById('modalTitle').textContent = '🪵 Add Firewood';
+  document.getElementById('modalBody').innerHTML = `<div class="form-group"><label>Amount (m³)</label><input type="number" id="fwAmount" value="0.5" min="0.1" max="50" step="0.1"></div><div class="form-group"><label>Source</label><input type="text" id="fwSource" placeholder="e.g. 'Bought in', 'Scavenged'"></div>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary" onclick="const a=parseFloat(document.getElementById('fwAmount').value)||0;state.firewood.storeM3=Math.round((state.firewood.storeM3+a)*10)/10;state.firewood.log.unshift({action:'add',amount:a,source:document.getElementById('fwSource').value||'Manual add',date:new Date().toISOString().split('T')[0]});save();closeModal();renderAll();showToast('🪵 Added',a+'m³ added to store.','success');">Add</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function openBurnFirewoodModal() {
+  document.getElementById('modalTitle').textContent = '🔥 Log Firewood Burn';
+  document.getElementById('modalBody').innerHTML = `<div class="form-group"><label>Burned (m³)</label><input type="number" id="fwBurn" value="0.2" min="0.1" max="10" step="0.1"></div><p style="font-size:10px;color:var(--text-dim);">Current store: ${state.firewood.storeM3}m³</p>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-danger" onclick="const a=parseFloat(document.getElementById('fwBurn').value)||0;state.firewood.storeM3=Math.max(0,Math.round((state.firewood.storeM3-a)*10)/10);state.firewood.log.unshift({action:'burn',amount:a,source:'Burned',date:new Date().toISOString().split('T')[0]});save();closeModal();renderAll();showToast('🔥 Burned',a+'m³ burned.','warn');">Log Burn</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ========================================================================
+// BEEHIVES
+// ========================================================================
+const BEE_HEALTH = { strong:{label:'Strong',color:'var(--green-light)',icon:'💪'}, moderate:{label:'Moderate',color:'var(--yellow)',icon:'👍'}, weak:{label:'Weak',color:'var(--red-light)',icon:'⚠️'}, dead:{label:'Dead/Lost',color:'var(--red)',icon:'💀'}, new:{label:'New Colony',color:'var(--accent2-light)',icon:'🆕'} };
+const HONEY_PER_HIVE_KG = 15; // conservative UK average
+
+function renderBees() {
+  try { _renderBeesInner(); } catch(e) { console.error('renderBees error:', e); }
+}
+function _renderBeesInner() {
+  const grid = document.getElementById('beeGrid');
+  const summary = document.getElementById('beeSummary');
+  const honeyLog = document.getElementById('honeyLog');
+  if (!grid) return;
+  const hives = state.beehives || [];
+  const activeHives = hives.filter(h => h.health !== 'dead');
+  const totalHoneyYear = activeHives.reduce((s,h) => s + (h.health==='strong'?HONEY_PER_HIVE_KG:h.health==='moderate'?HONEY_PER_HIVE_KG*0.6:h.health==='weak'?HONEY_PER_HIVE_KG*0.2:0), 0);
+  const harvestedTotal = hives.reduce((s,h) => s + (h.harvests||[]).reduce((ss,hh)=>ss+hh.kg,0), 0);
+
+  summary.innerHTML = `
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--honey-light);">${activeHives.length}</div><div class="stat-lbl">🐝 Active Hives</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--honey-light);">${Math.round(totalHoneyYear)}</div><div class="stat-lbl">🍯 kg/yr est.</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--accent-light);">${Math.round(harvestedTotal*10)/10}</div><div class="stat-lbl">kg harvested total</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--green-light);">${Math.round(totalHoneyYear*3040/1000)}k</div><div class="stat-lbl">kcal/yr (honey)</div></div>
+  `;
+
+  grid.innerHTML = '';
+  hives.forEach((hive, idx) => {
+    const h = BEE_HEALTH[hive.health] || BEE_HEALTH.moderate;
+    const card = document.createElement('div');
+    card.className = 'resource-card';
+    if (hive.health==='dead') card.style.opacity='0.5';
+    card.innerHTML = `
+      <div class="resource-header" style="background:linear-gradient(135deg,rgba(212,165,32,0.1),transparent);">
+        <div><div style="font-family:'Bitter',serif;font-weight:700;color:var(--honey-light);font-size:13px;">🐝 ${hive.name||'Hive '+(idx+1)}</div>
+        <div style="font-size:9px;color:var(--text-dim);">Added ${hive.dateAdded||'—'}</div></div>
+        <span style="font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600;color:${h.color};background:rgba(255,255,255,0.05);">${h.icon} ${h.label}</span>
+      </div>
+      <div class="resource-body">
+        <div class="livestock-stat"><span class="livestock-stat-label">Est. Honey/yr</span><span class="livestock-stat-value">${hive.health==='strong'?HONEY_PER_HIVE_KG:hive.health==='moderate'?Math.round(HONEY_PER_HIVE_KG*0.6):hive.health==='weak'?Math.round(HONEY_PER_HIVE_KG*0.2):0}kg</span></div>
+        <div class="livestock-stat"><span class="livestock-stat-label">Total Harvested</span><span class="livestock-stat-value">${(hive.harvests||[]).reduce((s,hh)=>s+hh.kg,0)}kg</span></div>
+        ${hive.notes ? `<div style="font-size:9px;color:var(--text-dim);margin-top:4px;font-style:italic;">${hive.notes}</div>` : ''}
+        <div style="font-size:9px;color:var(--accent2-light);margin-top:6px;">🌸 Pollination bonus: fruit trees, berries, beans, courgettes all yield more with nearby hives.</div>
+      </div>
+      <div class="resource-actions">
+        <button class="btn btn-primary btn-sm" onclick="harvestHoney(${idx})" ${hive.health==='dead'?'disabled':''}>🍯 Harvest</button>
+        <button class="btn btn-ghost btn-sm" onclick="editHive(${idx})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="if(confirm('Remove hive?')){state.beehives.splice(${idx},1);save();renderAll();}">🗑</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+  const addCard = document.createElement('div');
+  addCard.className = 'add-livestock-card';
+  addCard.onclick = () => openAddHiveModal();
+  addCard.innerHTML = '<div style="text-align:center;"><div style="font-size:28px;">🐝</div><div style="font-size:11px;font-weight:600;color:var(--text-dim);">Add Hive</div></div>';
+  grid.appendChild(addCard);
+
+  honeyLog.innerHTML = hives.flatMap(h => (h.harvests||[]).map(hh => ({...hh, hive:h.name||'Hive'}))).sort((a,b)=>b.date>a.date?1:-1).slice(0,10).map(e => `<div class="task-item" style="margin-bottom:4px;border-left-color:var(--honey);"><div class="task-veg">🍯 ${e.kg}kg from ${e.hive}</div><div class="task-action">${e.date}</div></div>`).join('') || '<p style="font-size:10px;color:var(--text-muted);">No honey harvested yet.</p>';
+}
+
+function openAddHiveModal() {
+  document.getElementById('modalTitle').textContent = '🐝 Add Beehive';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label>Hive Name</label><input type="text" id="hiveName" placeholder="e.g. 'Orchard Hive', 'Top Bar #1'"></div>
+    <div class="form-group"><label>Health Status</label><select id="hiveHealth"><option value="strong">💪 Strong</option><option value="moderate" selected>👍 Moderate</option><option value="new">🆕 New Colony</option><option value="weak">⚠️ Weak</option></select></div>
+    <div class="form-group"><label>Notes</label><textarea id="hiveNotes" placeholder="Hive type, queen age..."></textarea></div>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary" onclick="state.beehives.push({name:document.getElementById('hiveName').value.trim()||'Hive',health:document.getElementById('hiveHealth').value,notes:document.getElementById('hiveNotes').value,dateAdded:new Date().toISOString().split('T')[0],harvests:[]});save();closeModal();renderAll();showToast('🐝 Hive Added','New beehive registered!','success');">Add</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function editHive(idx) {
+  const hive = state.beehives[idx]; if(!hive) return;
+  document.getElementById('modalTitle').textContent = `✏️ ${hive.name}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label>Name</label><input type="text" id="editHiveName" value="${hive.name||''}"></div>
+    <div class="form-group"><label>Health</label><select id="editHiveHealth">${Object.entries(BEE_HEALTH).map(([k,v])=>`<option value="${k}" ${hive.health===k?'selected':''}>${v.icon} ${v.label}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Notes</label><textarea id="editHiveNotes">${hive.notes||''}</textarea></div>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary btn-sm" onclick="state.beehives[${idx}].name=document.getElementById('editHiveName').value;state.beehives[${idx}].health=document.getElementById('editHiveHealth').value;state.beehives[${idx}].notes=document.getElementById('editHiveNotes').value;save();closeModal();renderAll();">💾 Save</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function harvestHoney(idx) {
+  document.getElementById('modalTitle').textContent = '🍯 Harvest Honey';
+  document.getElementById('modalBody').innerHTML = `<div class="form-group"><label>Kilograms harvested</label><input type="number" id="honeyKg" value="5" min="0.1" max="50" step="0.5"></div>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary" onclick="const kg=parseFloat(document.getElementById('honeyKg').value)||0;if(!state.beehives[${idx}].harvests)state.beehives[${idx}].harvests=[];state.beehives[${idx}].harvests.push({kg,date:new Date().toISOString().split('T')[0]});save();closeModal();renderAll();showToast('🍯 Harvested',kg+'kg honey collected!','success');">Harvest</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ========================================================================
+// FISH PONDS
+// ========================================================================
+const FISH_SPECIES = [
+  { name: 'Rainbow Trout', icon: '🐟', kgPerFish: 0.5, growMonths: 12, needsFlow: true, minPondM2: 50, desc: 'Needs cool, oxygenated, flowing water. Excellent eating. Stocking rate: 1 per 2m² in flowing water.', cal: 1190 },
+  { name: 'Brown Trout', icon: '🐟', kgPerFish: 0.4, growMonths: 18, needsFlow: true, minPondM2: 50, desc: 'Wild flavour. Needs clean, cool, flowing water. Slower growing than rainbow.', cal: 1190 },
+  { name: 'Common Carp', icon: '🐡', kgPerFish: 2.0, growMonths: 24, needsFlow: false, minPondM2: 100, desc: 'Tolerates still, warm water. Hardy. Grows large. Traditional pond fish.', cal: 1270 },
+  { name: 'Mirror Carp', icon: '🐡', kgPerFish: 2.5, growMonths: 24, needsFlow: false, minPondM2: 100, desc: 'Variant of common carp. Fewer scales, easier to prepare. Same requirements.', cal: 1270 },
+  { name: 'Tilapia', icon: '🐠', kgPerFish: 0.5, growMonths: 8, needsFlow: false, minPondM2: 20, desc: 'Warm-water species. In UK needs heated pond/greenhouse pond. Very fast growing.', cal: 960 },
+  { name: 'Perch', icon: '🐟', kgPerFish: 0.3, growMonths: 18, needsFlow: false, minPondM2: 30, desc: 'Native UK species. Excellent eating. Tolerates most pond conditions.', cal: 910 },
+  { name: 'Tench', icon: '🐟', kgPerFish: 0.8, growMonths: 24, needsFlow: false, minPondM2: 50, desc: 'Hardy bottom-feeder. Tolerates low oxygen. Good in mixed ponds.', cal: 870 },
+];
+
+function renderPonds() {
+  try { _renderPondsInner(); } catch(e) { console.error('renderPonds error:', e); }
+}
+function _renderPondsInner() {
+  const grid = document.getElementById('pondGrid');
+  const summary = document.getElementById('pondSummary');
+  const harvestLog = document.getElementById('fishHarvestLog');
+  if (!grid) return;
+  const ponds = state.ponds || [];
+  const totalFish = ponds.reduce((s,p) => s + (p.stockCount||0), 0);
+  const totalHarvested = ponds.reduce((s,p) => s + (p.harvests||[]).reduce((ss,h)=>ss+h.kg,0), 0);
+  const estYieldKg = ponds.reduce((s,p) => {
+    const sp = FISH_SPECIES.find(f=>f.name===p.species);
+    return s + (sp ? sp.kgPerFish * (p.stockCount||0) : 0);
+  }, 0);
+
+  summary.innerHTML = `
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--fish-light);">${ponds.length}</div><div class="stat-lbl">🐟 Ponds</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--fish-light);">${totalFish}</div><div class="stat-lbl">Fish Stocked</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--accent-light);">${Math.round(estYieldKg)}</div><div class="stat-lbl">kg est. yield</div></div>
+    <div class="livestock-summary-card"><div class="stat-num" style="color:var(--green-light);">${Math.round(totalHarvested*10)/10}</div><div class="stat-lbl">kg harvested</div></div>
+  `;
+
+  grid.innerHTML = '';
+  ponds.forEach((pond, idx) => {
+    const sp = FISH_SPECIES.find(f => f.name === pond.species) || {};
+    const card = document.createElement('div');
+    card.className = 'resource-card';
+    const monthsSinceStock = pond.stockDate ? Math.round((Date.now()-new Date(pond.stockDate).getTime())/(30.44*864e5)) : 0;
+    const readyToHarvest = sp.growMonths && monthsSinceStock >= sp.growMonths;
+    if (readyToHarvest) card.style.borderColor = 'rgba(90,173,106,0.5)';
+    card.innerHTML = `
+      <div class="resource-header" style="background:linear-gradient(135deg,rgba(58,122,154,0.15),transparent);">
+        <div><div style="font-family:'Bitter',serif;font-weight:700;color:var(--fish-light);font-size:13px;">${sp.icon||'🐟'} ${pond.name||'Pond'}</div>
+        <div style="font-size:9px;color:var(--text-dim);">${pond.species} · ${pond.stockCount||0} fish · ${pond.pondSizeM2||'?'}m²</div></div>
+      </div>
+      <div class="resource-body">
+        <div class="livestock-stat"><span class="livestock-stat-label">Stocked</span><span class="livestock-stat-value">${pond.stockDate||'—'} (${monthsSinceStock}mo ago)</span></div>
+        <div class="livestock-stat"><span class="livestock-stat-label">Grow time</span><span class="livestock-stat-value">${sp.growMonths||'?'}mo ${readyToHarvest?'✅ READY':''}</span></div>
+        <div class="livestock-stat"><span class="livestock-stat-label">Est. yield</span><span class="livestock-stat-value">${Math.round((sp.kgPerFish||0)*(pond.stockCount||0)*10)/10}kg</span></div>
+        ${sp.needsFlow ? '<div style="font-size:9px;color:var(--accent2-light);margin-top:4px;">💧 Needs flowing/oxygenated water</div>' : '<div style="font-size:9px;color:var(--text-dim);margin-top:4px;">🏊 Tolerates still water</div>'}
+        <div style="font-size:9px;color:var(--text-dim);margin-top:4px;font-style:italic;">${sp.desc||''}</div>
+      </div>
+      <div class="resource-actions">
+        <button class="btn btn-primary btn-sm" onclick="harvestFish(${idx})" style="flex:1;">🎣 Harvest</button>
+        <button class="btn btn-ghost btn-sm" onclick="editPond(${idx})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="if(confirm('Remove pond?')){state.ponds.splice(${idx},1);save();renderAll();}">🗑</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+  const addCard = document.createElement('div');
+  addCard.className = 'add-livestock-card';
+  addCard.onclick = () => openAddPondModal();
+  addCard.innerHTML = '<div style="text-align:center;"><div style="font-size:28px;">🐟</div><div style="font-size:11px;font-weight:600;color:var(--text-dim);">Add Pond</div></div>';
+  grid.appendChild(addCard);
+
+  harvestLog.innerHTML = ponds.flatMap(p => (p.harvests||[]).map(h=>({...h,pond:p.name||'Pond'}))).sort((a,b)=>b.date>a.date?1:-1).slice(0,10).map(e => `<div class="task-item" style="margin-bottom:4px;border-left-color:var(--fish);"><div class="task-veg">🎣 ${e.kg}kg from ${e.pond}</div><div class="task-action">${e.fish||''} · ${e.date}</div></div>`).join('') || '<p style="font-size:10px;color:var(--text-muted);">No fish harvested yet.</p>';
+}
+
+function openAddPondModal() {
+  document.getElementById('modalTitle').textContent = '🐟 Add Fish Pond';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label>Pond Name</label><input type="text" id="pondName" placeholder="e.g. 'Top Pond', 'Stream Pool'"></div>
+    <div class="form-group"><label>Species</label><select id="pondSpecies">${FISH_SPECIES.map(f=>`<option value="${f.name}">${f.icon} ${f.name} (${f.kgPerFish}kg/fish, ${f.growMonths}mo)${f.needsFlow?' — needs flow':''}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Number stocked</label><input type="number" id="pondStock" value="20" min="1" max="1000"></div>
+    <div class="form-group"><label>Pond size (m²)</label><input type="number" id="pondSize" value="50" min="5" max="5000"></div>
+    <div class="form-group"><label>Stocking date</label><input type="date" id="pondDate" value="${new Date().toISOString().split('T')[0]}"></div>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary" onclick="state.ponds.push({name:document.getElementById('pondName').value.trim()||'Pond',species:document.getElementById('pondSpecies').value,stockCount:parseInt(document.getElementById('pondStock').value)||20,pondSizeM2:parseInt(document.getElementById('pondSize').value)||50,stockDate:document.getElementById('pondDate').value,harvests:[]});save();closeModal();renderAll();showToast('🐟 Pond Added','Fish stocked!','success');">Add</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function editPond(idx) {
+  const pond = state.ponds[idx]; if(!pond) return;
+  document.getElementById('modalTitle').textContent = `✏️ ${pond.name}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label>Name</label><input type="text" id="editPondName" value="${pond.name||''}"></div>
+    <div class="form-group"><label>Fish remaining</label><input type="number" id="editPondStock" value="${pond.stockCount||0}" min="0"></div>
+    <div class="form-group"><label>Pond size (m²)</label><input type="number" id="editPondSize" value="${pond.pondSizeM2||50}"></div>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary btn-sm" onclick="state.ponds[${idx}].name=document.getElementById('editPondName').value;state.ponds[${idx}].stockCount=parseInt(document.getElementById('editPondStock').value)||0;state.ponds[${idx}].pondSizeM2=parseInt(document.getElementById('editPondSize').value)||50;save();closeModal();renderAll();">💾 Save</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function harvestFish(idx) {
+  const pond = state.ponds[idx]; if(!pond) return;
+  const sp = FISH_SPECIES.find(f=>f.name===pond.species)||{kgPerFish:0.5};
+  document.getElementById('modalTitle').textContent = '🎣 Harvest Fish';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label>Number of fish</label><input type="number" id="fishNum" value="5" min="1" max="${pond.stockCount||100}"></div>
+    <div class="form-group"><label>Total weight (kg)</label><input type="number" id="fishKg" value="${Math.round(5*sp.kgPerFish*10)/10}" min="0.1" step="0.1"></div>
+    <p style="font-size:10px;color:var(--text-dim);">${pond.stockCount||0} fish remaining in pond. ~${sp.kgPerFish}kg each.</p>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary" onclick="const n=parseInt(document.getElementById('fishNum').value)||0;const kg=parseFloat(document.getElementById('fishKg').value)||0;state.ponds[${idx}].stockCount=Math.max(0,(state.ponds[${idx}].stockCount||0)-n);if(!state.ponds[${idx}].harvests)state.ponds[${idx}].harvests=[];state.ponds[${idx}].harvests.push({fish:n+'x '+state.ponds[${idx}].species,kg,date:new Date().toISOString().split('T')[0]});save();closeModal();renderAll();showToast('🎣 Harvested',kg+'kg fish!','success');">Harvest</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// Also update AI garden context to include livestock
 
 // Periodic check
 setInterval(()=>{const proj=getHarvestProjections(),n=state.notifications,now=new Date(),last=n.lastCheck?new Date(n.lastCheck):new Date(0);if((now-last)/36e5>=1){n.lastCheck=now.toISOString();save();if(n.harvestReminder)proj.filter(p=>p.daysLeft<=n.harvestDaysBefore&&p.daysLeft>0).forEach(p=>showToast(`${p.icon} ${p.veg} — ${p.daysLeft}d`,`At ${p.location}`,'warn',6000));if(n.overdueAlert)proj.filter(p=>p.isOverdue).forEach(p=>showToast(`🚨 ${p.veg} OVERDUE`,`${Math.abs(p.daysLeft)}d late!`,'danger',8000));}updateHeader();},60000);
