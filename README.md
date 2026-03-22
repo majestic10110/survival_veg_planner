@@ -1,4 +1,4 @@
-# 🌿 The Veg Plot — Survival Edition
+# 🌿 The Smallholding — Survival Edition
 
 A comprehensive UK vegetable garden planner built as a single HTML file. No server, no install, no dependencies — just open it in a browser and start planning your food production like your survival depends on it.
 
