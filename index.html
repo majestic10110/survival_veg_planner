@@ -354,6 +354,14 @@
   .cal-env-tab.tab-outdoor.active { background:rgba(106,170,94,0.4); border-color:rgba(106,170,94,0.5); }
   .cal-env-tab.tab-greenhouse.active { background:rgba(42,138,90,0.4); border-color:rgba(42,138,90,0.5); }
   .cal-env-tab.tab-polytunnel.active { background:rgba(90,122,191,0.4); border-color:rgba(90,122,191,0.5); }
+
+  /* Calendar info icon */
+  .cal-info-btn { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:rgba(74,158,187,0.15); border:1px solid rgba(74,158,187,0.25); color:var(--accent2-light); font-size:9px; font-weight:700; cursor:pointer; transition:all 0.15s; flex-shrink:0; margin-right:4px; vertical-align:middle; line-height:1; }
+  .cal-info-btn:hover { background:rgba(74,158,187,0.35); border-color:var(--accent2-light); transform:scale(1.15); }
+
+  /* Calendar section headers */
+  .cal-section-header td { background:var(--surface); padding:6px 8px; font-family:'Bitter',serif; font-weight:800; font-size:11px; letter-spacing:1px; text-transform:uppercase; border:none!important; }
+  .cal-section-header td:first-child { color:var(--accent-light); }
 </style>
 </head>
 <body>
@@ -411,7 +419,8 @@
       <div class="card"><h2>📅 This Month's Jobs</h2><div id="thisMonthTasks"></div></div>
       <div class="card"><h2>🍅 Nearest Harvests</h2><div id="dashHarvests"></div></div>
     </div>
-    <div class="card mt"><h2>🔄 Succession Sowing</h2><div id="successionTips" class="grid-3"></div></div>
+    <div class="card mt"><h2>🔄 Continuity Planning</h2><p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Crops approaching harvest — sow replacements now to avoid empty beds.</p><div id="continuityAlerts"></div></div>
+    <div class="card mt"><h2>🌱 Succession Sowing</h2><div id="successionTips" class="grid-3"></div></div>
   </div>
 
   <!-- WARNINGS -->
@@ -443,7 +452,7 @@
       <div style="display:flex;gap:5px;"><input type="text" id="bedAIInput" placeholder="What's happening in your beds..." style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-family:inherit;font-size:11px;" onkeydown="if(event.key==='Enter')sendBedAIMessage()"><button class="btn btn-ai btn-sm" onclick="sendBedAIMessage()">🤖</button><button class="btn btn-primary btn-sm" onclick="logBedAIMessage()">📋</button></div>
       <div id="bedAIResponse" style="display:none;margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;line-height:1.6;"></div>
     </div>
-    <div class="card mt"><h2>🪴 Pots, Containers & Ground Plots</h2><p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Track anything outside your raised beds — pots, grow bags, fruit trees in the ground, berry patches, rhubarb crowns, etc.</p><div class="pots-grid" id="potsGrid"></div></div>
+    <div class="card mt"><h2>🪴 Pots, Containers, Module Trays & Ground Plots</h2><p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Track anything outside your raised beds — pots, grow bags, seed module trays, fruit trees in the ground, berry patches, rhubarb crowns, etc.</p><div class="pots-grid" id="potsGrid"></div></div>
   </div>
 
   <!-- CALENDAR -->
@@ -481,7 +490,8 @@
   <!-- PIPELINE -->
   <div class="panel" id="panel-pipeline">
     <div class="card"><h2>🔄 Food Pipeline</h2><div id="pipelineView"></div></div>
-    <div class="card mt"><h2>📊 Crop Timelines</h2><div id="cropPipelines"></div></div>
+    <div class="card mt"><h2>📊 Crop Timelines</h2><p style="font-size:9px;color:var(--text-dim);margin-bottom:6px;">Orange marker = 30 days before harvest — start thinking about succession now.</p><div id="cropPipelines"></div></div>
+    <div class="card mt"><h2>🔄 Succession Planning — Sow Replacements</h2><p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Crops within 30 days of harvest. Sow replacements now so beds are never empty.</p><div id="pipelineSuccession"></div></div>
     <div class="card mt"><h2>🎯 Sow This Week</h2><div id="weeklyActions" class="grid-2"></div></div>
   </div>
 
@@ -660,113 +670,290 @@ const ENV_MODIFIERS = {
 
 // ========================================================================
 // VEGETABLE DATA — base months are for south-coast/south-england
+// Nutrition: per 100g raw edible portion (USDA/McCance & Widdowson verified)
+// cal=kcal, pro=protein(g), carb=carbs(g), fibre=fibre(g), vitC=vitamin C(mg), iron=iron(mg), vitA=vitamin A(mcg RAE), folate=folate(mcg)
+// soilBenefit: what this crop does for the soil when it's done
 // ========================================================================
 const VEGETABLES = [
-  // ===== HERBS =====
-  {name:'Basil',family:'Herb',sowIn:[3,4],sowOut:[5,6],harvest:[6,7,8,9],days:60,icon:'🌿',calories:23,fastGrow:true,minZone:'south-england',ghBetter:true},
-  {name:'Coriander',family:'Herb',sowIn:[],sowOut:[4,5,6,7,8],harvest:[6,7,8,9,10],days:45,icon:'🌿',calories:23,fastGrow:true},
-  {name:'Dill',family:'Herb',sowIn:[],sowOut:[4,5,6,7],harvest:[6,7,8,9],days:40,icon:'🌿',calories:43,fastGrow:true},
-  {name:'Mint',family:'Herb',sowIn:[3],sowOut:[4,5],harvest:[5,6,7,8,9,10],days:90,icon:'🌿',calories:44,coldHardy:true,perennial:true},
-  {name:'Parsley',family:'Herb',sowIn:[],sowOut:[3,4,5],harvest:[5,6,7,8,9,10,11],days:70,icon:'🌿',calories:36,coldHardy:true},
-  {name:'Chives',family:'Herb',sowIn:[3],sowOut:[4,5],harvest:[4,5,6,7,8,9,10],days:60,icon:'🌿',calories:30,coldHardy:true,perennial:true},
-  {name:'Rosemary',family:'Herb',sowIn:[],sowOut:[4,5],harvest:[1,2,3,4,5,6,7,8,9,10,11,12],days:365,icon:'🌿',calories:131,coldHardy:true,perennial:true},
-  {name:'Thyme',family:'Herb',sowIn:[3,4],sowOut:[5],harvest:[1,2,3,4,5,6,7,8,9,10,11,12],days:365,icon:'🌿',calories:101,coldHardy:true,perennial:true},
-  {name:'Sage',family:'Herb',sowIn:[3],sowOut:[5],harvest:[1,2,3,4,5,6,7,8,9,10,11,12],days:365,icon:'🌿',calories:315,coldHardy:true,perennial:true},
-  {name:'Oregano',family:'Herb',sowIn:[3,4],sowOut:[5],harvest:[6,7,8,9,10],days:80,icon:'🌿',calories:265,coldHardy:true,perennial:true},
+  // ===== HERBS (low calorie but high micronutrients — flavouring & medicinal) =====
+  {name:'Basil',family:'Herb',sowIn:[3,4],sowOut:[5,6],harvest:[6,7,8,9],days:60,icon:'🌿',calories:23,pro:3.2,carb:2.7,fibre:1.6,vitC:18,iron:3.2,vitA:264,folate:68,fastGrow:true,minZone:'south-england',ghBetter:true,soilBenefit:'Remove — shallow roots, minimal residue'},
+  {name:'Coriander',family:'Herb',sowIn:[],sowOut:[4,5,6,7,8],harvest:[6,7,8,9,10],days:45,icon:'🌿',calories:23,pro:2.1,carb:3.7,fibre:2.8,vitC:27,iron:1.8,vitA:337,folate:62,fastGrow:true,soilBenefit:'Attracts beneficial insects; leave roots in soil'},
+  {name:'Dill',family:'Herb',sowIn:[],sowOut:[4,5,6,7],harvest:[6,7,8,9],days:40,icon:'🌿',calories:43,pro:3.5,carb:7.0,fibre:2.1,vitC:85,iron:6.6,vitA:386,folate:150,fastGrow:true,soilBenefit:'Deep taproot breaks compaction; attracts hoverflies'},
+  {name:'Mint',family:'Herb',sowIn:[3],sowOut:[4,5],harvest:[5,6,7,8,9,10],days:90,icon:'🌿',calories:44,pro:3.3,carb:8.4,fibre:6.8,vitC:13,iron:5.1,vitA:212,folate:105,coldHardy:true,perennial:true,soilBenefit:'Spreading roots stabilise soil; deters pests'},
+  {name:'Parsley',family:'Herb',sowIn:[],sowOut:[3,4,5],harvest:[5,6,7,8,9,10,11],days:70,icon:'🌿',calories:36,pro:3.0,carb:6.3,fibre:3.3,vitC:133,iron:6.2,vitA:421,folate:152,coldHardy:true,soilBenefit:'Deep taproot; high in minerals — good compost material'},
+  {name:'Chives',family:'Herb',sowIn:[3],sowOut:[4,5],harvest:[4,5,6,7,8,9,10],days:60,icon:'🌿',calories:30,pro:3.3,carb:4.4,fibre:2.5,vitC:58,iron:1.6,vitA:218,folate:105,coldHardy:true,perennial:true,soilBenefit:'Allium — suppresses soil-borne fungal disease'},
+  {name:'Rosemary',family:'Herb',sowIn:[],sowOut:[4,5],harvest:[1,2,3,4,5,6,7,8,9,10,11,12],days:365,icon:'🌿',calories:131,pro:3.3,carb:20.7,fibre:14.1,vitC:22,iron:6.7,vitA:146,folate:109,coldHardy:true,perennial:true,soilBenefit:'Woody roots improve drainage; aromatic oils deter pests'},
+  {name:'Thyme',family:'Herb',sowIn:[3,4],sowOut:[5],harvest:[1,2,3,4,5,6,7,8,9,10,11,12],days:365,icon:'🌿',calories:101,pro:5.6,carb:24.5,fibre:14.0,vitC:160,iron:17.4,vitA:190,folate:45,coldHardy:true,perennial:true,soilBenefit:'Ground cover suppresses weeds; attracts pollinators'},
+  {name:'Sage',family:'Herb',sowIn:[3],sowOut:[5],harvest:[1,2,3,4,5,6,7,8,9,10,11,12],days:365,icon:'🌿',calories:315,pro:10.6,carb:60.7,fibre:40.3,vitC:32,iron:28.1,vitA:295,folate:274,coldHardy:true,perennial:true,soilBenefit:'Aromatic — deters carrot fly and cabbage moth'},
+  {name:'Oregano',family:'Herb',sowIn:[3,4],sowOut:[5],harvest:[6,7,8,9,10],days:80,icon:'🌿',calories:265,pro:9.0,carb:68.9,fibre:42.5,vitC:2,iron:36.8,vitA:85,folate:237,coldHardy:true,perennial:true,soilBenefit:'Ground cover; attracts beneficial insects'},
 
-  // ===== LEGUMES =====
-  {name:'Beans (French)',family:'Legume',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9],days:60,icon:'🫘',calories:31,fastGrow:true},
-  {name:'Beans (Broad)',family:'Legume',sowIn:[1,2],sowOut:[2,3,10,11],harvest:[5,6,7],days:90,icon:'🫘',calories:88,store:true,coldHardy:true},
-  {name:'Beans (Runner)',family:'Legume',sowIn:[4],sowOut:[5,6],harvest:[7,8,9,10],days:60,icon:'🫘',calories:25,fastGrow:true},
-  {name:'Peas',family:'Legume',sowIn:[2,3],sowOut:[3,4,5,6],harvest:[6,7,8,9],days:60,icon:'🟢',calories:81,fastGrow:true},
-  {name:'Mangetout / Sugar Snap',family:'Legume',sowIn:[2,3],sowOut:[3,4,5],harvest:[6,7,8],days:65,icon:'🟢',calories:42,fastGrow:true},
+  // ===== LEGUMES (nitrogen fixers — critical for soil fertility) =====
+  {name:'Beans (French)',family:'Legume',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9],days:60,icon:'🫘',calories:31,pro:1.8,carb:7.0,fibre:2.7,vitC:12,iron:1.0,vitA:35,folate:33,fastGrow:true,soilBenefit:'NITROGEN FIXER — leave roots in soil. Follow with hungry brassicas.'},
+  {name:'Beans (Broad)',family:'Legume',sowIn:[1,2],sowOut:[2,3,10,11],harvest:[5,6,7],days:90,icon:'🫘',calories:88,pro:7.9,carb:11.7,fibre:5.4,vitC:33,iron:1.5,vitA:4,folate:148,store:true,coldHardy:true,soilBenefit:'EXCELLENT NITROGEN FIXER — chop and drop foliage as green manure. Best legume for soil.'},
+  {name:'Beans (Runner)',family:'Legume',sowIn:[4],sowOut:[5,6],harvest:[7,8,9,10],days:60,icon:'🫘',calories:25,pro:1.6,carb:4.7,fibre:1.9,vitC:17,iron:0.7,vitA:21,folate:28,fastGrow:true,soilBenefit:'NITROGEN FIXER — heavy cropper. Leave roots in ground after clearing.'},
+  {name:'Peas',family:'Legume',sowIn:[2,3],sowOut:[3,4,5,6],harvest:[6,7,8,9],days:60,icon:'🟢',calories:81,pro:5.4,carb:14.5,fibre:5.1,vitC:40,iron:1.5,vitA:38,folate:65,fastGrow:true,soilBenefit:'NITROGEN FIXER — chop haulm and compost. Roots enrich soil for following crop.'},
+  {name:'Mangetout / Sugar Snap',family:'Legume',sowIn:[2,3],sowOut:[3,4,5],harvest:[6,7,8],days:65,icon:'🟢',calories:42,pro:2.8,carb:7.6,fibre:2.6,vitC:60,iron:2.1,vitA:54,folate:42,fastGrow:true,soilBenefit:'NITROGEN FIXER — as peas.'},
 
-  // ===== ROOTS =====
-  {name:'Beetroot',family:'Root',sowIn:[],sowOut:[3,4,5,6],harvest:[6,7,8,9,10],days:90,icon:'🫐',calories:43,store:true},
-  {name:'Carrot',family:'Root',sowIn:[],sowOut:[3,4,5,6,7],harvest:[6,7,8,9,10],days:70,icon:'🥕',calories:41,store:true,fastGrow:true},
-  {name:'Parsnip',family:'Root',sowIn:[],sowOut:[3,4,5],harvest:[10,11,12,1,2],days:150,icon:'🥕',calories:75,store:true,coldHardy:true},
-  {name:'Swede',family:'Root',sowIn:[],sowOut:[5,6,7],harvest:[10,11,12,1],days:140,icon:'🥔',calories:38,store:true,coldHardy:true},
-  {name:'Turnips',family:'Root',sowIn:[],sowOut:[3,4,5,7,8],harvest:[5,6,7,9,10],days:50,icon:'🥔',calories:28,fastGrow:true,store:true,emergency:true,coldHardy:true},
-  {name:'Radish',family:'Root',sowIn:[],sowOut:[3,4,5,6,7,8,9],harvest:[4,5,6,7,8,9,10],days:25,icon:'🔴',calories:16,fastGrow:true,emergency:true},
-  {name:'Jerusalem Artichoke',family:'Root',sowIn:[],sowOut:[2,3],harvest:[10,11,12,1,2],days:200,icon:'🌻',calories:73,store:true,coldHardy:true},
-  {name:'Celeriac',family:'Root',sowIn:[2,3],sowOut:[5,6],harvest:[10,11,12,1],days:200,icon:'🥕',calories:42,store:true,coldHardy:true},
-  {name:'Sweet Potato',family:'Root',sowIn:[4,5],sowOut:[6],harvest:[9,10],days:120,icon:'🍠',calories:86,store:true,minZone:'south-england',ghBetter:true},
+  // ===== ROOTS (energy-dense, storable — survival staples) =====
+  {name:'Beetroot',family:'Root',sowIn:[],sowOut:[3,4,5,6],harvest:[6,7,8,9,10],days:90,icon:'🫐',calories:43,pro:1.6,carb:9.6,fibre:2.8,vitC:5,iron:0.8,vitA:2,folate:109,store:true,soilBenefit:'Deep taproot breaks compaction. Leaves are excellent compost.'},
+  {name:'Carrot',family:'Root',sowIn:[],sowOut:[3,4,5,6,7],harvest:[6,7,8,9,10],days:70,icon:'🥕',calories:41,pro:0.9,carb:9.6,fibre:2.8,vitC:6,iron:0.3,vitA:835,folate:19,store:true,fastGrow:true,soilBenefit:'Deep root aerates soil. Follow with nitrogen fixers (legumes).'},
+  {name:'Parsnip',family:'Root',sowIn:[],sowOut:[3,4,5],harvest:[10,11,12,1,2],days:150,icon:'🥕',calories:75,pro:1.2,carb:18.0,fibre:4.9,vitC:17,iron:0.6,vitA:0,folate:67,store:true,coldHardy:true,soilBenefit:'Very deep root — excellent subsoil breaker. High-carbon foliage for compost.'},
+  {name:'Swede',family:'Root',sowIn:[],sowOut:[5,6,7],harvest:[10,11,12,1],days:140,icon:'🥔',calories:38,pro:1.1,carb:8.6,fibre:2.3,vitC:25,iron:0.4,vitA:2,folate:21,store:true,coldHardy:true,soilBenefit:'Brassica family — rotate away from other brassicas. Bulky residue feeds soil.'},
+  {name:'Turnips',family:'Root',sowIn:[],sowOut:[3,4,5,7,8],harvest:[5,6,7,9,10],days:50,icon:'🥔',calories:28,pro:0.9,carb:6.4,fibre:1.8,vitC:21,iron:0.3,vitA:0,folate:15,fastGrow:true,store:true,emergency:true,coldHardy:true,soilBenefit:'Fast catch crop. Leaves edible and nutritious. Brassica — rotate.'},
+  {name:'Radish',family:'Root',sowIn:[],sowOut:[3,4,5,6,7,8,9],harvest:[4,5,6,7,8,9,10],days:25,icon:'🔴',calories:16,pro:0.7,carb:3.4,fibre:1.6,vitC:15,iron:0.3,vitA:0,folate:25,fastGrow:true,emergency:true,soilBenefit:'Excellent catch crop between main plantings. Breaks surface crust. Brassica family.'},
+  {name:'Jerusalem Artichoke',family:'Root',sowIn:[],sowOut:[2,3],harvest:[10,11,12,1,2],days:200,icon:'🌻',calories:73,pro:2.0,carb:17.4,fibre:1.6,vitC:4,iron:3.4,vitA:1,folate:13,store:true,coldHardy:true,soilBenefit:'Tall — acts as windbreak. Massive root system improves soil structure. Will spread if not managed.'},
+  {name:'Celeriac',family:'Root',sowIn:[2,3],sowOut:[5,6],harvest:[10,11,12,1],days:200,icon:'🥕',calories:42,pro:1.5,carb:9.2,fibre:1.8,vitC:8,iron:0.7,vitA:0,folate:8,store:true,coldHardy:true,soilBenefit:'Heavy feeder — needs rich soil. Good residue for compost.'},
+  {name:'Sweet Potato',family:'Root',sowIn:[4,5],sowOut:[6],harvest:[9,10],days:120,icon:'🍠',calories:86,pro:1.6,carb:20.1,fibre:3.0,vitC:2,iron:0.6,vitA:709,folate:11,store:true,minZone:'south-england',ghBetter:true,soilBenefit:'Dense leaf canopy smothers weeds. Unrelated to potatoes — no shared diseases.'},
 
-  // ===== BRASSICAS =====
-  {name:'Broccoli (PSB)',family:'Brassica',sowIn:[2],sowOut:[4,5],harvest:[1,2,3,6],days:200,icon:'🥦',calories:34,coldHardy:true},
-  {name:'Broccoli (Calabrese)',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9,10],days:80,icon:'🥦',calories:34},
-  {name:'Brussels Sprouts',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[10,11,12,1,2],days:180,icon:'🌿',calories:43,store:true,coldHardy:true},
-  {name:'Cabbage (Spring)',family:'Brassica',sowIn:[],sowOut:[7,8],harvest:[3,4,5],days:240,icon:'🥬',calories:25,coldHardy:true},
-  {name:'Cabbage (Summer)',family:'Brassica',sowIn:[1,2],sowOut:[4,5],harvest:[6,7,8],days:90,icon:'🥬',calories:25},
-  {name:'Cabbage (Winter)',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[10,11,12],days:180,icon:'🥬',calories:25,store:true,coldHardy:true},
-  {name:'Cauliflower',family:'Brassica',sowIn:[1,2],sowOut:[4,5,6],harvest:[6,7,8,9,10],days:120,icon:'🥦',calories:25},
-  {name:'Kale',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9,10,11,12],days:60,icon:'🥬',calories:49,fastGrow:true,coldHardy:true},
-  {name:'Pak Choi',family:'Brassica',sowIn:[],sowOut:[4,5,6,7,8],harvest:[6,7,8,9,10],days:45,icon:'🥬',calories:13,fastGrow:true},
-  {name:'Kohlrabi',family:'Brassica',sowIn:[3],sowOut:[4,5,6,7],harvest:[6,7,8,9,10],days:55,icon:'🥬',calories:27,fastGrow:true,coldHardy:true},
+  // ===== BRASSICAS (nutrient-dense, many cold-hardy — winter survival crops) =====
+  {name:'Broccoli (PSB)',family:'Brassica',sowIn:[2],sowOut:[4,5],harvest:[1,2,3,6],days:200,icon:'🥦',calories:34,pro:2.8,carb:6.6,fibre:2.6,vitC:89,iron:0.7,vitA:31,folate:63,coldHardy:true,soilBenefit:'Heavy feeder. Thick stems slow to decompose — chop finely for compost. Rotate.'},
+  {name:'Broccoli (Calabrese)',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9,10],days:80,icon:'🥦',calories:34,pro:2.8,carb:6.6,fibre:2.6,vitC:89,iron:0.7,vitA:31,folate:63,soilBenefit:'As PSB. Follow with legumes.'},
+  {name:'Brussels Sprouts',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[10,11,12,1,2],days:180,icon:'🌿',calories:43,pro:3.4,carb:9.0,fibre:3.8,vitC:85,iron:1.4,vitA:38,folate:61,store:true,coldHardy:true,soilBenefit:'Very heavy feeder — depletes nitrogen. MUST follow with legumes.'},
+  {name:'Cabbage (Spring)',family:'Brassica',sowIn:[],sowOut:[7,8],harvest:[3,4,5],days:240,icon:'🥬',calories:25,pro:1.3,carb:5.8,fibre:2.5,vitC:37,iron:0.5,vitA:5,folate:43,coldHardy:true,soilBenefit:'Outer leaves make excellent compost. Rotate brassicas annually.'},
+  {name:'Cabbage (Summer)',family:'Brassica',sowIn:[1,2],sowOut:[4,5],harvest:[6,7,8],days:90,icon:'🥬',calories:25,pro:1.3,carb:5.8,fibre:2.5,vitC:37,iron:0.5,vitA:5,folate:43,soilBenefit:'As spring cabbage.'},
+  {name:'Cabbage (Winter)',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[10,11,12],days:180,icon:'🥬',calories:25,pro:1.3,carb:5.8,fibre:2.5,vitC:37,iron:0.5,vitA:5,folate:43,store:true,coldHardy:true,soilBenefit:'As spring cabbage. Stores well — critical winter vitamin C source.'},
+  {name:'Cauliflower',family:'Brassica',sowIn:[1,2],sowOut:[4,5,6],harvest:[6,7,8,9,10],days:120,icon:'🥦',calories:25,pro:1.9,carb:5.0,fibre:2.0,vitC:48,iron:0.4,vitA:0,folate:57,soilBenefit:'Heavy feeder — needs rich soil. Rotate with non-brassicas.'},
+  {name:'Kale',family:'Brassica',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9,10,11,12],days:60,icon:'🥬',calories:49,pro:4.3,carb:9.0,fibre:3.6,vitC:120,iron:1.5,vitA:500,folate:141,fastGrow:true,coldHardy:true,soilBenefit:'SUPERFOOD. Leaves throughout winter. Deep roots. Excellent green manure if chopped in.'},
+  {name:'Pak Choi',family:'Brassica',sowIn:[],sowOut:[4,5,6,7,8],harvest:[6,7,8,9,10],days:45,icon:'🥬',calories:13,pro:1.5,carb:2.2,fibre:1.0,vitC:45,iron:0.8,vitA:223,folate:66,fastGrow:true,soilBenefit:'Fast catch crop. Light feeder — good between heavy crops.'},
+  {name:'Kohlrabi',family:'Brassica',sowIn:[3],sowOut:[4,5,6,7],harvest:[6,7,8,9,10],days:55,icon:'🥬',calories:27,pro:1.7,carb:6.2,fibre:3.6,vitC:62,iron:0.4,vitA:2,folate:16,fastGrow:true,coldHardy:true,soilBenefit:'Fast brassica — useful gap filler. Rotate as other brassicas.'},
 
-  // ===== ALLIUMS =====
-  {name:'Garlic',family:'Allium',sowIn:[],sowOut:[10,11],harvest:[6,7],days:240,store:true,icon:'🧄',calories:149,coldHardy:true},
-  {name:'Onion',family:'Allium',sowIn:[1,2],sowOut:[3,4],harvest:[7,8,9],days:150,icon:'🧅',calories:40,store:true},
-  {name:'Shallot',family:'Allium',sowIn:[],sowOut:[2,3,11,12],harvest:[7,8],days:150,icon:'🧅',calories:72,store:true,coldHardy:true},
-  {name:'Leeks',family:'Allium',sowIn:[1,2],sowOut:[3,4,5],harvest:[9,10,11,12,1,2],days:140,icon:'🥬',calories:61,store:true,coldHardy:true},
-  {name:'Spring Onions',family:'Allium',sowIn:[],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🌿',calories:32,fastGrow:true},
+  // ===== ALLIUMS (disease-suppressing, storable) =====
+  {name:'Garlic',family:'Allium',sowIn:[],sowOut:[10,11],harvest:[6,7],days:240,store:true,icon:'🧄',calories:149,pro:6.4,carb:33.1,fibre:2.1,vitC:31,iron:1.7,vitA:0,folate:3,coldHardy:true,soilBenefit:'ANTIFUNGAL — suppresses soil-borne disease. Allicin deters pests. Excellent before strawberries.'},
+  {name:'Onion',family:'Allium',sowIn:[1,2],sowOut:[3,4],harvest:[7,8,9],days:150,icon:'🧅',calories:40,pro:1.1,carb:9.3,fibre:1.7,vitC:7,iron:0.2,vitA:0,folate:19,store:true,soilBenefit:'Suppresses soil fungi. Shallow roots — follow with deep rooters.'},
+  {name:'Shallot',family:'Allium',sowIn:[],sowOut:[2,3,11,12],harvest:[7,8],days:150,icon:'🧅',calories:72,pro:2.5,carb:16.8,fibre:3.2,vitC:8,iron:1.2,vitA:4,folate:34,store:true,coldHardy:true,soilBenefit:'As onion. Excellent keeper — stores 6-12 months.'},
+  {name:'Leeks',family:'Allium',sowIn:[1,2],sowOut:[3,4,5],harvest:[9,10,11,12,1,2],days:140,icon:'🥬',calories:61,pro:1.5,carb:14.2,fibre:1.8,vitC:12,iron:2.1,vitA:83,folate:64,store:true,coldHardy:true,soilBenefit:'Stand in ground all winter — living food store. Allium disease suppression.'},
+  {name:'Spring Onions',family:'Allium',sowIn:[],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🌿',calories:32,pro:1.8,carb:7.3,fibre:2.6,vitC:19,iron:1.5,vitA:50,folate:64,fastGrow:true,soilBenefit:'Fast catch crop. Allium pest deterrent — interplant with carrots.'},
 
-  // ===== LEAF & SALAD =====
-  {name:'Lettuce',family:'Leaf',sowIn:[2,3],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🥗',calories:15,fastGrow:true},
-  {name:'Chard / Spinach',family:'Leaf',sowIn:[],sowOut:[3,4,5,8,9],harvest:[5,6,7,8,9,10,11],days:60,icon:'🌿',calories:19,fastGrow:true,coldHardy:true},
-  {name:'Rocket',family:'Leaf',sowIn:[],sowOut:[3,4,5,6,7,8,9,10],harvest:[4,5,6,7,8,9,10,11],days:21,icon:'🌿',calories:25,fastGrow:true,emergency:true,coldHardy:true},
-  {name:'Lamb\'s Lettuce (Corn Salad)',family:'Leaf',sowIn:[],sowOut:[3,4,8,9,10],harvest:[4,5,6,10,11,12,1,2],days:50,icon:'🥗',calories:21,fastGrow:true,coldHardy:true},
-  {name:'Land Cress',family:'Leaf',sowIn:[],sowOut:[3,4,8,9],harvest:[5,6,7,10,11,12,1],days:50,icon:'🌿',calories:32,fastGrow:true,coldHardy:true},
+  // ===== LEAF & SALAD (fast-growing, vitamin-rich, low calorie) =====
+  {name:'Lettuce',family:'Leaf',sowIn:[2,3],sowOut:[3,4,5,6,7,8],harvest:[5,6,7,8,9,10],days:60,icon:'🥗',calories:15,pro:1.4,carb:2.9,fibre:1.3,vitC:9,iron:0.9,vitA:370,folate:38,fastGrow:true,soilBenefit:'Shallow roots — good catch crop. Minimal soil impact.'},
+  {name:'Chard / Spinach',family:'Leaf',sowIn:[],sowOut:[3,4,5,8,9],harvest:[5,6,7,8,9,10,11],days:60,icon:'🌿',calories:19,pro:1.8,carb:3.6,fibre:1.6,vitC:30,iron:1.8,vitA:469,folate:80,fastGrow:true,coldHardy:true,soilBenefit:'Deep taproot (chard). Cut-and-come-again — productive for months.'},
+  {name:'Rocket',family:'Leaf',sowIn:[],sowOut:[3,4,5,6,7,8,9,10],harvest:[4,5,6,7,8,9,10,11],days:21,icon:'🌿',calories:25,pro:2.6,carb:3.7,fibre:1.6,vitC:15,iron:1.5,vitA:119,folate:97,fastGrow:true,emergency:true,coldHardy:true,soilBenefit:'Brassica family — fast catch crop. Edible in 3 weeks.'},
+  {name:'Lamb\'s Lettuce (Corn Salad)',family:'Leaf',sowIn:[],sowOut:[3,4,8,9,10],harvest:[4,5,6,10,11,12,1,2],days:50,icon:'🥗',calories:21,pro:2.0,carb:3.6,fibre:1.5,vitC:38,iron:2.2,vitA:355,folate:14,fastGrow:true,coldHardy:true,soilBenefit:'Overwinters — living ground cover prevents erosion. Very cold-hardy.'},
+  {name:'Land Cress',family:'Leaf',sowIn:[],sowOut:[3,4,8,9],harvest:[5,6,7,10,11,12,1],days:50,icon:'🌿',calories:32,pro:2.6,carb:5.5,fibre:1.5,vitC:70,iron:1.3,vitA:346,folate:0,fastGrow:true,coldHardy:true,soilBenefit:'Overwinters. High vitamin C — scurvy prevention crop. Brassica family.'},
 
   // ===== FRUITING VEG =====
-  {name:'Tomato',family:'Solanaceae',sowIn:[2,3],sowOut:[5,6],harvest:[7,8,9,10],days:80,icon:'🍅',calories:18,ghBetter:true},
-  {name:'Peppers',family:'Fruiting',sowIn:[2,3,4],sowOut:[6],harvest:[8,9,10],days:90,icon:'🫑',calories:20,minZone:'south-england',ghBetter:true},
-  {name:'Chilli Peppers',family:'Fruiting',sowIn:[1,2,3],sowOut:[6],harvest:[8,9,10],days:100,icon:'🌶️',calories:40,minZone:'south-england',ghBetter:true},
-  {name:'Aubergine',family:'Solanaceae',sowIn:[2,3],sowOut:[6],harvest:[8,9,10],days:100,icon:'🍆',calories:25,minZone:'south-england',ghBetter:true},
-  {name:'Courgette / Marrow',family:'Cucurbit',sowIn:[4],sowOut:[5,6],harvest:[7,8,9,10],days:50,icon:'🥒',calories:17,fastGrow:true},
-  {name:'Cucumber',family:'Cucurbit',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9],days:60,icon:'🥒',calories:15,ghBetter:true},
-  {name:'Squash / Pumpkin',family:'Cucurbit',sowIn:[4],sowOut:[5,6],harvest:[8,9,10],days:90,icon:'🎃',calories:45,store:true},
-  {name:'Sweetcorn',family:'Grass',sowIn:[3,4],sowOut:[5,6],harvest:[8,9],days:80,icon:'🌽',calories:86,minZone:'midlands'},
+  {name:'Tomato',family:'Solanaceae',sowIn:[2,3],sowOut:[5,6],harvest:[7,8,9,10],days:80,icon:'🍅',calories:18,pro:0.9,carb:3.9,fibre:1.2,vitC:14,iron:0.3,vitA:42,folate:15,ghBetter:true,soilBenefit:'Heavy feeder. Prone to blight in wet years. Solanaceae — rotate strictly.'},
+  {name:'Peppers',family:'Fruiting',sowIn:[2,3,4],sowOut:[6],harvest:[8,9,10],days:90,icon:'🫑',calories:20,pro:0.9,carb:4.6,fibre:1.7,vitC:128,iron:0.3,vitA:18,folate:10,minZone:'south-england',ghBetter:true,soilBenefit:'Light feeder. Remove all plant material — solanaceae diseases persist.'},
+  {name:'Chilli Peppers',family:'Fruiting',sowIn:[1,2,3],sowOut:[6],harvest:[8,9,10],days:100,icon:'🌶️',calories:40,pro:1.9,carb:9.0,fibre:1.5,vitC:144,iron:1.0,vitA:48,folate:23,minZone:'south-england',ghBetter:true,soilBenefit:'As peppers. Capsaicin deters some pests.'},
+  {name:'Aubergine',family:'Solanaceae',sowIn:[2,3],sowOut:[6],harvest:[8,9,10],days:100,icon:'🍆',calories:25,pro:1.0,carb:5.9,fibre:3.0,vitC:2,iron:0.2,vitA:1,folate:22,minZone:'south-england',ghBetter:true,soilBenefit:'Heavy feeder. Solanaceae — strict rotation.'},
+  {name:'Courgette / Marrow',family:'Cucurbit',sowIn:[4],sowOut:[5,6],harvest:[7,8,9,10],days:50,icon:'🥒',calories:17,pro:1.2,carb:3.1,fibre:1.0,vitC:18,iron:0.4,vitA:10,folate:24,fastGrow:true,soilBenefit:'Large leaves suppress weeds. Heavy feeder but adds bulk when composted.'},
+  {name:'Cucumber',family:'Cucurbit',sowIn:[3,4],sowOut:[5,6],harvest:[7,8,9],days:60,icon:'🥒',calories:15,pro:0.7,carb:3.6,fibre:0.5,vitC:3,iron:0.3,vitA:5,folate:7,ghBetter:true,soilBenefit:'Shallow roots. Light feeder. Good for intercropping.'},
+  {name:'Squash / Pumpkin',family:'Cucurbit',sowIn:[4],sowOut:[5,6],harvest:[8,9,10],days:90,icon:'🎃',calories:45,pro:1.0,carb:11.7,fibre:2.0,vitC:9,iron:0.8,vitA:426,folate:16,store:true,soilBenefit:'Sprawling leaves suppress weeds. Stores 3-6 months. Three Sisters companion.'},
+  {name:'Sweetcorn',family:'Grass',sowIn:[3,4],sowOut:[5,6],harvest:[8,9],days:80,icon:'🌽',calories:86,pro:3.3,carb:19.0,fibre:2.7,vitC:7,iron:0.5,vitA:9,folate:42,minZone:'midlands',soilBenefit:'Grass family — breaks brassica/solanaceae disease cycles. Stalks as compost/mulch.'},
 
-  // ===== POTATOES =====
-  {name:'Potato (Early)',family:'Solanaceae',sowIn:[2],sowOut:[3,4],harvest:[6,7],days:70,icon:'🥔',calories:77,store:true},
-  {name:'Potato (Main)',family:'Solanaceae',sowIn:[2],sowOut:[4,5],harvest:[8,9,10],days:120,icon:'🥔',calories:77,store:true},
+  // ===== POTATOES (calorie kings — survival staple) =====
+  {name:'Potato (Early)',family:'Solanaceae',sowIn:[2],sowOut:[3,4],harvest:[6,7],days:70,icon:'🥔',calories:77,pro:2.0,carb:17.5,fibre:2.2,vitC:20,iron:0.8,vitA:0,folate:15,store:true,soilBenefit:'Tuber formation breaks and aerates soil. Excellent first crop on new ground. Rotate — blight.'},
+  {name:'Potato (Main)',family:'Solanaceae',sowIn:[2],sowOut:[4,5],harvest:[8,9,10],days:120,icon:'🥔',calories:77,pro:2.0,carb:17.5,fibre:2.2,vitC:20,iron:0.8,vitA:0,folate:15,store:true,soilBenefit:'As earlies. Stores 4-6 months. Highest calorie yield per m² of any UK crop.'},
 
   // ===== PERENNIALS / OTHER VEG =====
-  {name:'Globe Artichoke',family:'Perennial',sowIn:[3,4],sowOut:[5],harvest:[6,7,8,9],days:365,icon:'🌸',calories:47,perennial:true},
-  {name:'Asparagus',family:'Perennial',sowIn:[],sowOut:[3,4],harvest:[4,5,6],days:730,icon:'🌿',calories:20,perennial:true,coldHardy:true},
-  {name:'Rhubarb',family:'Perennial',sowIn:[],sowOut:[11,12,1,2,3],harvest:[4,5,6],days:365,icon:'🌿',calories:21,perennial:true,coldHardy:true},
-  {name:'Celery',family:'Leaf',sowIn:[2,3],sowOut:[5,6],harvest:[8,9,10,11],days:120,icon:'🌿',calories:14},
-  {name:'Florence Fennel',family:'Herb',sowIn:[],sowOut:[5,6,7],harvest:[8,9,10],days:65,icon:'🌿',calories:31},
+  {name:'Globe Artichoke',family:'Perennial',sowIn:[3,4],sowOut:[5],harvest:[6,7,8,9],days:365,icon:'🌸',calories:47,pro:3.3,carb:10.5,fibre:5.4,vitC:12,iron:1.3,vitA:0,folate:68,perennial:true,soilBenefit:'Massive root system improves deep soil structure over years.'},
+  {name:'Asparagus',family:'Perennial',sowIn:[],sowOut:[3,4],harvest:[4,5,6],days:730,icon:'🌿',calories:20,pro:2.2,carb:3.9,fibre:2.1,vitC:6,iron:2.1,vitA:38,folate:52,perennial:true,coldHardy:true,soilBenefit:'Deep roots (2m+). Productive for 20+ years. Once established, very low maintenance.'},
+  {name:'Rhubarb',family:'Perennial',sowIn:[],sowOut:[11,12,1,2,3],harvest:[4,5,6],days:365,icon:'🌿',calories:21,pro:0.9,carb:4.5,fibre:1.8,vitC:8,iron:0.2,vitA:5,folate:7,perennial:true,coldHardy:true,soilBenefit:'Massive leaves — excellent slug trap and mulch material. Oxalic acid in leaves kills weeds.'},
+  {name:'Celery',family:'Leaf',sowIn:[2,3],sowOut:[5,6],harvest:[8,9,10,11],days:120,icon:'🌿',calories:14,pro:0.7,carb:3.0,fibre:1.6,vitC:3,iron:0.2,vitA:22,folate:36,soilBenefit:'Hungry — needs rich, moist soil. Shallow roots.'},
+  {name:'Florence Fennel',family:'Herb',sowIn:[],sowOut:[5,6,7],harvest:[8,9,10],days:65,icon:'🌿',calories:31,pro:1.2,carb:7.3,fibre:3.1,vitC:12,iron:0.7,vitA:7,folate:27,soilBenefit:'Deep taproot. ALLELOPATHIC — inhibits many plants. Grow separately.'},
 
-  // ===== SOFT FRUIT / BERRIES =====
-  {name:'Strawberry',family:'Fruit',sowIn:[],sowOut:[3,4,8,9],harvest:[6,7,8],days:120,icon:'🍓',calories:32,perennial:true},
-  {name:'Strawberry (Everbearing)',family:'Fruit',sowIn:[],sowOut:[3,4],harvest:[6,7,8,9,10],days:90,icon:'🍓',calories:32,perennial:true},
-  {name:'Raspberry (Summer)',family:'Fruit',sowIn:[],sowOut:[11,12,2,3],harvest:[6,7,8],days:365,icon:'🫐',calories:52,perennial:true,coldHardy:true},
-  {name:'Raspberry (Autumn)',family:'Fruit',sowIn:[],sowOut:[11,12,2,3],harvest:[8,9,10],days:365,icon:'🫐',calories:52,perennial:true,coldHardy:true},
-  {name:'Blackcurrant',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[7,8],days:365,icon:'⚫',calories:63,perennial:true,coldHardy:true,store:true},
-  {name:'Redcurrant',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[7,8],days:365,icon:'🔴',calories:56,perennial:true,coldHardy:true,store:true},
-  {name:'Whitecurrant',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[7,8],days:365,icon:'⚪',calories:56,perennial:true,coldHardy:true},
-  {name:'Gooseberry',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[6,7,8],days:365,icon:'🟢',calories:44,perennial:true,coldHardy:true,store:true},
-  {name:'Blueberry',family:'Fruit',sowIn:[],sowOut:[10,11,3,4],harvest:[7,8,9],days:365,icon:'🫐',calories:57,perennial:true,coldHardy:true},
-  {name:'Blackberry',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[8,9,10],days:365,icon:'⬛',calories:43,perennial:true,coldHardy:true},
+  // ===== SOFT FRUIT / BERRIES (vitamin C, antioxidants) =====
+  {name:'Strawberry',family:'Fruit',sowIn:[],sowOut:[3,4,8,9],harvest:[6,7,8],days:120,icon:'🍓',calories:32,pro:0.7,carb:7.7,fibre:2.0,vitC:59,iron:0.4,vitA:1,folate:24,perennial:true,soilBenefit:'Runners colonise ground. Replace every 3-4 years — virus buildup.'},
+  {name:'Strawberry (Everbearing)',family:'Fruit',sowIn:[],sowOut:[3,4],harvest:[6,7,8,9,10],days:90,icon:'🍓',calories:32,pro:0.7,carb:7.7,fibre:2.0,vitC:59,iron:0.4,vitA:1,folate:24,perennial:true,soilBenefit:'As strawberry. Longer harvest window — fruit June-October.'},
+  {name:'Raspberry (Summer)',family:'Fruit',sowIn:[],sowOut:[11,12,2,3],harvest:[6,7,8],days:365,icon:'🫐',calories:52,pro:1.2,carb:11.9,fibre:6.5,vitC:26,iron:0.7,vitA:2,folate:21,perennial:true,coldHardy:true,soilBenefit:'Spreads via suckers — control or use. Canes make good pea supports.'},
+  {name:'Raspberry (Autumn)',family:'Fruit',sowIn:[],sowOut:[11,12,2,3],harvest:[8,9,10],days:365,icon:'🫐',calories:52,pro:1.2,carb:11.9,fibre:6.5,vitC:26,iron:0.7,vitA:2,folate:21,perennial:true,coldHardy:true,soilBenefit:'Cut to ground each winter. Less disease than summer types.'},
+  {name:'Blackcurrant',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[7,8],days:365,icon:'⚫',calories:63,pro:1.4,carb:15.4,fibre:5.0,vitC:181,iron:1.5,vitA:12,folate:8,perennial:true,coldHardy:true,store:true,soilBenefit:'HIGHEST vitamin C of any UK fruit. Freezes/preserves excellently. 15+ year lifespan.'},
+  {name:'Redcurrant',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[7,8],days:365,icon:'🔴',calories:56,pro:1.4,carb:13.8,fibre:4.3,vitC:41,iron:1.0,vitA:2,folate:8,perennial:true,coldHardy:true,store:true,soilBenefit:'Very productive. Makes excellent jelly for preserving.'},
+  {name:'Whitecurrant',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[7,8],days:365,icon:'⚪',calories:56,pro:1.4,carb:13.8,fibre:4.3,vitC:41,iron:1.0,vitA:2,folate:8,perennial:true,coldHardy:true,soilBenefit:'Sweetest currant — eat fresh. As redcurrant.'},
+  {name:'Gooseberry',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[6,7,8],days:365,icon:'🟢',calories:44,pro:0.9,carb:10.2,fibre:4.3,vitC:28,iron:0.3,vitA:15,folate:6,perennial:true,coldHardy:true,store:true,soilBenefit:'Shade-tolerant — grow under fruit trees. Preserves well. Very hardy.'},
+  {name:'Blueberry',family:'Fruit',sowIn:[],sowOut:[10,11,3,4],harvest:[7,8,9],days:365,icon:'🫐',calories:57,pro:0.7,carb:14.5,fibre:2.4,vitC:10,iron:0.3,vitA:3,folate:6,perennial:true,coldHardy:true,soilBenefit:'Needs acid soil (pH 4.5-5.5). Grow in pots with ericaceous compost if soil is alkaline.'},
+  {name:'Blackberry',family:'Fruit',sowIn:[],sowOut:[10,11,2,3],harvest:[8,9,10],days:365,icon:'⬛',calories:43,pro:1.4,carb:9.6,fibre:5.3,vitC:21,iron:0.6,vitA:11,folate:25,perennial:true,coldHardy:true,soilBenefit:'Vigorous — will take over if not managed. Wild blackberries are FREE foraged food.'},
 
   // ===== FRUIT TREES (pot/dwarf/trained) =====
-  {name:'Apple (Dwarf/Trained)',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[8,9,10,11],days:365,icon:'🍎',calories:52,perennial:true,coldHardy:true,store:true},
-  {name:'Pear (Dwarf/Trained)',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[9,10,11],days:365,icon:'🍐',calories:57,perennial:true,coldHardy:true,store:true},
-  {name:'Plum / Damson',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8,9],days:365,icon:'🟣',calories:46,perennial:true,coldHardy:true,store:true},
-  {name:'Cherry',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[6,7,8],days:365,icon:'🍒',calories:50,perennial:true,coldHardy:true},
-  {name:'Peach / Nectarine',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8,9],days:365,icon:'🍑',calories:39,perennial:true,minZone:'south-england',ghBetter:true},
-  {name:'Apricot',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8],days:365,icon:'🟠',calories:48,perennial:true,minZone:'south-coast',ghBetter:true},
-  {name:'Fig',family:'Fruit Tree',sowIn:[],sowOut:[3,4,11],harvest:[8,9,10],days:365,icon:'🟤',calories:74,perennial:true,minZone:'south-england',ghBetter:true},
-  {name:'Lemon (Container)',family:'Citrus',sowIn:[],sowOut:[],harvest:[11,12,1,2],days:365,icon:'🍋',calories:29,perennial:true,ghBetter:true},
+  {name:'Apple (Dwarf/Trained)',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[8,9,10,11],days:365,icon:'🍎',calories:52,pro:0.3,carb:13.8,fibre:2.4,vitC:5,iron:0.1,vitA:3,folate:3,perennial:true,coldHardy:true,store:true,soilBenefit:'Stores 2-5 months. Makes cider, vinegar, pectin for preserving. 30+ year productive life.'},
+  {name:'Pear (Dwarf/Trained)',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[9,10,11],days:365,icon:'🍐',calories:57,pro:0.4,carb:15.2,fibre:3.1,vitC:4,iron:0.2,vitA:1,folate:7,perennial:true,coldHardy:true,store:true,soilBenefit:'Perry (pear cider). Stores shorter than apples. Very long-lived tree.'},
+  {name:'Plum / Damson',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8,9],days:365,icon:'🟣',calories:46,pro:0.7,carb:11.4,fibre:1.4,vitC:10,iron:0.2,vitA:17,folate:5,perennial:true,coldHardy:true,store:true,soilBenefit:'Damsons make superb jam/gin. Very hardy. Self-fertile varieties available.'},
+  {name:'Cherry',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[6,7,8],days:365,icon:'🍒',calories:50,pro:1.0,carb:12.2,fibre:1.6,vitC:7,iron:0.4,vitA:3,folate:4,perennial:true,coldHardy:true,soilBenefit:'Net against birds. Morello (sour) is self-fertile and shade-tolerant.'},
+  {name:'Peach / Nectarine',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8,9],days:365,icon:'🍑',calories:39,pro:0.9,carb:9.5,fibre:1.5,vitC:7,iron:0.3,vitA:16,folate:4,perennial:true,minZone:'south-england',ghBetter:true,soilBenefit:'Needs wall/greenhouse in most UK areas. Fan-train south-facing.'},
+  {name:'Apricot',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8],days:365,icon:'🟠',calories:48,pro:1.4,carb:11.1,fibre:2.0,vitC:10,iron:0.4,vitA:96,folate:9,perennial:true,minZone:'south-coast',ghBetter:true,soilBenefit:'Drought-tolerant once established. Needs warm wall. IoW climate suitable.'},
+  {name:'Fig',family:'Fruit Tree',sowIn:[],sowOut:[3,4,11],harvest:[8,9,10],days:365,icon:'🟤',calories:74,pro:0.8,carb:19.2,fibre:2.9,vitC:2,iron:0.4,vitA:7,folate:6,perennial:true,minZone:'south-england',ghBetter:true,soilBenefit:'Restrict roots for best fruiting. Very drought-tolerant. Good wall plant.'},
+  {name:'Lemon (Container)',family:'Citrus',sowIn:[],sowOut:[],harvest:[11,12,1,2],days:365,icon:'🍋',calories:29,pro:1.1,carb:9.3,fibre:2.8,vitC:53,iron:0.6,vitA:1,folate:11,perennial:true,ghBetter:true,soilBenefit:'Container only in UK. Bring indoors Oct-Apr. Juice is a preservative.'},
 ];
 
 const MONTHS=['J','F','M','A','M','J','J','A','S','O','N','D'];
 const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTH_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const ROTATION_FAMILIES={Solanaceae:{note:'Potatoes, Tomatoes, Peppers → follow with legumes.',after:'Legume'},Brassica:{note:'Cabbages, Kale, Broccoli → follow with roots.',after:'Root'},Root:{note:'Carrots, Parsnips, Beetroot → follow with solanaceae.',after:'Solanaceae'},Legume:{note:'Beans, Peas → follow with brassicas.',after:'Brassica'}};
-const COMPANIONS=[{a:'Tomato',b:'Basil',why:'Basil repels aphids and whitefly.'},{a:'Carrot',b:'Onion',why:'Onion masks carrot fly.'},{a:'Brassicas',b:'Nasturtium',why:'Trap crop for aphids.'},{a:'Beans',b:'Sweetcorn',why:'Three Sisters nitrogen fixing.'},{a:'Lettuce',b:'Beetroot',why:'Lettuce finishes before beets need space.'},{a:'Kale',b:'Dill',why:'Dill attracts hoverflies.'},{a:'Strawberry',b:'Garlic',why:'Garlic deters aphids and grey mould from strawberries.'},{a:'Raspberry',b:'Garlic',why:'Garlic planted nearby helps deter raspberry beetle.'},{a:'Apple Tree',b:'Chives',why:'Chives help prevent apple scab when planted at the base.'},{a:'Courgette',b:'Beans',why:'Beans fix nitrogen that feeds hungry courgettes.'},{a:'Cucumber',b:'Dill',why:'Dill attracts pollinators and predatory insects for cucumbers.'},{a:'Blueberry',b:'Strawberry',why:'Both thrive in acidic soil — good companions in pots.'}];
+const COMPANIONS=[{a:'Tomato',b:'Basil',why:'Basil repels aphids and whitefly.'},{a:'Carrot',b:'Onion',why:'Onion masks carrot fly.'},{a:'Brassicas',b:'Nasturtium',why:'Trap crop for aphids.'},{a:'Beans',b:'Sweetcorn',why:'Three Sisters nitrogen fixing.'},{a:'Lettuce',b:'Beetroot',why:'Lettuce finishes before beets need space.'},{a:'Kale',b:'Dill',why:'Dill attracts hoverflies.'},{a:'Strawberry',b:'Garlic',why:'Garlic deters aphids and grey mould from strawberries.'},{a:'Raspberry',b:'Garlic',why:'Garlic planted nearby helps deter raspberry beetle.'},{a:'Apple Tree',b:'Chives',why:'Chives help prevent apple scab when planted at the base.'},{a:'Courgette',b:'Beans',why:'Beans fix nitrogen that feeds hungry courgettes.'},{a:'Cucumber',b:'Dill',why:'Dill attracts pollinators and predatory insects for cucumbers.'},{a:'Blueberry',b:'Strawberry',why:'Both thrive in acidic soil — good companions in pots.'},{a:'Peas',b:'Carrot',why:'Peas fix nitrogen for carrots; carrots shade pea roots.'},{a:'Tomato',b:'Parsley',why:'Parsley attracts hoverflies that eat tomato pests.'},{a:'Beans (Broad)',b:'Spinach',why:'Broad beans shelter spinach and fix nitrogen.'},{a:'Potato (Early)',b:'Beans (Broad)',why:'Beans fix nitrogen; potatoes shade weeds around beans.'},{a:'Sweetcorn',b:'Squash / Pumpkin',why:'Three Sisters: squash shades soil, suppresses weeds under corn.'}];
+
+// Antagonist pairings — crops that harm each other
+const ANTAGONISTS=[
+  {a:'Tomato',b:'Brassicas',why:'Tomatoes stunt brassica growth.'},
+  {a:'Beans (Runner)',b:'Onion',why:'Alliums inhibit bean nitrogen fixing.'},
+  {a:'Beans (French)',b:'Onion',why:'Alliums inhibit bean nitrogen fixing.'},
+  {a:'Peas',b:'Garlic',why:'Garlic inhibits pea growth.'},
+  {a:'Potato (Early)',b:'Tomato',why:'Same family — share blight. Never grow together.'},
+  {a:'Potato (Main)',b:'Tomato',why:'Same family — share blight. Never grow together.'},
+  {a:'Carrot',b:'Dill',why:'Dill can cross-pollinate and stunt carrots.'},
+  {a:'Fennel',b:'Tomato',why:'Fennel is allelopathic — inhibits most plants nearby.'},
+];
+
+// Get companion & antagonist advice for a given veg, considering what else is in the same bed
+function getCompanionAdvice(vegName, bedId) {
+  const bed = state.beds.find(b=>b.id===bedId);
+  if (!bed) return { companions: [], antagonists: [], nearby: [] };
+  
+  // What's already in this bed?
+  const nearbyVegs = [...new Set(bed.cells.filter(c=>c&&!c.failed&&!c.harvested&&c.veg!==vegName).map(c=>c.veg))];
+  
+  const companions = [];
+  const antagonists = [];
+  
+  // Check companion matches
+  COMPANIONS.forEach(c => {
+    const vegFamily = VEGETABLES.find(v=>v.name===vegName)?.family;
+    const matchA = c.a === vegName || c.a === vegFamily || (c.a === 'Brassicas' && vegFamily === 'Brassica');
+    const matchB = c.b === vegName || c.b === vegFamily || (c.b === 'Brassicas' && vegFamily === 'Brassica');
+    
+    if (matchA && nearbyVegs.some(n => n === c.b || VEGETABLES.find(v=>v.name===n)?.family === c.b))
+      companions.push({ partner: c.b, why: c.why, present: true });
+    else if (matchA)
+      companions.push({ partner: c.b, why: c.why, present: false });
+    
+    if (matchB && nearbyVegs.some(n => n === c.a || VEGETABLES.find(v=>v.name===n)?.family === c.a))
+      companions.push({ partner: c.a, why: c.why, present: true });
+    else if (matchB)
+      companions.push({ partner: c.a, why: c.why, present: false });
+  });
+  
+  // Check antagonist matches
+  ANTAGONISTS.forEach(c => {
+    const vegFamily = VEGETABLES.find(v=>v.name===vegName)?.family;
+    const matchA = c.a === vegName || c.a === vegFamily;
+    const matchB = c.b === vegName || c.b === vegFamily;
+    
+    if (matchA && nearbyVegs.some(n => n === c.b || VEGETABLES.find(v=>v.name===n)?.family === c.b))
+      antagonists.push({ partner: c.b, why: c.why, present: true });
+    if (matchB && nearbyVegs.some(n => n === c.a || VEGETABLES.find(v=>v.name===n)?.family === c.a))
+      antagonists.push({ partner: c.a, why: c.why, present: true });
+  });
+  
+  return { companions, antagonists, nearby: nearbyVegs };
+}
+
+// ========================================================================
+// CONTINUITY PLANNING — recommend replacement crops before harvest
+// ========================================================================
+
+// Get continuity suggestions for a crop about to be harvested
+function getContinuitySuggestions(vegName, bedId) {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const bed = state.beds.find(b=>b.id===bedId);
+  const env = bed?.env || 'outdoor';
+  const veg = VEGETABLES.find(v=>v.name===vegName);
+  if (!veg) return [];
+  
+  const vegFamily = veg.family;
+  // Ideal rotation: follow with a different family
+  const rotNext = ROTATION_FAMILIES[vegFamily]?.after;
+  
+  // Soil logic: what does the soil need after this crop?
+  const soilNeedsNitrogen = ['Brassica','Solanaceae','Cucurbit','Grass'].includes(vegFamily); // heavy feeders deplete N
+  const soilHasNitrogen = vegFamily === 'Legume'; // legumes leave N behind
+  
+  // Find crops that can ACTUALLY be sown in the current or next month for this zone
+  const candidates = getVegForZone(env).filter(v => {
+    if (v.name === vegName) return false;
+    if (v.perennial) return false;
+    const sowOut = getAdjustedMonths(v.sowOut, env);
+    const sowIn = getAdjustedMonths(v.sowIn, env);
+    return sowOut.includes(month) || sowOut.includes(month%12+1) || sowIn.includes(month) || sowIn.includes(month%12+1);
+  });
+  
+  // Score candidates with soil and nutrition intelligence
+  return candidates.map(v => {
+    let score = 0;
+    const isRotationMatch = rotNext && v.family === rotNext;
+    if (isRotationMatch) score += 30;
+    
+    // Soil benefit scoring
+    if (soilNeedsNitrogen && v.family === 'Legume') score += 25; // Soil is depleted — legumes fix it
+    if (soilHasNitrogen && ['Brassica','Solanaceae','Cucurbit','Leaf'].includes(v.family)) score += 20; // Soil is rich — plant hungry crops
+    if (v.family !== vegFamily) score += 10; // Different family = basic rotation
+    if (v.family === vegFamily) score -= 25; // Same family = disease risk
+    
+    // Seasonal intelligence
+    if (v.fastGrow) score += 15; // Fills the gap quickly
+    if (v.coldHardy && month >= 8) score += 20; // Autumn/winter: cold-hardy is critical
+    if (v.coldHardy && month >= 10) score += 10; // Extra bonus late season
+    if (!v.coldHardy && month >= 10) score -= 15; // Tender crops won't survive
+    
+    // Survival value: calorie density, protein, storage
+    if (v.calories >= 70) score += 15; // High calorie (potatoes, parsnip, sweetcorn)
+    else if (v.calories >= 40) score += 8;
+    if (v.pro >= 3) score += 10; // Good protein source
+    if (v.store) score += 12; // Storable = food security
+    if (v.vitC >= 30) score += 5; // Vitamin C — scurvy prevention
+    
+    // Companion synergy with remaining bed contents
+    const nearby = bed ? [...new Set(bed.cells.filter(c=>c&&!c.failed&&!c.harvested&&c.veg!==vegName).map(c=>c.veg))] : [];
+    const hasCompanion = COMPANIONS.some(c => {
+      return (c.a === v.name || c.b === v.name) && nearby.some(n => n === c.a || n === c.b);
+    });
+    if (hasCompanion) score += 15;
+    
+    // Antagonist penalty
+    const hasAntagonist = ANTAGONISTS.some(c => {
+      const matchA = c.a === v.name && nearby.some(n => n === c.b);
+      const matchB = c.b === v.name && nearby.some(n => n === c.a);
+      return matchA || matchB;
+    });
+    if (hasAntagonist) score -= 20;
+    
+    const sowMethod = getAdjustedMonths(v.sowOut, env).includes(month) ? 'Direct sow' : 'Sow indoors';
+    const soilReason = soilNeedsNitrogen && v.family === 'Legume' ? 'Fixes nitrogen — soil needs it'
+      : soilHasNitrogen && ['Brassica','Leaf'].includes(v.family) ? 'Soil rich after legumes — use it'
+      : isRotationMatch ? 'Good rotation follow-on' : '';
+    
+    return {
+      name: v.name, icon: v.icon, family: v.family, days: getAdjustedDays(v.days, env),
+      score, isRotationMatch, sowMethod, fastGrow: v.fastGrow, store: v.store,
+      calories: v.calories, pro: v.pro, coldHardy: v.coldHardy, soilReason
+    };
+  }).sort((a,b) => b.score - a.score).slice(0, 8);
+}
+
+// Check all beds for crops approaching harvest and generate continuity alerts
+function getContinuityAlerts() {
+  const now = new Date();
+  const alerts = [];
+  state.beds.forEach(bed => {
+    const env = bed.env || 'outdoor';
+    // Group cells by crop
+    const cropGroups = {};
+    bed.cells.forEach((cell, idx) => {
+      if (!cell || cell.failed || cell.harvested) return;
+      const veg = VEGETABLES.find(v=>v.name===cell.veg);
+      if (!veg?.days) return;
+      const adjDays = getAdjustedDays(veg.days, env);
+      const daysLeft = Math.ceil((new Date(cell.date).getTime() + adjDays * 864e5 - now) / 864e5);
+      if (daysLeft <= 30 && daysLeft > -7) {
+        if (!cropGroups[cell.veg]) cropGroups[cell.veg] = { daysLeft, cellCount: 0 };
+        cropGroups[cell.veg].cellCount++;
+        if (daysLeft < cropGroups[cell.veg].daysLeft) cropGroups[cell.veg].daysLeft = daysLeft;
+      }
+    });
+    
+    Object.entries(cropGroups).forEach(([vegName, info]) => {
+      const suggestions = getContinuitySuggestions(vegName, bed.id);
+      if (suggestions.length > 0) {
+        alerts.push({
+          bed: bed.name, bedId: bed.id, veg: vegName,
+          icon: VEGETABLES.find(v=>v.name===vegName)?.icon || '🌿',
+          daysLeft: info.daysLeft, cellCount: info.cellCount,
+          suggestions: suggestions.slice(0, 4)
+        });
+      }
+    });
+  });
+  return alerts.sort((a,b) => a.daysLeft - b.daysLeft);
+}
 
 // ========================================================================
 // LIVESTOCK DATA — with sex/breeding logic
@@ -775,8 +962,14 @@ const COMPANIONS=[{a:'Tomato',b:'Basil',why:'Basil repels aphids and whitefly.'}
 const SEX_LABELS = {
   chicken: { male: 'Cockerel', female: 'Hen', maleIcon: '🐓', femaleIcon: '🐔', breedNote: 'Need 1 cockerel per 6-10 hens for fertile eggs. Hens lay without a male but eggs won\'t hatch.' },
   duck:    { male: 'Drake', female: 'Duck', maleIcon: '🦆', femaleIcon: '🦆', breedNote: 'Need 1 drake per 4-6 ducks for fertile eggs. Ducks lay without a drake but eggs won\'t hatch.' },
+  turkey:  { male: 'Stag (Tom)', female: 'Hen', maleIcon: '🦃', femaleIcon: '🦃', breedNote: 'Need 1 stag per 6-10 hens. Heritage breeds can mate naturally. Broad-breasted types need AI. Hens brood well — excellent mothers.' },
+  goose:   { male: 'Gander', female: 'Goose', maleIcon: '🪿', femaleIcon: '🪿', breedNote: 'Need 1 gander per 2-4 geese. Geese mate for life and breed seasonally (spring). Excellent parents — will hatch and raise their own goslings. Very long-lived (15-25 years).' },
+  quail:   { male: 'Cock', female: 'Hen', maleIcon: '🐦', femaleIcon: '🐦', breedNote: 'Need 1 cock per 3-5 hens for fertile eggs. Hens lay without a male. Quail rarely go broody — use an incubator for hatching.' },
+  rabbit:  { male: 'Buck', female: 'Doe', maleIcon: '🐇', femaleIcon: '🐇', breedNote: 'Need 1 buck per 5-10 does. Extremely prolific — a doe can produce 4-6 litters/year of 6-10 kits. House buck separately except for mating. Breed responsibly — they multiply fast.' },
+  goat:    { male: 'Billy', female: 'Nanny', maleIcon: '🐐', femaleIcon: '🐐', breedNote: 'Need 1 billy per 20-30 nannies. Billies STINK — keep separate except for breeding (autumn). Nannies kid in spring, 1-3 kids. Must be bred annually to maintain milk production. Consider borrowing a billy rather than keeping one.' },
   cow:     { male: 'Bull', female: 'Cow', maleIcon: '🐂', femaleIcon: '🐄', breedNote: 'Need a bull for breeding. Most smallholders use AI (artificial insemination) instead of keeping a bull — bulls are dangerous. Dairy cows MUST calve annually to keep producing milk.' },
   pig:     { male: 'Boar', female: 'Sow', maleIcon: '🐗', femaleIcon: '🐷', breedNote: 'Need 1 boar per 6-8 sows for breeding. Without a boar you must buy replacement weaners. A sow produces 2 litters/year of 8-12 piglets.' },
+  sheep:   { male: 'Ram', female: 'Ewe', maleIcon: '🐏', femaleIcon: '🐑', breedNote: 'Need 1 ram per 30-40 ewes. Rams are only with ewes for ~6 weeks in autumn (tupping). Ewes lamb in spring, typically 1-3 lambs. Without a ram, buy in replacement lambs or use a borrowed/hired ram.' },
 };
 
 const LIVESTOCK_TYPES = {
@@ -794,6 +987,9 @@ const LIVESTOCK_TYPES = {
           { name: 'Rhode Island Red', eggsPerYear: 250, peakMonths: [3,4,5,6,7,8,9], winterDrop: 0.35, desc: 'Classic dual-purpose. Reliable, hardy, good in UK climate.', lifespan: '4-5 yrs productive', space: '4 sq ft coop + 10 sq ft run per bird', feed: '~125g layer pellets/day' },
           { name: 'Welsummer', eggsPerYear: 200, peakMonths: [3,4,5,6,7,8], winterDrop: 0.45, desc: 'Terracotta speckled eggs. Good free-ranger, friendly.', lifespan: '4-5 yrs productive', space: '4 sq ft coop + 10 sq ft run per bird', feed: '~125g layer pellets/day' },
           { name: 'Cream Legbar', eggsPerYear: 230, peakMonths: [3,4,5,6,7,8,9], winterDrop: 0.4, desc: 'Blue/green eggs. Autosexing breed, alert and active.', lifespan: '4-5 yrs productive', space: '4 sq ft coop + 10 sq ft run per bird', feed: '~120g layer pellets/day' },
+          { name: 'Orpington (Buff)', eggsPerYear: 200, peakMonths: [3,4,5,6,7,8], winterDrop: 0.35, desc: 'Large, fluffy, docile heritage breed. Good winter layer, excellent broody — ideal for hatching. Tinted eggs.', lifespan: '5-7 yrs productive', space: '5 sq ft coop + 12 sq ft run per bird', feed: '~140g layer pellets/day' },
+          { name: 'Orpington (Black)', eggsPerYear: 190, peakMonths: [3,4,5,6,7,8], winterDrop: 0.35, desc: 'Original Orpington colour. Hardy, calm, reliable layer. Excellent broody and mother.', lifespan: '5-7 yrs productive', space: '5 sq ft coop + 12 sq ft run per bird', feed: '~140g layer pellets/day' },
+          { name: 'Orpington (Blue)', eggsPerYear: 180, peakMonths: [3,4,5,6,7,8], winterDrop: 0.35, desc: 'Rare colour variant. Show-quality bird that still lays well. Very gentle temperament.', lifespan: '5-7 yrs productive', space: '5 sq ft coop + 12 sq ft run per bird', feed: '~140g layer pellets/day' },
         ],
         caloriesPerUnit: 78, unitName: 'egg', unitPlural: 'eggs', proteinPerUnit: 6.3,
       },
@@ -804,6 +1000,7 @@ const LIVESTOCK_TYPES = {
           { name: 'Cornish Cross', daysToTable: 56, dressedWeight: 2.5, desc: 'Fast-growing commercial meat bird. Ready in 8 weeks.', space: '2 sq ft per bird min', feed: '~6kg feed per bird total', batchesPerYear: 4, note: 'Grow in batches of 10-25. Prone to leg issues if overfed.' },
           { name: 'Hubbard/Ranger', daysToTable: 70, dressedWeight: 2.2, desc: 'Slower-grow alternative. Better welfare, more flavour. 10 weeks.', space: '3 sq ft per bird', feed: '~7kg feed per bird total', batchesPerYear: 3, note: 'Healthier bird, good foragers, excellent meat quality.' },
           { name: 'Sussex (Table)', daysToTable: 120, dressedWeight: 2.8, desc: 'Heritage dual-purpose. Slower but self-sustaining flock potential.', space: '4 sq ft per bird', feed: '~10kg feed per bird total', batchesPerYear: 2, note: 'Can breed your own replacements. True smallholding bird.' },
+          { name: 'Orpington (Table)', daysToTable: 140, dressedWeight: 3.2, desc: 'Large, heavy heritage bird. Excellent meat quality with good fat coverage. Slow-growing but superb flavour.', space: '5 sq ft per bird', feed: '~12kg feed per bird total', batchesPerYear: 2, note: 'Heaviest heritage table bird. Hens also lay, making them truly dual-purpose. Excellent broodies — will hatch their own replacements.' },
         ],
         caloriesPerKg: 2390, proteinPerKg: 250,
       }
@@ -880,6 +1077,140 @@ const LIVESTOCK_TYPES = {
     },
     care: 'Daily: feed 2x, fresh water, check fencing (escape artists!). Pigs MUST be kept in pairs minimum. Legal: register with APHA, movement licences, 20-day standstill. Wallowing area for sunburn. Rotate paddocks. Electric fencing essential. Buy weaners spring, slaughter autumn — pigs do NOT overwinter cheaply.',
   },
+  sheep: {
+    icon: '🐑', label: 'Sheep', plural: 'Sheep',
+    purposes: {
+      meat: {
+        label: 'Lamb / Mutton',
+        icon: '🍖',
+        breeds: [
+          { name: 'Suffolk', monthsToTable: 6, dressedWeight: 20, desc: 'Classic terminal sire. Fast-growing lambs with excellent meat conformation.', space: '0.25 acres per ewe + lambs', feed: 'Mainly grass. Hay/haylage in winter + concentrate for ewes pre-lambing', note: 'Most popular meat breed. Cross with hill ewes for hardy fast-growing lambs.' },
+          { name: 'Texel', monthsToTable: 6, dressedWeight: 22, desc: 'Muscular, lean meat. Very popular commercial breed. Good conformation.', space: '0.25 acres per ewe + lambs', feed: 'Grass + hay/haylage winter. Concentrates pre-lambing.', note: 'Lean carcass, premium prices. Can have difficult lambings — big lambs.' },
+          { name: 'Southdown', monthsToTable: 7, dressedWeight: 16, desc: 'Small, compact native breed. Superb flavoured meat. Easy lambing.', space: '0.2 acres per ewe + lambs', feed: 'Grass + hay winter. Low input — thrives on poor pasture.', note: 'Perfect smallholding sheep. Docile, easy to handle, compact size. Baby Doll variant even smaller.' },
+          { name: 'Dorset (Poll)', monthsToTable: 6, dressedWeight: 18, desc: 'Can breed out of season — potentially 2 lamb crops/year. Versatile.', space: '0.25 acres per ewe + lambs', feed: 'Grass + hay winter + concentrates for extended breeding.', note: 'Only UK breed that can lamb twice a year. Higher management but more lambs per ewe.' },
+          { name: 'Jacob', monthsToTable: 8, dressedWeight: 14, desc: 'Hardy, multi-horned primitive breed. Lean, gamey meat. Low maintenance.', space: '0.2 acres per ewe + lambs', feed: 'Almost entirely grass. Minimal supplementation needed.', note: 'Very low input. Attractive multi-horned breed. Fleece popular with hand-spinners.' },
+          { name: 'Shetland', monthsToTable: 8, dressedWeight: 12, desc: 'Tiny, extremely hardy native. Superb fine wool AND delicious meat. Thrives on poor land.', space: '0.15 acres per ewe + lambs', feed: 'Grass only — thrives on rough grazing. Minimal to zero supplementation.', note: 'Ideal for smallholders with limited land. Fine wool highly prized. Very easy care.' },
+          { name: 'Hebridean', monthsToTable: 9, dressedWeight: 12, desc: 'Black primitive breed. Conservation grazer. Hardy, lean, low-input.', space: '0.15 acres per ewe + lambs', feed: 'Rough grazing. Almost no supplementation.', note: 'Excellent conservation grazer — manages scrubland and rough pasture naturally. Rare breed.' },
+        ],
+        caloriesPerKg: 2500, proteinPerKg: 250,
+      }
+    },
+    care: 'Daily: visual check of flock, water. Seasonal: shearing (June), foot trimming 2-3x/year, worming programme (faecal egg counts recommended over routine dosing). Tupping: ram in Nov, lambing Mar-Apr. Lambing is the busiest period — expect 2-3 weeks of intensive work. Legal: register holding with APHA, ear tags, movement licences. Fencing: sheep-netting or stock fencing. Electric won\'t reliably hold sheep unless trained. Predation: rare in UK but check lambs for crows/foxes. Foot rot is the most common issue — trim regularly, footbath preventatively.',
+  },
+  turkey: {
+    icon: '🦃', label: 'Turkey', plural: 'Turkeys',
+    purposes: {
+      meat: {
+        label: 'Table Birds',
+        icon: '🍗',
+        breeds: [
+          { name: 'Bronze (Heritage)', monthsToTable: 7, dressedWeight: 7, desc: 'Classic heritage turkey. Excellent flavour. Can breed naturally. Slow-growing.', space: '10 sq ft coop + 20 sq ft run per bird', feed: '~15kg grower feed total per bird', note: 'Natural mating, good foragers, can fly — clip wings or roof the run. Outstanding Christmas bird.' },
+          { name: 'Norfolk Black', monthsToTable: 7, dressedWeight: 6, desc: 'Traditional British breed. Rich, gamey flavour. Hardy and self-sufficient.', space: '10 sq ft coop + 20 sq ft run per bird', feed: '~14kg grower feed total', note: 'Heritage rare breed. Excellent forager. Hens go broody — will hatch own poults.' },
+          { name: 'Bourbon Red', monthsToTable: 7, dressedWeight: 7.5, desc: 'American heritage breed. Calm temperament, good flavour, decent breast meat.', space: '10 sq ft coop + 20 sq ft run per bird', feed: '~15kg grower feed total', note: 'One of the best heritage breeds for meat quality. Attractive reddish plumage.' },
+          { name: 'Broad Breasted White', monthsToTable: 5, dressedWeight: 10, desc: 'Commercial type. Fast growth, huge breast. Cannot mate naturally.', space: '8 sq ft per bird', feed: '~20kg grower feed total', note: 'Maximum meat yield but MUST use AI for breeding. Leg problems if kept too long. Not self-sustaining.' },
+          { name: 'Narragansett', monthsToTable: 7, dressedWeight: 7, desc: 'Heritage breed. Calm, good mothers, beautiful plumage. Excellent pest control.', space: '10 sq ft coop + 20 sq ft run per bird', feed: '~14kg grower feed total', note: 'Endangered breed — keeping them helps conservation. Good dual purpose for meat and pest control.' },
+        ],
+        caloriesPerKg: 1890, proteinPerKg: 290,
+      }
+    },
+    care: 'Daily: fresh water, feed, visual health check. Turkeys are social — keep minimum 3. Susceptible to blackhead disease — NEVER keep on ground previously used by chickens unless rested 2+ years. Very vulnerable as poults (first 8 weeks) — keep warm, dry, protected. Adults are hardy. Excellent tick, slug and insect control. Can be aggressive during breeding season. Roost high — need tall housing. UK: order poults May-June for Christmas table birds. Legal: no specific registration beyond general poultry rules.',
+  },
+  goose: {
+    icon: '🪿', label: 'Goose', plural: 'Geese',
+    purposes: {
+      eggs: {
+        label: 'Laying Flock',
+        icon: '🥚',
+        breeds: [
+          { name: 'Chinese (White)', eggsPerYear: 60, peakMonths: [2,3,4,5,6], winterDrop: 0.9, desc: 'Best goose layer. 50-60 large eggs/year. Alert — excellent "guard geese". Light, upright body.', lifespan: '15-20 yrs', space: '20 sq ft house + grazing per bird', feed: 'Mainly grass + handful of wheat evening' },
+          { name: 'Embden', eggsPerYear: 35, peakMonths: [2,3,4,5], winterDrop: 0.95, desc: 'Large white goose. 30-40 eggs/yr. Dual purpose — excellent table bird too.', lifespan: '15-20 yrs', space: '20 sq ft house + grazing per bird', feed: 'Mainly grass + wheat supplement' },
+        ],
+        caloriesPerUnit: 185, unitName: 'egg', unitPlural: 'eggs', proteinPerUnit: 14,
+      },
+      meat: {
+        label: 'Table Geese',
+        icon: '🍖',
+        breeds: [
+          { name: 'Embden', monthsToTable: 6, dressedWeight: 5.5, desc: 'Classic large white table goose. Fast growth, good conformation, white feathers (clean pluck).', space: '25 sq ft per bird + grazing', feed: 'Grass + ~10kg grain supplement total', note: 'The commercial choice. Grows large quickly. Goslings in spring for Michaelmas/Christmas.' },
+          { name: 'Toulouse', monthsToTable: 7, dressedWeight: 6, desc: 'Very large grey goose. Calm, docile, heavy. Excellent rich meat with good fat.', space: '25 sq ft per bird + grazing', feed: 'Grass + ~12kg grain supplement total', note: 'Heaviest breed. Prone to going broody. Superb roasting bird with rich flavour.' },
+          { name: 'Pilgrim', monthsToTable: 6, dressedWeight: 4.5, desc: 'Auto-sexing breed (males white, females grey). Calm, quiet, easy to handle.', space: '20 sq ft per bird + grazing', feed: 'Grass + ~8kg grain supplement total', note: 'Ideal smallholder goose. Quiet, friendly, easy to sex. Good mothers.' },
+          { name: 'Brecon Buff', monthsToTable: 6, dressedWeight: 4.5, desc: 'Welsh heritage breed. Hardy, attractive buff colour. Good forager.', space: '20 sq ft per bird + grazing', feed: 'Grass + ~8kg grain supplement total', note: 'Rare breed — conservation value. Excellent free-range bird. Hardy in all UK conditions.' },
+        ],
+        caloriesPerKg: 3050, proteinPerKg: 250,
+      }
+    },
+    care: 'Daily: fresh water (deep enough to submerge head), grass access essential (geese are grazers — 80% of diet is grass). Weekly: check feet, top up grit. Seasonal: breeding Feb-June only, goslings need protection from crows and foxes first 3 weeks. Geese are LOUD — consider neighbours. Excellent guard animals. Very long-lived (15-25 years). Pair-bond for life — don\'t separate bonded pairs. No specific UK registration needed. Low-maintenance compared to other poultry. Will keep grass short — natural lawn mowers.',
+  },
+  quail: {
+    icon: '🐦', label: 'Quail', plural: 'Quail',
+    purposes: {
+      eggs: {
+        label: 'Laying Flock',
+        icon: '🥚',
+        breeds: [
+          { name: 'Coturnix (Japanese)', eggsPerYear: 280, peakMonths: [3,4,5,6,7,8,9,10], winterDrop: 0.5, desc: 'Prolific layer — 250-300 tiny eggs/yr. Mature in just 6-8 weeks! Quiet, compact.', lifespan: '2-3 yrs', space: '1 sq ft per bird in covered enclosure', feed: '~25g game bird feed/day + grit' },
+          { name: 'Italian (Golden)', eggsPerYear: 260, peakMonths: [3,4,5,6,7,8,9], winterDrop: 0.5, desc: 'Attractive golden colour. Good layer, slightly calmer than standard Coturnix.', lifespan: '2-3 yrs', space: '1 sq ft per bird', feed: '~25g game bird feed/day' },
+          { name: 'Jumbo Coturnix', eggsPerYear: 250, peakMonths: [3,4,5,6,7,8,9], winterDrop: 0.5, desc: 'Larger variant — bigger eggs, also good for meat. Dual purpose mini-bird.', lifespan: '2-3 yrs', space: '1.5 sq ft per bird', feed: '~30g game bird feed/day' },
+        ],
+        caloriesPerUnit: 14, unitName: 'egg', unitPlural: 'eggs', proteinPerUnit: 1.2,
+      },
+      meat: {
+        label: 'Table Birds',
+        icon: '🍖',
+        breeds: [
+          { name: 'Jumbo Coturnix', daysToTable: 56, dressedWeight: 0.18, desc: 'Tiny but delicious. 180g dressed. Ready in 8 weeks. Breed in huge numbers.', space: '1.5 sq ft per bird', feed: '~1kg feed total per bird', batchesPerYear: 5, note: 'Extremely fast turnover. 50+ birds easily managed in a small space. Delicacy meat.' },
+          { name: 'Bobwhite', daysToTable: 70, dressedWeight: 0.15, desc: 'American quail. Slightly smaller but excellent flavour. Game-bird taste.', space: '2 sq ft per bird', feed: '~1.2kg feed total per bird', batchesPerYear: 4, note: 'Wilder temperament. Need fully enclosed housing — will fly.' },
+        ],
+        caloriesPerKg: 2340, proteinPerKg: 250,
+      }
+    },
+    care: 'Daily: fresh water, feed (game bird crumbs, NOT chicken feed — quail need higher protein 24-28%). Collect eggs — quail don\'t nest, they drop eggs randomly. MUST be fully enclosed (mesh roof) — quail fly vertically when startled. Quiet — ideal for urban/suburban. No UK registration needed. Short lifespan (2-3 yrs). Keep in groups (1 cock to 3-5 hens). Supplemental light in winter extends laying season. Very low space requirement — can keep 20+ in a hutch-sized enclosure. Manure is excellent fertiliser.',
+  },
+  rabbit: {
+    icon: '🐇', label: 'Rabbit', plural: 'Rabbits',
+    purposes: {
+      meat: {
+        label: 'Table Rabbits',
+        icon: '🍖',
+        breeds: [
+          { name: 'New Zealand White', daysToTable: 84, dressedWeight: 1.5, desc: 'Classic commercial meat rabbit. Fast growth, excellent feed conversion, large litters.', space: 'Doe: 24x30" hutch or colony. Buck: separate 24x24"', feed: '~150g pellets/day + unlimited hay + greens', batchesPerYear: 4, note: 'Fastest growing breed. A doe produces 4-6 litters/year of 8-10 kits. Very efficient protein source.' },
+          { name: 'Californian', daysToTable: 84, dressedWeight: 1.4, desc: 'White with dark points. Excellent meat quality. Good temperament. Popular commercial cross.', space: 'Doe: 24x30" hutch. Buck: separate', feed: '~140g pellets/day + hay + greens', batchesPerYear: 4, note: 'Often crossed with NZW for maximum production. Calm, easy to handle.' },
+          { name: 'Rex', daysToTable: 90, dressedWeight: 1.3, desc: 'Dual purpose — superb fur AND good meat. Plush velvet coat. Docile.', space: 'Doe: 24x30" hutch', feed: '~130g pellets/day + hay + greens', batchesPerYear: 3, note: 'Pelts are valuable — velvety fur for crafts. Slightly slower growing but excellent quality.' },
+          { name: 'Flemish Giant', daysToTable: 120, dressedWeight: 2.5, desc: 'Huge rabbit — up to 10kg live. Slow growing but massive carcass. Gentle giants.', space: '36x36" minimum — these are BIG', feed: '~200g pellets/day + unlimited hay', batchesPerYear: 2, note: 'Impressive size but slower feed conversion than smaller breeds. Very docile. Smaller litters (4-6).' },
+          { name: 'Silver Fox', daysToTable: 90, dressedWeight: 1.5, desc: 'Heritage dual purpose. Beautiful silver fur, good meat. Calm temperament.', space: 'Doe: 24x30" hutch', feed: '~140g pellets/day + hay + greens', batchesPerYear: 3, note: 'Rare breed. Excellent mothers, good litter size. Fur stands up when stroked backwards — unique.' },
+        ],
+        caloriesPerKg: 1730, proteinPerKg: 330,
+      }
+    },
+    care: 'Daily: fresh water, hay (unlimited), pellets, health check. Weekly: clean hutch, check teeth and nails. Rabbits are the most efficient converters of forage to meat on a smallholding — they eat grass, weeds, kitchen scraps, hay, and garden thinnings. House bucks SEPARATELY (fight to death). Breed does from 6 months. Gestation 31 days. Kits weaned at 8 weeks. Can be colony-raised (does together) or in individual hutches. Predator-proof housing essential. No UK registration needed. Quiet, low-impact, legal almost everywhere. Manure is "cold" — goes straight on garden without composting.',
+  },
+  goat: {
+    icon: '🐐', label: 'Goat', plural: 'Goats',
+    purposes: {
+      dairy: {
+        label: 'Dairy',
+        icon: '🥛',
+        breeds: [
+          { name: 'Saanen', litresPerDay: 4, lactationMonths: 10, dryMonths: 2, fatContent: 3.5, desc: 'Highest milk yield of any goat. White, large, calm. The "Holstein of goats".', space: '200 sq ft per goat minimum + browse/pasture', feed: '~1.5kg concentrate + unlimited hay + browse', note: 'Excellent for cheese and yoghurt. Milk 2x daily. Must kid annually to lactate.' },
+          { name: 'Toggenburg', litresPerDay: 3, lactationMonths: 10, dryMonths: 2, fatContent: 3.3, desc: 'Swiss breed. Good consistent production. Hardy, alert, can be vocal.', space: '200 sq ft per goat + browse/pasture', feed: '~1.2kg concentrate + hay + browse', note: 'Lower fat than some breeds — good drinking milk. Hardy in UK climate.' },
+          { name: 'Anglo-Nubian', litresPerDay: 2.5, lactationMonths: 10, dryMonths: 2, fatContent: 5.0, desc: 'Floppy ears, Roman nose. Richest milk — highest butterfat. Excellent for cheese.', space: '200 sq ft per goat + browse', feed: '~1.3kg concentrate + hay + browse', note: 'Best milk for cheese-making due to high fat. Vocal — LOUD. Needs good fencing.' },
+          { name: 'Golden Guernsey', litresPerDay: 2, lactationMonths: 10, dryMonths: 2, fatContent: 3.8, desc: 'Rare breed. Beautiful golden colour. Good milk with excellent flavour. Docile.', space: '150 sq ft per goat + browse', feed: '~1kg concentrate + hay + browse', note: 'Endangered — conservation value. Smaller, easier to handle. Ideal starter dairy goat.' },
+          { name: 'Nigerian Dwarf', litresPerDay: 1, lactationMonths: 10, dryMonths: 2, fatContent: 6.5, desc: 'Tiny dairy goat — knee height. Richest milk of any breed. Year-round breeding.', space: '100 sq ft per goat + browse', feed: '~0.5kg concentrate + hay + browse', note: 'Perfect for small spaces. Highest butterfat — superb for cheese. Can breed year-round unlike most goats.' },
+        ],
+        caloriesPerLitre: 690, proteinPerLitre: 36, unitName: 'litre', unitPlural: 'litres',
+      },
+      meat: {
+        label: 'Meat Goats',
+        icon: '🍖',
+        breeds: [
+          { name: 'Boer', monthsToTable: 8, dressedWeight: 25, desc: 'Best meat goat worldwide. Fast growing, muscular, docile.', space: '200 sq ft per goat + browse/pasture', feed: '~1.5kg concentrate + hay + browse', note: 'South African breed. Excellent meat conformation. Will clear brush and scrubland.' },
+          { name: 'Kiko', monthsToTable: 9, dressedWeight: 22, desc: 'Low-maintenance meat goat. Hardy, parasite-resistant, excellent forager.', space: '200 sq ft per goat + browse/pasture', feed: 'Mainly browse and forage, minimal supplement', note: 'Almost zero-input breed. Thrives on rough land. Excellent for clearing brambles and scrub.' },
+        ],
+        caloriesPerKg: 1430, proteinPerKg: 270,
+      }
+    },
+    care: 'Daily: fresh water, hay, feed, health check, milk 2x daily (dairy). Goats MUST have companions — minimum 2. They are browsers not grazers — they prefer hedgerow, brush, weeds, bark over grass. Fencing is the #1 challenge — goats escape EVERYTHING. Stock fencing minimum 4ft + electric strand. They climb, jump, squeeze through gaps. Shelter essential — goats HATE rain. Foot trim every 6-8 weeks. Worming programme essential. Legal: register holding with APHA if >2 goats. Goat milk does not need to be pasteurised to sell in UK (unlike cow). Goats are intelligent, curious, destructive and entertaining.',
+  },
 };
 
 // ========================================================================
@@ -910,12 +1241,13 @@ function getMonthlyEggProduction(animal) {
   return counts;
 }
 
-// Only female cows produce milk. A bull produces nothing but enables breeding.
+// Only female cows/goats produce milk. A bull/billy produces nothing but enables breeding.
 function getMonthlyMilkProduction(animal) {
   if (!animal || animal.purpose !== 'dairy') return new Array(12).fill(0);
   const females = animal.females || 0;
   if (females <= 0) return new Array(12).fill(0);
-  const breed = LIVESTOCK_TYPES.cow?.purposes?.dairy?.breeds?.find(b => b.name === animal.breed);
+  const typeData = LIVESTOCK_TYPES[animal.type];
+  const breed = typeData?.purposes?.dairy?.breeds?.find(b => b.name === animal.breed);
   if (!breed) return new Array(12).fill(0);
   const counts = [];
   for (let m = 0; m < 12; m++) {
@@ -925,7 +1257,7 @@ function getMonthlyMilkProduction(animal) {
     let dailyRate = isDry ? 0 : breed.litresPerDay;
     if (isPeak) dailyRate *= 1.1;
     if ([1,2,3,10].includes(m+1) && !isDry) dailyRate *= 0.85;
-    counts.push(Math.round(dailyRate * females * daysInMonth)); // ONLY cows milk
+    counts.push(Math.round(dailyRate * females * daysInMonth));
   }
   return counts;
 }
@@ -984,9 +1316,10 @@ function getDispatchImpact(animal, sex) {
       const calLoss = Math.round(dailyEggs * (LIVESTOCK_TYPES[animal.type]?.purposes?.eggs?.caloriesPerUnit || 78));
       impacts.push({ type: 'warn', text: `Lose ~${calLoss} kcal/day from food supply` });
     } else if (animal.purpose === 'dairy') {
-      const breed = LIVESTOCK_TYPES.cow?.purposes?.dairy?.breeds?.find(b => b.name === animal.breed);
+      const breed = LIVESTOCK_TYPES[animal.type]?.purposes?.dairy?.breeds?.find(b => b.name === animal.breed);
       impacts.push({ type: 'danger', text: `Lose ~${breed?.litresPerDay||10}L milk/day` });
-      impacts.push({ type: 'warn', text: `Lose ~${Math.round((breed?.litresPerDay||10) * 620)} kcal/day from food supply` });
+      const calPerLitre = LIVESTOCK_TYPES[animal.type]?.purposes?.dairy?.caloriesPerLitre || 620;
+      impacts.push({ type: 'warn', text: `Lose ~${Math.round((breed?.litresPerDay||10) * calPerLitre)} kcal/day from food supply` });
     }
     if ((animal.females || 0) <= 1) {
       impacts.push({ type: 'danger', text: `Last ${sexLabels.female.toLowerCase()}! Flock/herd will have NO production.` });
@@ -1035,7 +1368,7 @@ function getLivestockMonthlyCalories() {
       eggCounts.forEach((c, i) => { monthlyCals[i] += c * calPerUnit; });
     } else if (animal.purpose === 'dairy') {
       const milkLitres = getMonthlyMilkProduction(animal);
-      const calPerLitre = LIVESTOCK_TYPES.cow?.purposes?.dairy?.caloriesPerLitre || 620;
+      const calPerLitre = LIVESTOCK_TYPES[animal.type]?.purposes?.dairy?.caloriesPerLitre || 620;
       milkLitres.forEach((l, i) => { monthlyCals[i] += l * calPerLitre; });
     } else if (animal.purpose === 'meat') {
       const totalKg = getAnnualMeatKg(animal);
@@ -1301,6 +1634,14 @@ function getWarnings() {
   try {
     (state.beehives||[]).forEach(h => { if(h.health==='weak') w.push({type:'warn',icon:'🐝',title:`Hive "${h.name}" is weak`,detail:'Inspect for disease, varroa, or queenlessness.'}); if(h.health==='dead') w.push({type:'danger',icon:'🐝',title:`Hive "${h.name}" has died`,detail:'Colony lost. Remove and clean equipment.'}); });
   } catch(e) { console.error('Bee warnings:', e); }
+  // Module tray plant-out warnings
+  try {
+    state.pots.filter(p=>p.isModule&&p.plant&&p.plantOutTarget).forEach(pot=>{
+      const dlOut=Math.ceil((new Date(pot.plantOutTarget).getTime()-Date.now())/864e5);
+      if(dlOut<=0) w.push({type:'warn',icon:'🧫',title:`${pot.name}: ${pot.plant} — PLANT OUT NOW!`,detail:`Seedlings in module tray are ready to transplant. ${pot.cellsUsed||0} cells to plant out.`});
+      else if(dlOut<=5) w.push({type:'warn',icon:'🧫',title:`${pot.name}: ${pot.plant} — plant out in ${dlOut}d`,detail:`Start hardening off seedlings. ${pot.cellsUsed||0} cells ready soon.`});
+    });
+  } catch(e) { console.error('Module tray warnings:', e); }
   return w;
 }
 
@@ -1405,19 +1746,38 @@ function renderCalendar() {
     <div class="legend-item"><div class="legend-dot" style="background:rgba(90,159,212,0.75)"></div>Sow Indoors</div>
     <div class="legend-item"><div class="legend-dot" style="background:rgba(106,170,94,0.75)"></div>Sow Out</div>
     <div class="legend-item"><div class="legend-dot" style="background:rgba(224,148,58,0.75)"></div>Harvest</div>
-    ${isProtected ? `<div class="legend-item"><div class="legend-dot" style="background:${env==='greenhouse'?'rgba(42,138,90,0.7)':'rgba(90,122,191,0.6)'}"></div>${ENV_MODIFIERS[env].label} Extended</div>` : ''}`;
+    ${isProtected ? `<div class="legend-item"><div class="legend-dot" style="background:${env==='greenhouse'?'rgba(42,138,90,0.7)':'rgba(90,122,191,0.6)'}"></div>${ENV_MODIFIERS[env].label} Extended</div>` : ''}
+    <div class="legend-item" style="margin-left:auto;font-size:8px;color:var(--text-muted);">ℹ = nutrition & detail</div>`;
 
   const tbody = document.getElementById('calBody');
   tbody.innerHTML = '';
   const now = new Date().getMonth() + 1;
-  const vegs = getVegForZone(env);
+  const allVegs = getVegForZone(env);
 
-  vegs.forEach(v => {
+  // Sort into sections: Vegetables (alphabetical), Herbs (alphabetical), Fruit (alphabetical)
+  const vegFamilies = ['Legume','Root','Brassica','Allium','Leaf','Solanaceae','Fruiting','Cucurbit','Grass','Perennial'];
+  const herbFamilies = ['Herb'];
+  const fruitFamilies = ['Fruit','Fruit Tree','Citrus'];
+
+  const vegetables = allVegs.filter(v => vegFamilies.includes(v.family)).sort((a,b) => a.name.localeCompare(b.name));
+  const herbs = allVegs.filter(v => herbFamilies.includes(v.family)).sort((a,b) => a.name.localeCompare(b.name));
+  const fruits = allVegs.filter(v => fruitFamilies.includes(v.family)).sort((a,b) => a.name.localeCompare(b.name));
+
+  function addSectionHeader(label, emoji, count) {
+    const tr = document.createElement('tr');
+    tr.className = 'cal-section-header';
+    tr.innerHTML = `<td colspan="13">${emoji} ${label} (${count})</td>`;
+    tbody.appendChild(tr);
+  }
+
+  function addVegRow(v) {
     const tr = document.createElement('tr');
     const adjSowIn = getAdjustedMonths(v.sowIn, env);
     const adjSowOut = getAdjustedMonths(v.sowOut, env);
     const adjHarvest = getAdjustedHarvest(v.harvest, env);
-    let html = `<td class="veg-name">${v.icon} ${v.name}${v.coldHardy?' ❄️':''}${v.fastGrow?' ⚡':''}</td>`;
+
+    const escapedName = v.name.replace(/'/g, "\\'");
+    let html = `<td><span class="veg-name" style="display:inline-flex;align-items:center;gap:0;"><span class="cal-info-btn" onclick="event.stopPropagation();openVegDetailModal('${escapedName}')" title="Nutrition & info">ℹ</span>${v.icon} ${v.name}${v.coldHardy?' ❄️':''}${v.fastGrow?' ⚡':''}</span></td>`;
     for(let m=1;m<=12;m++){
       const isCur=m===now;
       let cls='',label='';
@@ -1430,7 +1790,89 @@ function renderCalendar() {
     }
     tr.innerHTML=html;
     tbody.appendChild(tr);
-  });
+  }
+
+  if (vegetables.length) { addSectionHeader('Vegetables', '🥬', vegetables.length); vegetables.forEach(addVegRow); }
+  if (herbs.length) { addSectionHeader('Herbs', '🌿', herbs.length); herbs.forEach(addVegRow); }
+  if (fruits.length) { addSectionHeader('Fruit & Berries', '🍎', fruits.length); fruits.forEach(addVegRow); }
+}
+
+// Vegetable detail modal — opened by clicking name in calendar
+function openVegDetailModal(vegName) {
+  const v = VEGETABLES.find(vv => vv.name === vegName);
+  if (!v) return;
+  const env = calEnv || 'outdoor';
+  const adjSowIn = getAdjustedMonths(v.sowIn, env);
+  const adjSowOut = getAdjustedMonths(v.sowOut, env);
+  const adjHarvest = getAdjustedHarvest(v.harvest, env);
+  const adjDays = getAdjustedDays(v.days, env);
+
+  const sowInStr = adjSowIn.length ? adjSowIn.map(m=>MONTH_SHORT[m-1]).join(', ') : '—';
+  const sowOutStr = adjSowOut.length ? adjSowOut.map(m=>MONTH_SHORT[m-1]).join(', ') : '—';
+  const harvestStr = adjHarvest.length ? adjHarvest.map(m=>MONTH_SHORT[m-1]).join(', ') : '—';
+
+  // Companion info
+  const companions = COMPANIONS.filter(c => c.a === v.name || c.b === v.name || c.a === v.family || c.b === v.family);
+  const antagonists = ANTAGONISTS.filter(c => c.a === v.name || c.b === v.name || c.a === v.family || c.b === v.family);
+
+  const compHtml = companions.length ? companions.map(c => {
+    const partner = c.a === v.name || c.a === v.family ? c.b : c.a;
+    return `<div style="font-size:10px;margin-bottom:3px;">🤝 <strong>${partner}</strong> — ${c.why}</div>`;
+  }).join('') : '<div style="font-size:10px;color:var(--text-dim);">No specific companions recorded.</div>';
+
+  const antHtml = antagonists.length ? antagonists.map(c => {
+    const partner = c.a === v.name || c.a === v.family ? c.b : c.a;
+    return `<div style="font-size:10px;margin-bottom:3px;color:var(--red-light);">🚫 <strong>${partner}</strong> — ${c.why}</div>`;
+  }).join('') : '';
+
+  document.getElementById('modalTitle').textContent = `${v.icon} ${v.name}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--accent2-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Growing</div>
+        <div style="font-size:11px;margin-bottom:4px;"><span style="color:var(--text-dim);">Family:</span> <strong>${v.family}</strong></div>
+        <div style="font-size:11px;margin-bottom:4px;"><span style="color:var(--text-dim);">Days to harvest:</span> <strong>${adjDays}d</strong></div>
+        <div style="font-size:11px;margin-bottom:4px;"><span style="color:var(--text-dim);">Sow indoors:</span> ${sowInStr}</div>
+        <div style="font-size:11px;margin-bottom:4px;"><span style="color:var(--text-dim);">Sow direct:</span> ${sowOutStr}</div>
+        <div style="font-size:11px;margin-bottom:4px;"><span style="color:var(--text-dim);">Harvest:</span> ${harvestStr}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+          ${v.fastGrow?'<span class="cal-tip-tag" style="background:rgba(74,158,187,0.2);color:var(--accent2-light);">⚡ Fast</span>':''}
+          ${v.coldHardy?'<span class="cal-tip-tag" style="background:rgba(90,159,212,0.15);color:#8ac;">❄️ Cold-Hardy</span>':''}
+          ${v.store?'<span class="cal-tip-tag" style="background:rgba(212,192,64,0.15);color:var(--yellow);">📦 Stores</span>':''}
+          ${v.perennial?'<span class="cal-tip-tag" style="background:rgba(90,173,106,0.15);color:var(--green-light);">🔄 Perennial</span>':''}
+          ${v.emergency?'<span class="cal-tip-tag" style="background:rgba(196,64,64,0.2);color:var(--red-light);">🚨 Emergency crop</span>':''}
+          ${v.ghBetter?'<span class="cal-tip-tag" style="background:rgba(42,138,90,0.15);color:var(--greenhouse-light);">🏡 Better under glass</span>':''}
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--accent2-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Nutrition per 100g</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;">
+          <div style="font-size:11px;"><span style="color:var(--text-dim);">Calories:</span> <strong>${v.calories} kcal</strong></div>
+          <div style="font-size:11px;"><span style="color:var(--text-dim);">Protein:</span> <strong>${v.pro}g</strong></div>
+          <div style="font-size:11px;"><span style="color:var(--text-dim);">Carbs:</span> <strong>${v.carb}g</strong></div>
+          <div style="font-size:11px;"><span style="color:var(--text-dim);">Fibre:</span> <strong>${v.fibre}g</strong></div>
+          <div style="font-size:11px;"><span style="color:var(--text-dim);">Vitamin C:</span> <strong>${v.vitC}mg</strong>${v.vitC>=50?' 🍊':''}</div>
+          <div style="font-size:11px;"><span style="color:var(--text-dim);">Iron:</span> <strong>${v.iron}mg</strong>${v.iron>=3?' 💪':''}</div>
+          <div style="font-size:11px;"><span style="color:var(--text-dim);">Vitamin A:</span> <strong>${v.vitA} mcg</strong>${v.vitA>=200?' 👁️':''}</div>
+          <div style="font-size:11px;"><span style="color:var(--text-dim);">Folate:</span> <strong>${v.folate} mcg</strong>${v.folate>=100?' ✨':''}</div>
+        </div>
+        <div style="margin-top:8px;font-size:9px;color:var(--text-dim);">
+          ${v.calories>=70?'<span style="color:var(--green-light);font-weight:600;">HIGH ENERGY</span> — survival staple. ':''}
+          ${v.pro>=4?'<span style="color:var(--accent2-light);font-weight:600;">HIGH PROTEIN</span>. ':''}
+          ${v.vitC>=80?'<span style="color:var(--yellow);font-weight:600;">VITAMIN C RICH</span> — scurvy prevention. ':''}
+          ${v.iron>=3?'<span style="color:var(--red-light);font-weight:600;">IRON RICH</span> — anaemia prevention. ':''}
+          ${v.vitA>=300?'<span style="color:var(--accent-light);font-weight:600;">VITAMIN A RICH</span> — eye/immune health. ':''}
+        </div>
+      </div>
+    </div>
+    ${v.soilBenefit ? `<div style="margin-top:12px;padding:8px 10px;border-radius:6px;background:rgba(90,173,106,0.08);border:1px solid rgba(90,173,106,0.15);"><div style="font-size:10px;font-weight:700;color:var(--green-light);margin-bottom:3px;">🌱 Soil Benefit</div><div style="font-size:10px;color:var(--text);line-height:1.5;">${v.soilBenefit}</div></div>` : ''}
+    <div style="margin-top:12px;">
+      <div style="font-size:10px;font-weight:700;color:var(--green-light);margin-bottom:4px;">🤝 Companions</div>
+      ${compHtml}
+      ${antHtml ? `<div style="font-size:10px;font-weight:700;color:var(--red-light);margin-top:6px;margin-bottom:4px;">⚠️ Avoid</div>${antHtml}` : ''}
+    </div>`;
+  document.getElementById('modalBtns').innerHTML = `<button class="btn btn-primary btn-sm" onclick="closeModal()">✕ Close</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
 }
 
 // ========================================================================
@@ -1494,6 +1936,33 @@ function renderDashboard() {
   const succEl=document.getElementById('successionTips');
   const succVegs=vegs.filter(v=>getAdjustedMonths(v.sowOut,'outdoor').includes(month));
   succEl.innerHTML=succVegs.slice(0,6).map(v=>`<div class="rotation-card" style="padding:8px;"><div style="font-size:20px;">${v.icon}</div><div style="font-weight:700;font-size:11px;">${v.name}</div><div style="font-size:9px;color:var(--text-dim);margin-top:2px;">${getAdjustedDays(v.days,'outdoor')}d${v.fastGrow?' ⚡':''}${v.store?' 📦':''}${v.coldHardy?' ❄️':''}</div></div>`).join('')||'<p style="color:var(--text-muted);font-size:11px;">Nothing to succession-sow this month outdoors.</p>';
+
+  // Continuity alerts
+  try {
+    const contEl=document.getElementById('continuityAlerts');
+    const contAlerts=getContinuityAlerts();
+    if(contAlerts.length>0){
+      contEl.innerHTML=contAlerts.map(a=>{
+        const urgency=a.daysLeft<=7?'border-left:3px solid var(--accent);background:linear-gradient(90deg,rgba(212,135,46,0.08),transparent 30%);':a.daysLeft<=14?'border-left:3px solid var(--yellow);':'border-left:3px solid var(--accent2);';
+        const urgLabel=a.daysLeft<=0?'<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:var(--accent);color:#fff;font-weight:700;">HARVEST NOW</span>':a.daysLeft<=7?'<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(212,135,46,0.3);color:var(--accent-light);font-weight:700;">'+a.daysLeft+'d LEFT</span>':'<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(74,158,187,0.15);color:var(--accent2-light);">~'+a.daysLeft+'d</span>';
+        return`<div style="padding:10px;margin-bottom:8px;border-radius:8px;${urgency}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="font-size:12px;font-weight:700;">${a.icon} ${a.veg} in ${a.bed} ${urgLabel}</div>
+            <div style="font-size:9px;color:var(--text-dim);">${a.cellCount} cell${a.cellCount>1?'s':''}</div>
+          </div>
+          <div style="font-size:9px;color:var(--text-dim);margin-bottom:6px;">Replace with:</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            ${a.suggestions.map(s=>`<button class="btn btn-ghost btn-sm" style="font-size:9px;padding:3px 8px;" onclick="setContinuityCrop('${a.bedId}','${s.name}')">
+              ${s.icon} ${s.name} ${s.isRotationMatch?'♻️':''}${s.fastGrow?'⚡':''}
+              <span style="font-size:7px;color:var(--text-dim);margin-left:2px;">${s.days}d</span>
+            </button>`).join('')}
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      contEl.innerHTML='<p style="color:var(--text-muted);font-size:10px;">No crops approaching harvest yet, or no beds planted.</p>';
+    }
+  } catch(e) { console.error('continuity render:', e); }
 }
 
 // ========================================================================
@@ -1519,7 +1988,14 @@ function renderWarnings() {
   // Also include greenhouse options
   const ghFast=state.environments.includes('greenhouse')?VEGETABLES.filter(v=>v.fastGrow&&getAdjustedMonths(v.sowOut,'greenhouse').includes(month)&&!fast.find(f=>f.name===v.name)).map(v=>({...v,envLabel:'🏡 GH'})):[];
   const all=[...fast.map(v=>({...v,envLabel:'🌤️'})),...ghFast];
-  ee.innerHTML=all.length?all.map(v=>`<div class="task-item" style="border-left-color:var(--green);"><div class="task-veg">${v.icon} ${v.name} ${v.emergency?'<span style="font-size:8px;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px;">FAST</span>':''} <span style="font-size:8px;opacity:0.6;">${v.envLabel}</span></div><div class="task-action">⚡ ${getAdjustedDays(v.days,v.envLabel.includes('GH')?'greenhouse':'outdoor')}d · ${v.calories}cal/100g</div></div>`).join(''):'<p style="color:var(--text-muted);font-size:11px;">No fast crops available now.</p>';
+  ee.innerHTML=all.length?all.map(v=>{
+    const env=v.envLabel.includes('GH')?'greenhouse':'outdoor';
+    return`<div class="task-item" style="border-left-color:var(--green);">
+      <div class="task-veg">${v.icon} ${v.name} ${v.emergency?'<span style="font-size:8px;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px;">FASTEST</span>':''} <span style="font-size:8px;opacity:0.6;">${v.envLabel}</span></div>
+      <div class="task-action">⚡ ${getAdjustedDays(v.days,env)}d · ${v.calories}kcal · ${v.pro||0}g pro · ${v.carb||0}g carb${v.vitC>=30?' · 🍊'+v.vitC+'mg vit C':''}${v.coldHardy?' ❄️':''}</div>
+      ${v.soilBenefit?`<div style="font-size:8px;color:var(--text-dim);margin-top:2px;">🌱 ${v.soilBenefit.substring(0,80)}${v.soilBenefit.length>80?'...':''}</div>`:''}
+    </div>`;
+  }).join(''):'<p style="color:var(--text-muted);font-size:11px;">No fast crops available now.</p>';
 }
 
 // ========================================================================
@@ -1549,7 +2025,42 @@ function renderPipeline() {
     potMatches.forEach(p=>{const d=new Date(p.plantedDate);if(d<earliestDate)earliestDate=d;});
     const elapsed=Math.max(0,Math.ceil((now-earliestDate)/864e5));const ad=getAdjustedDays(v.days,'outdoor');const pct=Math.min(100,Math.round(elapsed/ad*100));const dl=ad-elapsed;
     const locLabel=bedMatches.length>0&&potMatches.length>0?'beds+pots':potMatches.length>0?'🪴 pot':'bed';
-    return`<div style="display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);"><div style="font-size:10px;font-weight:600;color:var(--text-dim);">${v.icon} ${cn} <span style="font-size:7px;opacity:0.5;">${locLabel}</span></div><div><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);margin-bottom:1px;"><span>${pct}%</span><span>${dl>0?dl+'d':'🍴 READY'}</span></div><div style="height:12px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct>=100?'var(--accent)':'var(--green)'};border-radius:3px;"></div></div></div></div>`;}).join(''):'<p style="color:var(--text-muted);padding:8px;font-size:10px;">Plant crops to see timelines.</p>';
+    // 30-day succession marker
+    const succPct=Math.max(0,Math.min(100,Math.round((ad-30)/ad*100)));
+    const showSuccMarker=dl>0&&dl<=30;
+    const succMarkerHtml=ad>30?`<div style="position:absolute;left:${succPct}%;top:0;bottom:0;width:2px;background:var(--accent);opacity:0.7;" title="30 days before harvest — sow replacement!"></div>`:'';
+    const succLabel=showSuccMarker?'<span style="font-size:7px;padding:1px 4px;border-radius:3px;background:rgba(212,135,46,0.25);color:var(--accent-light);margin-left:4px;">🔄 SOW NEXT</span>':'';
+    return`<div style="display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);"><div style="font-size:10px;font-weight:600;color:var(--text-dim);">${v.icon} ${cn} <span style="font-size:7px;opacity:0.5;">${locLabel}</span>${succLabel}</div><div><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);margin-bottom:1px;"><span>${pct}%</span><span>${dl>0?dl+'d':'🍴 READY'}</span></div><div style="height:12px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;position:relative;">${succMarkerHtml}<div style="height:100%;width:${pct}%;background:${pct>=100?'var(--accent)':showSuccMarker?'linear-gradient(90deg,var(--green),var(--accent))':'var(--green)'};border-radius:3px;position:relative;z-index:1;"></div></div></div></div>`;}).join(''):'<p style="color:var(--text-muted);padding:8px;font-size:10px;">Plant crops to see timelines.</p>';
+
+  // Succession planning section
+  try {
+    const succEl=document.getElementById('pipelineSuccession');
+    const contAlerts=getContinuityAlerts();
+    if(contAlerts.length>0){
+      succEl.innerHTML=contAlerts.map(a=>{
+        const urgency=a.daysLeft<=7?'border-left:3px solid var(--accent);background:linear-gradient(90deg,rgba(212,135,46,0.08),transparent 30%);':a.daysLeft<=14?'border-left:3px solid var(--yellow);':'border-left:3px solid var(--accent2);';
+        const urgLabel=a.daysLeft<=0?'<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:var(--accent);color:#fff;font-weight:700;">HARVEST NOW</span>':a.daysLeft<=7?'<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(212,135,46,0.3);color:var(--accent-light);font-weight:700;">'+a.daysLeft+'d LEFT</span>':'<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(74,158,187,0.15);color:var(--accent2-light);">~'+a.daysLeft+'d</span>';
+        return`<div style="padding:10px;margin-bottom:8px;border-radius:8px;${urgency}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="font-size:12px;font-weight:700;">${a.icon} ${a.veg} → ${a.bed} ${urgLabel}</div>
+            <div style="font-size:9px;color:var(--text-dim);">${a.cellCount} cell${a.cellCount>1?'s':''} to replace</div>
+          </div>
+          <div style="font-size:9px;color:var(--text-dim);margin-bottom:6px;">Best replacements (rotation-aware, scored by fit):</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            ${a.suggestions.map(s=>`<button class="btn btn-ghost btn-sm" style="font-size:9px;padding:3px 8px;" onclick="setContinuityCrop('${a.bedId}','${s.name}')">
+              ${s.icon} ${s.name}
+              ${s.isRotationMatch?'<span style="font-size:7px;color:var(--green-light);">♻️</span>':''}
+              ${s.fastGrow?'<span style="font-size:7px;color:var(--accent2-light);">⚡</span>':''}
+              ${s.store?'<span style="font-size:7px;color:var(--yellow);">📦</span>':''}
+              <span style="font-size:7px;color:var(--text-dim);margin-left:2px;">${s.days}d · ${s.sowMethod}</span>
+            </button>`).join('')}
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      succEl.innerHTML='<p style="color:var(--text-muted);font-size:10px;text-align:center;padding:12px;">No crops within 30 days of harvest. Succession planning will appear here when harvests approach.</p>';
+    }
+  } catch(e) { console.error('pipeline succession:', e); }
 
   const month=now.getMonth()+1,we=document.getElementById('weeklyActions');
   const sowable=getVegForZone('outdoor').filter(v=>getAdjustedMonths(v.sowOut,'outdoor').includes(month)||getAdjustedMonths(v.sowIn,'outdoor').includes(month));
@@ -1661,12 +2172,140 @@ function renderBeds(){const now=new Date(),cont=document.getElementById('bedsCon
   addCard.onclick=()=>openAddBedModal();
   addCard.innerHTML='<div style="text-align:center;"><div style="font-size:28px;margin-bottom:4px;">➕</div><div style="font-size:11px;font-weight:600;color:var(--text-dim);">Add Bed</div></div>';
   cont.appendChild(addCard);
-  const pg=document.getElementById('potsGrid');pg.innerHTML='';state.pots.forEach(pot=>{const d=document.createElement('div');d.className='pot-item'+(pot.plant?' has-plant':'');d.onclick=()=>openPotModal(pot.id);d.innerHTML=`<div class="pot-emoji">${pot.emoji}</div><div class="pot-plant">${pot.plant||'—'}</div><div class="pot-label">${pot.name}</div>${pot.plantedDate?`<div class="pot-planted">${pot.plantedDate}</div>`:''}`;pg.appendChild(d);});const ap=document.createElement('div');ap.className='pot-item add-pot';ap.innerHTML='<div style="font-size:18px;">➕</div><div style="font-size:9px;margin-top:2px;">Add Pot / Ground</div>';ap.onclick=()=>openAddPotModal();pg.appendChild(ap);
+  const pg=document.getElementById('potsGrid');pg.innerHTML='';state.pots.forEach(pot=>{const d=document.createElement('div');d.className='pot-item'+(pot.plant?' has-plant':'');d.onclick=()=>openPotModal(pot.id);
+    let moduleInfo='';
+    if(pot.isModule){
+      const cellsUsed=pot.cellsUsed||0;
+      const totalCells=pot.moduleCells||0;
+      moduleInfo=`<div style="font-size:8px;color:var(--accent2-light);margin-top:2px;">${cellsUsed}/${totalCells} cells sown</div>`;
+      if(pot.plantOutTarget&&pot.plant){
+        const dlOut=Math.ceil((new Date(pot.plantOutTarget).getTime()-Date.now())/864e5);
+        if(dlOut<=0) moduleInfo+=`<div style="font-size:8px;color:var(--green-light);font-weight:700;">🌱 PLANT OUT NOW</div>`;
+        else if(dlOut<=7) moduleInfo+=`<div style="font-size:8px;color:var(--accent-light);">🌱 Plant out in ${dlOut}d</div>`;
+        else moduleInfo+=`<div style="font-size:8px;color:var(--text-dim);">🌱 Plant out ~${dlOut}d</div>`;
+      }
+    }
+    d.innerHTML=`<div class="pot-emoji">${pot.emoji}</div><div class="pot-plant">${pot.plant||'—'}</div><div class="pot-label">${pot.name}</div>${pot.plantedDate?`<div class="pot-planted">${pot.plantedDate}</div>`:''}${moduleInfo}`;pg.appendChild(d);});const ap=document.createElement('div');ap.className='pot-item add-pot';ap.innerHTML='<div style="font-size:18px;">➕</div><div style="font-size:9px;margin-top:2px;">Add Pot / Ground</div>';ap.onclick=()=>openAddPotModal();pg.appendChild(ap);
 }
 
 // Cell modal
 let activeCellBed=null,activeCellIdx=null;
-function openCellModal(bid,idx){activeCellBed=bid;activeCellIdx=idx;const bed=state.beds.find(b=>b.id===bid),cell=bed.cells[idx];document.getElementById('modalTitle').textContent=cell?`${cell.veg}`:` Plant Cell ${idx+1}`;if(cell){const v=VEGETABLES.find(vv=>vv.name===cell.veg);let hi='';if(v?.days&&!cell.failed&&!cell.harvested){const dl=Math.ceil((new Date(cell.date).getTime()+getAdjustedDays(v.days,'outdoor')*864e5-Date.now())/864e5);hi=`<p style="margin-top:6px;font-size:11px;padding:5px 8px;border-radius:5px;${dl<=7?'background:rgba(224,148,58,0.15);color:var(--accent-light);':'color:var(--text-dim);'}">${dl<=0?'🍴 READY!':'🕐 ~'+dl+'d left'}</p>`;}document.getElementById('modalBody').innerHTML=`<p><strong>${cell.veg}</strong> <span style="font-size:11px;color:${cell.failed?'var(--red-light)':cell.harvested?'var(--accent-light)':'var(--green-light)'};">${cell.failed?'💀 Failed':cell.harvested?'🍴 Harvested':'🌱 Growing'}</span></p><p style="font-size:10px;color:var(--text-dim);">Planted ${cell.date}</p>${hi}`;document.getElementById('modalBtns').innerHTML=`<button class="btn btn-harvest btn-sm" onclick="markHarvested()">🍴 Harvest</button><button class="btn btn-danger btn-sm" onclick="markCellFailed()">💀 Failed</button><button class="btn btn-danger btn-sm" onclick="clearCell()">🗑</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>`;}else{document.getElementById('modalBody').innerHTML=`<div class="form-group"><label>Vegetable</label><select id="cellVeg">${VEGETABLES.map(v=>`<option value="${v.name}">${v.icon} ${v.name}${v.coldHardy?' ❄️':''}</option>`).join('')}</select></div><div class="form-group"><label>Method</label><select id="cellSow"><option value="direct">Direct</option><option value="transplant">Transplant</option></select></div><div class="form-group"><label>Date</label><input type="date" id="cellDate" value="${new Date().toISOString().split('T')[0]}"></div>`;document.getElementById('modalBtns').innerHTML=`<button class="btn btn-primary" onclick="confirmCellPlant()">🌱 Plant</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;}document.getElementById('modalOverlay').classList.add('open');}
+function openCellModal(bid,idx){
+  activeCellBed=bid;activeCellIdx=idx;
+  const bed=state.beds.find(b=>b.id===bid),cell=bed.cells[idx];
+  const env=bed.env||'outdoor';
+  document.getElementById('modalTitle').textContent=cell?`${cell.veg}`:` Plant Cell ${idx+1}`;
+  
+  if(cell){
+    const v=VEGETABLES.find(vv=>vv.name===cell.veg);
+    let hi='';
+    let companionHtml='';
+    let continuityHtml='';
+    
+    if(v?.days&&!cell.failed&&!cell.harvested){
+      const dl=Math.ceil((new Date(cell.date).getTime()+getAdjustedDays(v.days,env)*864e5-Date.now())/864e5);
+      hi=`<p style="margin-top:6px;font-size:11px;padding:5px 8px;border-radius:5px;${dl<=7?'background:rgba(224,148,58,0.15);color:var(--accent-light);':'color:var(--text-dim);'}">${dl<=0?'🍴 READY!':'🕐 ~'+dl+'d left'}</p>`;
+      
+      // Companion advice
+      const advice=getCompanionAdvice(cell.veg, bid);
+      if(advice.antagonists.filter(a=>a.present).length>0){
+        companionHtml+=`<div style="margin-top:8px;padding:6px 8px;border-radius:6px;background:rgba(196,64,64,0.1);border:1px solid rgba(196,64,64,0.2);">
+          <div style="font-size:9px;font-weight:700;color:var(--red-light);margin-bottom:4px;">⚠️ BAD NEIGHBOURS IN THIS BED</div>
+          ${advice.antagonists.filter(a=>a.present).map(a=>`<div style="font-size:9px;color:var(--red-light);margin-bottom:2px;">🚫 ${a.partner}: ${a.why}</div>`).join('')}
+        </div>`;
+      }
+      const presentCompanions=advice.companions.filter(c=>c.present);
+      const suggestedCompanions=advice.companions.filter(c=>!c.present).slice(0,3);
+      if(presentCompanions.length>0){
+        companionHtml+=`<div style="margin-top:6px;padding:6px 8px;border-radius:6px;background:rgba(90,173,106,0.08);border:1px solid rgba(90,173,106,0.15);">
+          <div style="font-size:9px;font-weight:700;color:var(--green-light);margin-bottom:3px;">✅ Good companions nearby</div>
+          ${presentCompanions.map(c=>`<div style="font-size:9px;color:var(--green-light);margin-bottom:2px;">🤝 ${c.partner}: ${c.why}</div>`).join('')}
+        </div>`;
+      }
+      if(suggestedCompanions.length>0){
+        companionHtml+=`<div style="margin-top:4px;padding:4px 8px;border-radius:6px;background:rgba(74,158,187,0.06);">
+          <div style="font-size:8px;font-weight:600;color:var(--accent2-light);margin-bottom:2px;">💡 Consider adding nearby:</div>
+          ${suggestedCompanions.map(c=>`<div style="font-size:8px;color:var(--text-dim);">${c.partner} — ${c.why}</div>`).join('')}
+        </div>`;
+      }
+      
+      // Continuity suggestions when harvest is approaching (≤30 days)
+      if(dl<=30&&dl>-14){
+        const suggestions=getContinuitySuggestions(cell.veg, bid);
+        if(suggestions.length>0){
+          continuityHtml=`<div style="margin-top:8px;padding:8px;border-radius:6px;background:rgba(212,135,46,0.08);border:1px solid rgba(212,135,46,0.2);">
+            <div style="font-size:10px;font-weight:700;color:var(--accent-light);margin-bottom:6px;">🔄 Continuity — sow replacement now!</div>
+            <div style="font-size:9px;color:var(--text-dim);margin-bottom:6px;">Start these in a module tray or sow direct so they're ready when ${cell.veg} comes out:</div>
+            ${suggestions.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+              <div style="font-size:10px;">
+                ${s.icon} <strong>${s.name}</strong>
+                ${s.isRotationMatch?'<span style="font-size:7px;padding:1px 4px;border-radius:3px;background:rgba(90,173,106,0.2);color:var(--green-light);">ROTATION ✓</span>':''}
+                ${s.fastGrow?'<span style="font-size:7px;padding:1px 4px;border-radius:3px;background:rgba(74,158,187,0.2);color:var(--accent2-light);">FAST</span>':''}
+                ${s.store?'<span style="font-size:7px;padding:1px 4px;border-radius:3px;background:rgba(212,192,64,0.15);color:var(--yellow);">STORES</span>':''}
+              </div>
+              <div style="font-size:9px;color:var(--text-dim);">${s.sowMethod} · ${s.days}d</div>
+            </div>`).join('')}
+            <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+              ${suggestions.slice(0,3).map(s=>`<button class="btn btn-ghost btn-sm" style="font-size:8px;padding:3px 6px;" onclick="setContinuityCrop('${bid}','${s.name}');closeModal();">🌱 Sow ${s.name}</button>`).join('')}
+            </div>
+          </div>`;
+        }
+      }
+    }
+    
+    document.getElementById('modalBody').innerHTML=`<p><strong>${cell.veg}</strong> <span style="font-size:11px;color:${cell.failed?'var(--red-light)':cell.harvested?'var(--accent-light)':'var(--green-light)'};">${cell.failed?'💀 Failed':cell.harvested?'🍴 Harvested':'🌱 Growing'}</span></p><p style="font-size:10px;color:var(--text-dim);">Planted ${cell.date}</p>${hi}${companionHtml}${continuityHtml}`;
+    document.getElementById('modalBtns').innerHTML=`<button class="btn btn-harvest btn-sm" onclick="markHarvested()">🍴 Harvest</button><button class="btn btn-danger btn-sm" onclick="markCellFailed()">💀 Failed</button><button class="btn btn-danger btn-sm" onclick="clearCell()">🗑</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>`;
+  } else {
+    // Empty cell — show planting form with companion suggestions
+    const nearbyVegs=[...new Set(bed.cells.filter(c=>c&&!c.failed&&!c.harvested).map(c=>c.veg))];
+    let companionTip='';
+    if(nearbyVegs.length>0){
+      // Find vegs that would be good companions to what's already here
+      const goodPicks=[];
+      nearbyVegs.forEach(nv=>{
+        COMPANIONS.forEach(c=>{
+          if(c.a===nv||c.b===nv){
+            const partner=c.a===nv?c.b:c.a;
+            const vegObj=VEGETABLES.find(v=>v.name===partner);
+            if(vegObj){
+              const sowable=getAdjustedMonths(vegObj.sowOut,env).includes(new Date().getMonth()+1)||getAdjustedMonths(vegObj.sowIn,env).includes(new Date().getMonth()+1);
+              if(sowable) goodPicks.push({name:partner,icon:vegObj.icon,why:c.why,for:nv});
+            }
+          }
+        });
+      });
+      const unique=[...new Map(goodPicks.map(p=>[p.name,p])).values()].slice(0,4);
+      if(unique.length>0){
+        companionTip=`<div style="margin-top:8px;padding:6px 8px;border-radius:6px;background:rgba(90,173,106,0.06);border:1px solid rgba(90,173,106,0.12);">
+          <div style="font-size:9px;font-weight:700;color:var(--green-light);margin-bottom:4px;">🤝 Companion suggestions (good with ${nearbyVegs.slice(0,3).join(', ')}):</div>
+          ${unique.map(p=>`<div style="font-size:9px;color:var(--text-dim);margin-bottom:2px;">${p.icon} <strong>${p.name}</strong> — ${p.why}</div>`).join('')}
+        </div>`;
+      }
+    }
+    document.getElementById('modalBody').innerHTML=`<div class="form-group"><label>Vegetable</label><select id="cellVeg">${VEGETABLES.map(v=>`<option value="${v.name}">${v.icon} ${v.name}${v.coldHardy?' ❄️':''}</option>`).join('')}</select></div><div class="form-group"><label>Method</label><select id="cellSow"><option value="direct">Direct</option><option value="transplant">Transplant</option></select></div><div class="form-group"><label>Date</label><input type="date" id="cellDate" value="${new Date().toISOString().split('T')[0]}"></div>${companionTip}`;
+    document.getElementById('modalBtns').innerHTML=`<button class="btn btn-primary" onclick="confirmCellPlant()">🌱 Plant</button><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// Set a continuity crop — marks the current cell for replacement and logs a sowing action
+function setContinuityCrop(bedId, vegName) {
+  const bed = state.beds.find(b=>b.id===bedId);
+  if (!bed) return;
+  const veg = VEGETABLES.find(v=>v.name===vegName);
+  if (!veg) return;
+  const env = bed.env || 'outdoor';
+  const canDirectSow = getAdjustedMonths(veg.sowOut, env).includes(new Date().getMonth()+1);
+  
+  // Log the sowing
+  state.log.unshift({
+    id: Date.now(), veg: vegName, action: canDirectSow ? 'sow-out' : 'sow-in',
+    location: canDirectSow ? bedId : 'pot', date: new Date().toISOString().split('T')[0],
+    qty: '', notes: `Continuity sowing to replace harvested crop in ${bed.name}.`
+  });
+  save(); renderAll();
+  showToast('🔄 Continuity Sow', `${veg.icon} ${vegName} — ${canDirectSow?'sow direct in '+bed.name:'start indoors for transplant later'}.`, 'success', 5000);
+}
 function markCellFailed(){state.beds.find(b=>b.id===activeCellBed).cells[activeCellIdx].failed=true;save();closeModal();renderAll();}
 function confirmCellPlant(){state.beds.find(b=>b.id===activeCellBed).cells[activeCellIdx]={veg:document.getElementById('cellVeg').value,sowType:document.getElementById('cellSow').value,date:document.getElementById('cellDate').value,harvested:false};save();closeModal();renderAll();}
 function markHarvested(){const bed=state.beds.find(b=>b.id===activeCellBed);if(bed.cells[activeCellIdx])bed.cells[activeCellIdx].harvested=true;save();closeModal();renderAll();showToast('Harvested!','Replant this cell!','success');}
@@ -1812,11 +2451,31 @@ function deleteBed(bedId){
 // Pot modal
 let activePotId=null;
 function openPotModal(id){activePotId=id;const p=state.pots.find(pp=>pp.id===id);
-  const POT_EMOJIS=['🪴','🪣','🧺','📦','🏺','🫙','🛢️','🪻','🌳','🫐','🍓','🌱','🟫','🌻','🍎','🍐','☕'];
+  const POT_EMOJIS=['🪴','🪣','🧺','📦','🏺','🫙','🛢️','🪻','🌳','🫐','🍓','🌱','🟫','🌻','🍎','🍐','☕','🧫'];
   // Calculate harvest info if planted
   let harvestInfo='';
-  if(p.plant&&p.plantedDate){const veg=VEGETABLES.find(v=>v.name===p.plant);if(veg?.days){const dl=Math.ceil((new Date(p.plantedDate).getTime()+getAdjustedDays(veg.days,'outdoor')*864e5-Date.now())/864e5);harvestInfo=`<div style="margin-top:8px;padding:6px 10px;border-radius:6px;font-size:11px;${dl<=7?'background:rgba(224,148,58,0.15);color:var(--accent-light);':'background:rgba(255,255,255,0.03);color:var(--text-dim);'}">${dl<=0?'🍴 READY TO HARVEST!':'🕐 ~'+dl+' days until harvest ('+new Date(new Date(p.plantedDate).getTime()+getAdjustedDays(veg.days,'outdoor')*864e5).toLocaleDateString('en-GB')+')'}</div>`;}}
-  document.getElementById('modalTitle').textContent=`${p.emoji} ${p.name}`;
+  if(p.plant&&p.plantedDate&&!p.isModule){const veg=VEGETABLES.find(v=>v.name===p.plant);if(veg?.days){const dl=Math.ceil((new Date(p.plantedDate).getTime()+getAdjustedDays(veg.days,'outdoor')*864e5-Date.now())/864e5);harvestInfo=`<div style="margin-top:8px;padding:6px 10px;border-radius:6px;font-size:11px;${dl<=7?'background:rgba(224,148,58,0.15);color:var(--accent-light);':'background:rgba(255,255,255,0.03);color:var(--text-dim);'}">${dl<=0?'🍴 READY TO HARVEST!':'🕐 ~'+dl+' days until harvest ('+new Date(new Date(p.plantedDate).getTime()+getAdjustedDays(veg.days,'outdoor')*864e5).toLocaleDateString('en-GB')+')'}</div>`;}}
+  // Module tray specific info
+  let moduleHtml='';
+  if(p.isModule){
+    moduleHtml=`
+      <div class="form-group"><label>Cells Sown (of ${p.moduleCells})</label><input type="number" id="potCellsUsed" value="${p.cellsUsed||0}" min="0" max="${p.moduleCells||60}"></div>`;
+    if(p.plant&&p.plantedDate){
+      const veg=VEGETABLES.find(v=>v.name===p.plant);
+      const sowToOut=p.sowToPlantOutDays||28;
+      const targetDate=p.plantOutTarget||new Date(new Date(p.plantedDate).getTime()+sowToOut*864e5).toISOString().split('T')[0];
+      const dlOut=Math.ceil((new Date(targetDate).getTime()-Date.now())/864e5);
+      const statusColor=dlOut<=0?'var(--green-light)':dlOut<=7?'var(--accent-light)':'var(--text-dim)';
+      const statusText=dlOut<=0?'🌱 READY TO PLANT OUT — seedlings should be hardened off and transplanted to beds/pots now!':dlOut<=7?`🌱 Plant out in ~${dlOut} days — start hardening off (leave outside during day)`:`🌱 ~${dlOut} days until plant-out (${new Date(targetDate).toLocaleDateString('en-GB')})`;
+      moduleHtml+=`
+        <div class="form-group"><label>Target Plant-Out Date</label><input type="date" id="potPlantOutTarget" value="${targetDate}"></div>
+        <div style="margin-top:8px;padding:8px 10px;border-radius:6px;font-size:11px;background:rgba(74,158,187,0.1);color:${statusColor};line-height:1.5;">
+          ${statusText}
+          <div style="margin-top:6px;font-size:9px;color:var(--text-dim);">Seedling stage: ~${sowToOut} days. ${veg?'Full crop: '+veg.days+' days from sow.':''}</div>
+        </div>`;
+    }
+  }
+  document.getElementById('modalTitle').textContent=`${p.emoji} ${p.name}${p.isModule?' (Module Tray)':''}`;
   document.getElementById('modalBody').innerHTML=`
     <div class="form-group"><label>Pot Name</label><input type="text" id="potName" value="${p.name}" placeholder="e.g. Large Terracotta, Window Box..."></div>
     <div class="form-group"><label>Type / Icon</label>
@@ -1824,8 +2483,9 @@ function openPotModal(id){activePotId=id;const p=state.pots.find(pp=>pp.id===id)
       <input type="hidden" id="potEmojiVal" value="${p.emoji}">
       </div>
     </div>
-    <div class="form-group"><label>Plant</label><select id="potVeg"><option value="">— Empty —</option>${VEGETABLES.map(v=>`<option value="${v.name}" ${p.plant===v.name?'selected':''}>${v.icon} ${v.name}</option>`).join('')}</select></div>
-    <div class="form-group"><label>Planted Date</label><input type="date" id="potDate" value="${p.plantedDate||new Date().toISOString().split('T')[0]}"></div>
+    <div class="form-group"><label>${p.isModule?'Seed Sown':'Plant'}</label><select id="potVeg"><option value="">— Empty —</option>${VEGETABLES.map(v=>`<option value="${v.name}" ${p.plant===v.name?'selected':''}>${v.icon} ${v.name}</option>`).join('')}</select></div>
+    <div class="form-group"><label>${p.isModule?'Sow Date':'Planted Date'}</label><input type="date" id="potDate" value="${p.plantedDate||new Date().toISOString().split('T')[0]}"></div>
+    ${moduleHtml}
     ${harvestInfo}`;
   document.getElementById('modalBtns').innerHTML=`
     <button class="btn btn-primary btn-sm" onclick="savePot()">💾 Save</button>
@@ -1837,8 +2497,23 @@ function openPotModal(id){activePotId=id;const p=state.pots.find(pp=>pp.id===id)
 function savePot(){const p=state.pots.find(pp=>pp.id===activePotId);
   p.name=document.getElementById('potName').value.trim()||'Unnamed Pot';
   p.emoji=document.getElementById('potEmojiVal').value||'🪴';
+  const oldPlant=p.plant;
   p.plant=document.getElementById('potVeg').value||null;
   p.plantedDate=p.plant?document.getElementById('potDate').value:null;
+  if(p.isModule){
+    const cellsEl=document.getElementById('potCellsUsed');
+    if(cellsEl) p.cellsUsed=Math.max(0,Math.min(p.moduleCells||60,parseInt(cellsEl.value)||0));
+    const targetEl=document.getElementById('potPlantOutTarget');
+    if(targetEl) p.plantOutTarget=targetEl.value;
+    // Auto-calculate plant-out if newly planted
+    if(p.plant&&p.plant!==oldPlant&&p.plantedDate){
+      const veg=VEGETABLES.find(v=>v.name===p.plant);
+      const sowToOut=veg?Math.min(veg.days,Math.max(21,Math.round(veg.days*0.3))):28;
+      p.sowToPlantOutDays=sowToOut;
+      if(!p.plantOutTarget) p.plantOutTarget=new Date(new Date(p.plantedDate).getTime()+sowToOut*864e5).toISOString().split('T')[0];
+    }
+    if(!p.plant){p.cellsUsed=0;p.plantOutTarget=null;}
+  }
   save();closeModal();renderAll();showToast('Pot Saved',`${p.emoji} ${p.name} updated.`,'success');}
 
 function clearPot(){const p=state.pots.find(pp=>pp.id===activePotId);p.plant=null;p.plantedDate=null;save();closeModal();renderAll();}
@@ -1858,6 +2533,10 @@ function openAddPotModal(){
     {name:'Raised Planter',emoji:'🏺',desc:'Raised planter or urn'},
     {name:'Bucket / Tub',emoji:'🛢️',desc:'Repurposed bucket or large tub'},
     {name:'Jar / Indoor',emoji:'🫙',desc:'Jar, indoor pot, or sprouter'},
+    {name:'Module Tray — 12 Cell',emoji:'🧫',desc:'Seed module tray, 12 cells. Start seeds for planting out.',cells:12},
+    {name:'Module Tray — 24 Cell',emoji:'🧫',desc:'Seed module tray, 24 cells. Start seeds for planting out.',cells:24},
+    {name:'Module Tray — 36 Cell',emoji:'🧫',desc:'Seed module tray, 36 cells. Start seeds for planting out.',cells:36},
+    {name:'Module Tray — 60 Cell',emoji:'🧫',desc:'Seed module tray, 60 cells. High-volume seed starting.',cells:60},
     {name:'Ground — Fruit Tree',emoji:'🌳',desc:'Fruit tree planted in the ground (apple, pear, plum, etc.)'},
     {name:'Ground — Berry Patch',emoji:'🫐',desc:'Berry bush or cane in the ground (raspberry, currant, gooseberry)'},
     {name:'Ground — Strawberry Bed',emoji:'🍓',desc:'Dedicated strawberry patch or row'},
@@ -1888,6 +2567,8 @@ const ADD_POT_TYPES=[
   {name:'Large Pot',emoji:'🪴'},{name:'Small Pot',emoji:'🪻'},{name:'Grow Bag',emoji:'🪣'},
   {name:'Hanging Basket',emoji:'🧺'},{name:'Window Box',emoji:'📦'},{name:'Raised Planter',emoji:'🏺'},
   {name:'Bucket / Tub',emoji:'🛢️'},{name:'Jar / Indoor',emoji:'🫙'},
+  {name:'Module Tray — 12 Cell',emoji:'🧫',cells:12},{name:'Module Tray — 24 Cell',emoji:'🧫',cells:24},
+  {name:'Module Tray — 36 Cell',emoji:'🧫',cells:36},{name:'Module Tray — 60 Cell',emoji:'🧫',cells:60},
   {name:'Ground — Fruit Tree',emoji:'🌳'},{name:'Ground — Berry Patch',emoji:'🫐'},
   {name:'Ground — Strawberry Bed',emoji:'🍓'},{name:'Ground — Perennial',emoji:'🌱'},
   {name:'Ground — Open Plot',emoji:'🟫'},
@@ -1905,12 +2586,26 @@ function confirmAddPot(){
   const customName=document.getElementById('newPotName').value.trim();
   const plantNow=document.getElementById('newPotVeg').value;
   const id='pot_'+Date.now();
+  const isModule = !!type.cells;
   const newPot={
     id, name:customName||type.name, emoji:type.emoji,
     plant:plantNow||null, plantedDate:plantNow?new Date().toISOString().split('T')[0]:null
   };
+  if (isModule) {
+    newPot.isModule = true;
+    newPot.moduleCells = type.cells;
+    newPot.cellsUsed = plantNow ? type.cells : 0;
+    newPot.plantOutTarget = null; // will be calculated when planted
+    if (plantNow) {
+      const veg = VEGETABLES.find(v=>v.name===plantNow);
+      // Module trays: seedlings typically ready to plant out in 3-6 weeks
+      const sowToPlantOutDays = veg ? Math.min(veg.days, Math.max(21, Math.round(veg.days * 0.3))) : 28;
+      newPot.plantOutTarget = new Date(Date.now() + sowToPlantOutDays * 864e5).toISOString().split('T')[0];
+      newPot.sowToPlantOutDays = sowToPlantOutDays;
+    }
+  }
   state.pots.push(newPot);save();closeModal();renderAll();
-  showToast('Pot Added',`${newPot.emoji} ${newPot.name}${plantNow?' with '+plantNow:''}`,plantNow?'success':'info');
+  showToast('Pot Added',`${newPot.emoji} ${newPot.name}${plantNow?' with '+plantNow:''}${isModule?' ('+type.cells+' cells)':''}`,plantNow?'success':'info');
 }
 function closeModal(e){if(e&&e.target!==document.getElementById('modalOverlay'))return;document.getElementById('modalOverlay').classList.remove('open');}
 
@@ -2219,10 +2914,19 @@ function selectAnimalPurpose(typeKey, purposeKey) {
   const sl = SEX_LABELS[typeKey];
   // Sensible defaults
   let defMales = 0, defFemales = 4;
-  if (purposeKey === 'eggs') { defMales = 1; defFemales = 6; }
+  if (purposeKey === 'eggs' && typeKey === 'quail') { defMales = 1; defFemales = 5; }
+  else if (purposeKey === 'eggs' && typeKey === 'goose') { defMales = 1; defFemales = 3; }
+  else if (purposeKey === 'eggs') { defMales = 1; defFemales = 6; }
+  else if (purposeKey === 'dairy' && typeKey === 'goat') { defMales = 0; defFemales = 2; }
   else if (purposeKey === 'dairy') { defMales = 0; defFemales = 1; }
   else if (purposeKey === 'meat' && typeKey === 'pig') { defMales = 1; defFemales = 1; }
   else if (purposeKey === 'meat' && typeKey === 'cow') { defMales = 0; defFemales = 2; }
+  else if (purposeKey === 'meat' && typeKey === 'sheep') { defMales = 1; defFemales = 4; }
+  else if (purposeKey === 'meat' && typeKey === 'turkey') { defMales = 1; defFemales = 4; }
+  else if (purposeKey === 'meat' && typeKey === 'goose') { defMales = 1; defFemales = 3; }
+  else if (purposeKey === 'meat' && typeKey === 'quail') { defMales = 2; defFemales = 10; }
+  else if (purposeKey === 'meat' && typeKey === 'rabbit') { defMales = 1; defFemales = 3; }
+  else if (purposeKey === 'meat' && typeKey === 'goat') { defMales = 1; defFemales = 3; }
   else if (purposeKey === 'meat') { defMales = 0; defFemales = 10; }
 
   document.getElementById('modalTitle').textContent = `${typeData.icon} ${purposeData.label} — Choose Breed`;
