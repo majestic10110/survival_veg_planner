@@ -491,6 +491,7 @@
   <div class="panel" id="panel-pipeline">
     <div class="card"><h2>🔄 Food Pipeline</h2><div id="pipelineView"></div></div>
     <div class="card mt"><h2>📊 Crop Timelines</h2><p style="font-size:9px;color:var(--text-dim);margin-bottom:6px;">Orange marker = 30 days before harvest — start thinking about succession now.</p><div id="cropPipelines"></div></div>
+    <div class="card mt"><h2>🐣 Livestock Maturation</h2><p style="font-size:9px;color:var(--text-dim);margin-bottom:6px;">Young stock growing towards maturity — layers, breeders, and table animals.</p><div id="pipelineLivestock"></div></div>
     <div class="card mt"><h2>🔄 Succession Planning — Sow Replacements</h2><p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">Crops within 30 days of harvest. Sow replacements now so beds are never empty.</p><div id="pipelineSuccession"></div></div>
     <div class="card mt"><h2>🎯 Sow This Week</h2><div id="weeklyActions" class="grid-2"></div></div>
   </div>
@@ -773,6 +774,8 @@ const VEGETABLES = [
   {name:'Apricot',family:'Fruit Tree',sowIn:[],sowOut:[11,12,1,2,3],harvest:[7,8],days:365,icon:'🟠',calories:48,pro:1.4,carb:11.1,fibre:2.0,vitC:10,iron:0.4,vitA:96,folate:9,perennial:true,minZone:'south-coast',ghBetter:true,soilBenefit:'Drought-tolerant once established. Needs warm wall. IoW climate suitable.'},
   {name:'Fig',family:'Fruit Tree',sowIn:[],sowOut:[3,4,11],harvest:[8,9,10],days:365,icon:'🟤',calories:74,pro:0.8,carb:19.2,fibre:2.9,vitC:2,iron:0.4,vitA:7,folate:6,perennial:true,minZone:'south-england',ghBetter:true,soilBenefit:'Restrict roots for best fruiting. Very drought-tolerant. Good wall plant.'},
   {name:'Lemon (Container)',family:'Citrus',sowIn:[],sowOut:[],harvest:[11,12,1,2],days:365,icon:'🍋',calories:29,pro:1.1,carb:9.3,fibre:2.8,vitC:53,iron:0.6,vitA:1,folate:11,perennial:true,ghBetter:true,soilBenefit:'Container only in UK. Bring indoors Oct-Apr. Juice is a preservative.'},
+  {name:'Melon (Cantaloupe)',family:'Fruit',sowIn:[3,4],sowOut:[6],harvest:[8,9],days:90,icon:'🍈',calories:34,pro:0.8,carb:8.2,fibre:0.9,vitC:37,iron:0.2,vitA:169,folate:21,minZone:'south-england',ghBetter:true,soilBenefit:'Cucurbit family — sprawling vines suppress weeds. Needs heat. Best under glass in UK.'},
+  {name:'Watermelon',family:'Fruit',sowIn:[3,4],sowOut:[6],harvest:[8,9],days:100,icon:'🍉',calories:30,pro:0.6,carb:7.6,fibre:0.4,vitC:8,iron:0.2,vitA:28,folate:3,minZone:'south-coast',ghBetter:true,soilBenefit:'Needs long hot season — greenhouse essential in UK. Choose small-fruited varieties like Sugar Baby.'},
 ];
 
 const MONTHS=['J','F','M','A','M','J','J','A','S','O','N','D'];
@@ -960,16 +963,16 @@ function getContinuityAlerts() {
 // ========================================================================
 // Sex terminology per species
 const SEX_LABELS = {
-  chicken: { male: 'Cockerel', female: 'Hen', maleIcon: '🐓', femaleIcon: '🐔', breedNote: 'Need 1 cockerel per 6-10 hens for fertile eggs. Hens lay without a male but eggs won\'t hatch.' },
-  duck:    { male: 'Drake', female: 'Duck', maleIcon: '🦆', femaleIcon: '🦆', breedNote: 'Need 1 drake per 4-6 ducks for fertile eggs. Ducks lay without a drake but eggs won\'t hatch.' },
-  turkey:  { male: 'Stag (Tom)', female: 'Hen', maleIcon: '🦃', femaleIcon: '🦃', breedNote: 'Need 1 stag per 6-10 hens. Heritage breeds can mate naturally. Broad-breasted types need AI. Hens brood well — excellent mothers.' },
-  goose:   { male: 'Gander', female: 'Goose', maleIcon: '🪿', femaleIcon: '🪿', breedNote: 'Need 1 gander per 2-4 geese. Geese mate for life and breed seasonally (spring). Excellent parents — will hatch and raise their own goslings. Very long-lived (15-25 years).' },
-  quail:   { male: 'Cock', female: 'Hen', maleIcon: '🐦', femaleIcon: '🐦', breedNote: 'Need 1 cock per 3-5 hens for fertile eggs. Hens lay without a male. Quail rarely go broody — use an incubator for hatching.' },
-  rabbit:  { male: 'Buck', female: 'Doe', maleIcon: '🐇', femaleIcon: '🐇', breedNote: 'Need 1 buck per 5-10 does. Extremely prolific — a doe can produce 4-6 litters/year of 6-10 kits. House buck separately except for mating. Breed responsibly — they multiply fast.' },
-  goat:    { male: 'Billy', female: 'Nanny', maleIcon: '🐐', femaleIcon: '🐐', breedNote: 'Need 1 billy per 20-30 nannies. Billies STINK — keep separate except for breeding (autumn). Nannies kid in spring, 1-3 kids. Must be bred annually to maintain milk production. Consider borrowing a billy rather than keeping one.' },
-  cow:     { male: 'Bull', female: 'Cow', maleIcon: '🐂', femaleIcon: '🐄', breedNote: 'Need a bull for breeding. Most smallholders use AI (artificial insemination) instead of keeping a bull — bulls are dangerous. Dairy cows MUST calve annually to keep producing milk.' },
-  pig:     { male: 'Boar', female: 'Sow', maleIcon: '🐗', femaleIcon: '🐷', breedNote: 'Need 1 boar per 6-8 sows for breeding. Without a boar you must buy replacement weaners. A sow produces 2 litters/year of 8-12 piglets.' },
-  sheep:   { male: 'Ram', female: 'Ewe', maleIcon: '🐏', femaleIcon: '🐑', breedNote: 'Need 1 ram per 30-40 ewes. Rams are only with ewes for ~6 weeks in autumn (tupping). Ewes lamb in spring, typically 1-3 lambs. Without a ram, buy in replacement lambs or use a borrowed/hired ram.' },
+  chicken: { male: 'Cockerel', female: 'Hen', maleIcon: '🐓', femaleIcon: '🐔', young: 'Chick', youngIcon: '🐥', youngPlural: 'Chicks', matureDays: 182, breedNote: 'Need 1 cockerel per 6-10 hens for fertile eggs. Hens lay without a male but eggs won\'t hatch. Chicks take ~26 weeks (182 days) to reach point of lay or table weight.' },
+  duck:    { male: 'Drake', female: 'Duck', maleIcon: '🦆', femaleIcon: '🦆', young: 'Duckling', youngIcon: '🐤', youngPlural: 'Ducklings', matureDays: 150, breedNote: 'Need 1 drake per 4-6 ducks for fertile eggs. Ducks lay without a drake but eggs won\'t hatch. Ducklings mature in ~20-22 weeks.' },
+  turkey:  { male: 'Stag (Tom)', female: 'Hen', maleIcon: '🦃', femaleIcon: '🦃', young: 'Poult', youngIcon: '🐣', youngPlural: 'Poults', matureDays: 210, breedNote: 'Need 1 stag per 6-10 hens. Heritage breeds can mate naturally. Broad-breasted types need AI. Poults take ~30 weeks to table weight.' },
+  goose:   { male: 'Gander', female: 'Goose', maleIcon: '🪿', femaleIcon: '🪿', young: 'Gosling', youngIcon: '🐣', youngPlural: 'Goslings', matureDays: 180, breedNote: 'Need 1 gander per 2-4 geese. Geese mate for life and breed seasonally (spring). Goslings mature in ~26 weeks. Very long-lived (15-25 years).' },
+  quail:   { male: 'Cock', female: 'Hen', maleIcon: '🐦', femaleIcon: '🐦', young: 'Chick', youngIcon: '🐣', youngPlural: 'Chicks', matureDays: 42, breedNote: 'Need 1 cock per 3-5 hens for fertile eggs. Quail mature incredibly fast — laying at just 6 weeks!' },
+  rabbit:  { male: 'Buck', female: 'Doe', maleIcon: '🐇', femaleIcon: '🐇', young: 'Kit', youngIcon: '🐇', youngPlural: 'Kits', matureDays: 120, breedNote: 'Need 1 buck per 5-10 does. Kits weaned at 8 weeks, mature for breeding/table at ~16-18 weeks. Extremely prolific.' },
+  goat:    { male: 'Billy', female: 'Nanny', maleIcon: '🐐', femaleIcon: '🐐', young: 'Kid', youngIcon: '🐐', youngPlural: 'Kids', matureDays: 240, breedNote: 'Need 1 billy per 20-30 nannies. Kids mature for breeding at ~8 months. Dairy does first bred at 7-10 months.' },
+  cow:     { male: 'Bull', female: 'Cow', maleIcon: '🐂', femaleIcon: '🐄', young: 'Calf', youngIcon: '🐄', youngPlural: 'Calves', matureDays: 730, breedNote: 'Need a bull for breeding. Calves take ~24 months to reach table weight or breeding age. Most smallholders use AI.' },
+  pig:     { male: 'Boar', female: 'Sow', maleIcon: '🐗', femaleIcon: '🐷', young: 'Piglet', youngIcon: '🐷', youngPlural: 'Piglets', matureDays: 180, breedNote: 'Need 1 boar per 6-8 sows. Piglets weaned at 8 weeks. Reach table weight at ~6 months (180 days).' },
+  sheep:   { male: 'Ram', female: 'Ewe', maleIcon: '🐏', femaleIcon: '🐑', young: 'Lamb', youngIcon: '🐑', youngPlural: 'Lambs', matureDays: 180, breedNote: 'Need 1 ram per 30-40 ewes. Lambs reach table weight at ~6 months. Ewe lambs bred from 7 months if well grown.' },
 };
 
 const LIVESTOCK_TYPES = {
@@ -1488,6 +1491,7 @@ if (!state.woodland) state.woodland = [];
 if (!state.firewood) state.firewood = { storeM3: 0, log: [] };
 if (!state.beehives) state.beehives = [];
 if (!state.ponds) state.ponds = [];
+if (!state.youngStock) state.youngStock = [];
 // Migrate beds to have cols, rows, env
 state.beds.forEach(b => {
   if (!b.cols) b.cols = 8;
@@ -1642,6 +1646,19 @@ function getWarnings() {
       else if(dlOut<=5) w.push({type:'warn',icon:'🧫',title:`${pot.name}: ${pot.plant} — plant out in ${dlOut}d`,detail:`Start hardening off seedlings. ${pot.cellsUsed||0} cells ready soon.`});
     });
   } catch(e) { console.error('Module tray warnings:', e); }
+  // Young stock maturity warnings
+  try {
+    (state.youngStock||[]).forEach((ys,idx)=>{
+      if(ys.matured) return;
+      const sl=SEX_LABELS[ys.type];
+      const td=LIVESTOCK_TYPES[ys.type];
+      if(!sl) return;
+      const matureDate=new Date(new Date(ys.hatchDate).getTime()+(ys.matureDays||180)*864e5);
+      const dlLeft=Math.ceil((matureDate-Date.now())/864e5);
+      if(dlLeft<=0) w.push({type:'warn',icon:'🐣',title:`${ys.count} ${sl.youngPlural} MATURED — ready to join flock!`,detail:`${td?.icon||''} Hatched ${ys.hatchDate}. ${ys.destination==='table'?'Ready for table.':'Ready to lay/breed.'} Go to Livestock tab to mark matured.`});
+      else if(dlLeft<=14) w.push({type:'warn',icon:'🐣',title:`${ys.count} ${sl.youngPlural} maturing in ${dlLeft}d`,detail:`${td?.icon||''} ${ys.destination==='table'?'Approaching table weight.':'Almost at point of lay.'} Due ${matureDate.toLocaleDateString('en-GB')}.`});
+    });
+  } catch(e) { console.error('Young stock warnings:', e); }
   return w;
 }
 
@@ -1895,7 +1912,7 @@ function renderDashboard() {
   const gm=counts.filter(c=>c===0).length;
   document.getElementById('statGapMonths').textContent=gm;
   document.getElementById('statGapMonths').style.color=gm>4?'var(--red-light)':gm>2?'var(--yellow)':'';
-  const totalAnimals = (state.livestock||[]).reduce((s,a) => s + (a.males||0) + (a.females||0), 0);
+  const totalAnimals = (state.livestock||[]).reduce((s,a) => s + (a.males||0) + (a.females||0), 0) + (state.youngStock||[]).filter(y=>!y.matured).reduce((s,y)=>s+y.count,0);
   document.getElementById('statLivestock').textContent = totalAnimals;
   document.getElementById('statScore').textContent=score+'/100';
   document.getElementById('statScore').style.color=score<30?'var(--red-light)':score<60?'var(--yellow)':'var(--green-light)';
@@ -2031,6 +2048,35 @@ function renderPipeline() {
     const succMarkerHtml=ad>30?`<div style="position:absolute;left:${succPct}%;top:0;bottom:0;width:2px;background:var(--accent);opacity:0.7;" title="30 days before harvest — sow replacement!"></div>`:'';
     const succLabel=showSuccMarker?'<span style="font-size:7px;padding:1px 4px;border-radius:3px;background:rgba(212,135,46,0.25);color:var(--accent-light);margin-left:4px;">🔄 SOW NEXT</span>':'';
     return`<div style="display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);"><div style="font-size:10px;font-weight:600;color:var(--text-dim);">${v.icon} ${cn} <span style="font-size:7px;opacity:0.5;">${locLabel}</span>${succLabel}</div><div><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);margin-bottom:1px;"><span>${pct}%</span><span>${dl>0?dl+'d':'🍴 READY'}</span></div><div style="height:12px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;position:relative;">${succMarkerHtml}<div style="height:100%;width:${pct}%;background:${pct>=100?'var(--accent)':showSuccMarker?'linear-gradient(90deg,var(--green),var(--accent))':'var(--green)'};border-radius:3px;position:relative;z-index:1;"></div></div></div></div>`;}).join(''):'<p style="color:var(--text-muted);padding:8px;font-size:10px;">Plant crops to see timelines.</p>';
+
+  // Livestock maturation timelines
+  try {
+    const lsEl = document.getElementById('pipelineLivestock');
+    const ysProjs = getYoungStockProjections();
+    if (ysProjs.length > 0) {
+      lsEl.innerHTML = ysProjs.map(ys => {
+        const barColor = ys.isReady ? 'var(--green)' : ys.isSoon ? 'var(--yellow)' : 'var(--accent2)';
+        const statusLabel = ys.isReady ? '<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(90,173,106,0.25);color:var(--green-light);font-weight:700;">MATURE</span>'
+          : ys.isSoon ? '<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(212,192,64,0.2);color:var(--yellow);font-weight:700;">' + ys.daysLeft + 'd</span>'
+          : '<span style="font-size:8px;color:var(--text-dim);">' + ys.daysLeft + 'd</span>';
+        const destIcon = ys.destination === 'table' ? '🍖' : ys.destination === 'layers' ? '🥚' : '❓';
+        return `<div style="display:grid;grid-template-columns:110px 1fr;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+          <div style="font-size:10px;font-weight:600;color:var(--text-dim);">${ys.youngIcon} ${ys.count}× ${ys.youngName} <span style="font-size:7px;opacity:0.5;">${destIcon}</span></div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);margin-bottom:1px;">
+              <span>${ys.pct}% → ${ys.adultName} ${statusLabel}</span>
+              <span>${ys.matureDate.toLocaleDateString('en-GB')}</span>
+            </div>
+            <div style="height:10px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+              <div style="height:100%;width:${ys.pct}%;background:${barColor};border-radius:3px;transition:width 0.3s;"></div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      lsEl.innerHTML = '<p style="color:var(--text-muted);font-size:10px;text-align:center;padding:8px;">No young stock growing. Add chicks, ducklings, lambs etc from the Livestock tab.</p>';
+    }
+  } catch(e) { console.error('pipeline livestock:', e); }
 
   // Succession planning section
   try {
@@ -2633,7 +2679,7 @@ function renderRotation(){const pl=document.getElementById('rotationPlanner'),fa
 // EXPORT / IMPORT
 // ========================================================================
 function exportData(){const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`vegplot-${new Date().toISOString().split('T')[0]}.json`;a.click();showToast('Exported','Data saved.','success');}
-function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.beds&&d.log){if(!d.livestock)d.livestock=[];if(!d.woodland)d.woodland=[];if(!d.firewood)d.firewood={storeM3:0,log:[]};if(!d.beehives)d.beehives=[];if(!d.ponds)d.ponds=[];state=d;save();renderAll();showToast('Imported','Data restored.','success');}}catch{showToast('Error','Invalid file.','danger');}};r.readAsText(f);}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.beds&&d.log){if(!d.livestock)d.livestock=[];if(!d.woodland)d.woodland=[];if(!d.firewood)d.firewood={storeM3:0,log:[]};if(!d.beehives)d.beehives=[];if(!d.ponds)d.ponds=[];if(!d.youngStock)d.youngStock=[];state=d;save();renderAll();showToast('Imported','Data restored.','success');}}catch{showToast('Error','Invalid file.','danger');}};r.readAsText(f);}
 
 // ========================================================================
 // AI
@@ -2717,6 +2763,8 @@ function renderLivestock() {
   const totalMonthCals = livestockCals[new Date().getMonth()];
   const breedingIssues = animals.filter(a => getBreedingStatus(a).status !== 'good').length;
 
+  const youngCount = (state.youngStock||[]).filter(y=>!y.matured).reduce((s,y)=>s+y.count,0);
+
   // Summary cards
   summary.innerHTML = `
     <div class="livestock-summary-card"><div class="stat-num" style="color:var(--livestock-light);">${totalAnimals}</div><div class="stat-lbl">${totalMales}♂ ${totalFemales}♀ Total</div></div>
@@ -2724,6 +2772,7 @@ function renderLivestock() {
     <div class="livestock-summary-card"><div class="stat-num" style="color:var(--accent2-light);">${totalMilkMonth}L</div><div class="stat-lbl">🥛 Milk/Month</div></div>
     <div class="livestock-summary-card"><div class="stat-num" style="color:var(--red-light);">${Math.round(totalMeatYear)}kg</div><div class="stat-lbl">🥩 Meat/Year</div></div>
     <div class="livestock-summary-card"><div class="stat-num" style="color:var(--green-light);">${Math.round(totalMonthCals/1000)}k</div><div class="stat-lbl">kcal This Month</div></div>
+    ${youngCount > 0 ? `<div class="livestock-summary-card"><div class="stat-num" style="color:var(--yellow);">🐣 ${youngCount}</div><div class="stat-lbl">Young Growing</div></div>` : ''}
     ${breedingIssues > 0 ? `<div class="livestock-summary-card" style="border-color:rgba(196,64,64,0.3);"><div class="stat-num" style="color:var(--red-light);">⚠️ ${breedingIssues}</div><div class="stat-lbl">Breeding Issues</div></div>` : ''}
   `;
 
@@ -2812,6 +2861,50 @@ function renderLivestock() {
   addCard.onclick = () => openAddLivestockModal();
   addCard.innerHTML = '<div style="text-align:center;"><div style="font-size:28px;margin-bottom:4px;">➕</div><div style="font-size:11px;font-weight:600;color:var(--text-dim);">Add Animals</div></div>';
   grid.appendChild(addCard);
+
+  // Add young stock card
+  const addYoungCard = document.createElement('div');
+  addYoungCard.className = 'add-livestock-card';
+  addYoungCard.style.borderColor = 'rgba(212,192,64,0.3)';
+  addYoungCard.onclick = () => openAddYoungStockModal();
+  addYoungCard.innerHTML = '<div style="text-align:center;"><div style="font-size:28px;margin-bottom:4px;">🐣</div><div style="font-size:11px;font-weight:600;color:var(--text-dim);">Add Young Stock</div><div style="font-size:8px;color:var(--text-muted);margin-top:2px;">Chicks, ducklings, lambs...</div></div>';
+  grid.appendChild(addYoungCard);
+
+  // Render young stock cards
+  const ysProjs = getYoungStockProjections();
+  ysProjs.forEach(ys => {
+    const card = document.createElement('div');
+    card.className = 'livestock-card';
+    if (ys.isReady) card.style.borderColor = 'rgba(90,173,106,0.5)';
+    else if (ys.isSoon) card.style.borderColor = 'rgba(212,192,64,0.4)';
+    card.innerHTML = `
+      <div class="livestock-header" style="background:linear-gradient(135deg,rgba(212,192,64,0.12),transparent);">
+        <div style="display:flex;align-items:center;">
+          <span class="livestock-icon">${ys.youngIcon}</span>
+          <div>
+            <div class="livestock-name" style="color:var(--yellow);">${ys.count}× ${ys.youngName}</div>
+            <div style="font-size:9px;color:var(--text-dim);">Hatched ${ys.hatchDate} · ${ys.destination === 'table' ? '🍖 For table' : ys.destination === 'layers' ? '🥚 Future layers' : '❓ Undecided'}</div>
+          </div>
+        </div>
+        <span style="font-size:9px;padding:2px 8px;border-radius:10px;font-weight:600;${ys.isReady?'background:rgba(90,173,106,0.2);color:var(--green-light);':'background:rgba(212,192,64,0.15);color:var(--yellow);'}">${ys.isReady?'✅ MATURE':'🐣 Growing'}</span>
+      </div>
+      <div class="livestock-body">
+        <div style="margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);margin-bottom:2px;"><span>${ys.pct}% grown</span><span>${ys.daysLeft>0?ys.daysLeft+'d left':'READY!'}</span></div>
+          <div style="height:10px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:${ys.pct}%;background:${ys.isReady?'var(--green)':ys.isSoon?'var(--yellow)':'var(--accent2)'};border-radius:3px;transition:width 0.3s;"></div>
+          </div>
+        </div>
+        <div class="livestock-stat"><span class="livestock-stat-label">Mature by</span><span class="livestock-stat-value">${ys.matureDate.toLocaleDateString('en-GB')}</span></div>
+        <div class="livestock-stat"><span class="livestock-stat-label">Becoming</span><span class="livestock-stat-value">${ys.adultName}</span></div>
+        ${ys.notes?`<div style="font-size:9px;color:var(--text-dim);margin-top:4px;font-style:italic;">${ys.notes}</div>`:''}
+      </div>
+      <div class="livestock-actions">
+        ${ys.isReady?`<button class="btn btn-success btn-sm" onclick="matureYoungStock(${ys.idx})" style="flex:1;">✅ Mark Matured</button>`:`<button class="btn btn-ghost btn-sm" style="flex:1;" disabled>Growing...</button>`}
+        <button class="btn btn-danger btn-sm" onclick="removeYoungStock(${ys.idx})">🗑</button>
+      </div>`;
+    grid.appendChild(card);
+  });
 
   // Production timeline
   timeline.innerHTML = '';
@@ -3151,6 +3244,138 @@ function removeLivestock(idx) {
   state.livestock.splice(idx, 1);
   save(); renderAll();
   showToast('Removed', `${animal.breed} removed.`, 'info');
+}
+
+// ========================================================================
+// YOUNG STOCK — chicks, ducklings, goslings, poults, kits, kids, lambs, piglets, calves
+// ========================================================================
+
+function openAddYoungStockModal() {
+  const types = Object.entries(LIVESTOCK_TYPES).filter(([k]) => SEX_LABELS[k]?.young);
+  document.getElementById('modalTitle').textContent = '🐣 Add Young Stock';
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Track hatched, born, or bought young animals. They'll appear in the food pipeline with a maturation countdown.</p>
+    <div class="form-group"><label>Animal Type</label>
+      <select id="ysType" onchange="updateYoungStockForm()">
+        ${types.map(([k,t]) => `<option value="${k}">${t.icon} ${SEX_LABELS[k].youngPlural} (${t.plural})</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group"><label>Number</label><input type="number" id="ysCount" value="6" min="1" max="200"></div>
+    <div class="form-group"><label>Hatch / Birth Date</label><input type="date" id="ysDate" value="${new Date().toISOString().split('T')[0]}"></div>
+    <div class="form-group"><label>Destination</label>
+      <select id="ysDest">
+        <option value="layers">Future Layers / Breeders</option>
+        <option value="table">Table / Meat</option>
+        <option value="undecided">Undecided</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Notes</label><input type="text" id="ysNotes" placeholder="e.g. hatched under broody, bought from market..."></div>
+    <div id="ysMaturityInfo" style="margin-top:8px;padding:6px 8px;border-radius:6px;background:rgba(74,158,187,0.08);font-size:10px;color:var(--accent2-light);"></div>`;
+  document.getElementById('modalBtns').innerHTML = `
+    <button class="btn btn-primary" onclick="confirmAddYoungStock()">🐣 Add</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(updateYoungStockForm, 50);
+}
+
+function updateYoungStockForm() {
+  const typeKey = document.getElementById('ysType')?.value;
+  if (!typeKey) return;
+  const sl = SEX_LABELS[typeKey];
+  const typeData = LIVESTOCK_TYPES[typeKey];
+  const matureDays = sl.matureDays || 180;
+  const matureDate = new Date(new Date(document.getElementById('ysDate')?.value || Date.now()).getTime() + matureDays * 864e5);
+  const el = document.getElementById('ysMaturityInfo');
+  if (el) el.innerHTML = `${sl.youngIcon} ${sl.youngPlural} → mature ${sl.female}s/${sl.male}s in <strong>${matureDays} days</strong> (~${Math.round(matureDays/7)} weeks). Ready by <strong>${matureDate.toLocaleDateString('en-GB')}</strong>. They'll show in the food pipeline with a countdown.`;
+}
+
+function confirmAddYoungStock() {
+  const typeKey = document.getElementById('ysType').value;
+  const count = Math.max(1, parseInt(document.getElementById('ysCount').value) || 1);
+  const hatchDate = document.getElementById('ysDate').value;
+  const dest = document.getElementById('ysDest').value;
+  const notes = document.getElementById('ysNotes').value.trim();
+  const sl = SEX_LABELS[typeKey];
+  const typeData = LIVESTOCK_TYPES[typeKey];
+
+  if (!state.youngStock) state.youngStock = [];
+  state.youngStock.push({
+    id: 'ys_' + Date.now(),
+    type: typeKey,
+    count,
+    hatchDate,
+    destination: dest,
+    matureDays: sl.matureDays || 180,
+    notes,
+    matured: false,
+  });
+  save(); closeModal(); renderAll();
+  showToast(`${sl.youngIcon} ${count} ${sl.youngPlural} Added`, `Maturing in ${sl.matureDays} days. Check food pipeline for countdown.`, 'success');
+}
+
+function getYoungStockProjections() {
+  const now = new Date();
+  const projections = [];
+  (state.youngStock || []).forEach((ys, idx) => {
+    if (ys.matured) return;
+    const sl = SEX_LABELS[ys.type];
+    const typeData = LIVESTOCK_TYPES[ys.type];
+    if (!sl || !typeData) return;
+    const hatchDate = new Date(ys.hatchDate);
+    const matureDate = new Date(hatchDate.getTime() + (ys.matureDays || 180) * 864e5);
+    const daysLeft = Math.ceil((matureDate - now) / 864e5);
+    const elapsed = Math.ceil((now - hatchDate) / 864e5);
+    const pct = Math.min(100, Math.round(elapsed / (ys.matureDays || 180) * 100));
+    projections.push({
+      idx, id: ys.id, type: ys.type, count: ys.count, destination: ys.destination,
+      icon: typeData.icon, youngName: sl.youngPlural, youngIcon: sl.youngIcon,
+      adultName: ys.destination === 'table' ? 'table weight' : `${sl.female}s/${sl.male}s`,
+      daysLeft, pct, hatchDate, matureDate, notes: ys.notes,
+      isReady: daysLeft <= 0, isSoon: daysLeft > 0 && daysLeft <= 14, isGrowing: daysLeft > 14,
+    });
+  });
+  return projections.sort((a, b) => a.daysLeft - b.daysLeft);
+}
+
+function matureYoungStock(idx) {
+  const ys = state.youngStock[idx];
+  if (!ys) return;
+  const sl = SEX_LABELS[ys.type];
+  ys.matured = true;
+  // Offer to add to a livestock group
+  document.getElementById('modalTitle').textContent = `${sl.youngIcon} ${sl.youngPlural} Matured!`;
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:11px;margin-bottom:10px;">${ys.count} ${sl.youngPlural} have reached maturity. What would you like to do?</p>
+    <p style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">If adding to an existing flock, go to Livestock → Manage and adjust the male/female counts.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div class="form-group"><label>Males to keep</label><input type="number" id="ysMatureM" value="${Math.floor(ys.count*0.3)}" min="0" max="${ys.count}"></div>
+      <div class="form-group"><label>Females to keep</label><input type="number" id="ysMatureF" value="${Math.ceil(ys.count*0.7)}" min="0" max="${ys.count}"></div>
+    </div>`;
+  document.getElementById('modalBtns').innerHTML = `
+    <button class="btn btn-primary btn-sm" onclick="confirmMatureYoungStock(${idx})">✅ Mark Matured</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function confirmMatureYoungStock(idx) {
+  const ys = state.youngStock[idx];
+  ys.matured = true;
+  state.log.unshift({
+    id: Date.now(), veg: `[${LIVESTOCK_TYPES[ys.type]?.icon} ${SEX_LABELS[ys.type]?.youngPlural}]`,
+    action: 'note', location: 'livestock', date: new Date().toISOString().split('T')[0],
+    qty: `${ys.count}`, notes: `${ys.count} ${SEX_LABELS[ys.type]?.youngPlural} matured to adults. Hatched ${ys.hatchDate}.`
+  });
+  save(); closeModal(); renderAll();
+  showToast('✅ Matured', `${ys.count} ${SEX_LABELS[ys.type]?.youngPlural} are now adults. Update livestock counts in the Livestock tab.`, 'success', 6000);
+}
+
+function removeYoungStock(idx) {
+  const ys = state.youngStock[idx];
+  if (!ys) return;
+  const sl = SEX_LABELS[ys.type];
+  if (!confirm(`Remove ${ys.count} ${sl?.youngPlural || 'young stock'}?`)) return;
+  state.youngStock.splice(idx, 1);
+  save(); renderAll();
 }
 
 // ========================================================================
